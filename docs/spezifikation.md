@@ -114,8 +114,12 @@ MVP-Set (gemäß Angebot der Frühförderstelle Lörrach):
 | `physiotherapie` | Physiotherapie | Grob-/Bewegungsmotorik, Haltung |
 | `ergotherapie` | Ergotherapie | Fein-/Wahrnehmungsmotorik, Handlungsfähigkeit |
 | `psychologie` | Psychologische Beratung/Behandlung | Verhalten, Emotion, Interaktion |
+| `kunsttherapie` | Kunsttherapie | kreativer Ausdruck, Wahrnehmung, Emotionsregulation |
+| `musiktherapie` | Musiktherapie | Rhythmus, Kommunikation, emotionaler/sozialer Ausdruck |
 
-Vorbereitet (inaktiv, leicht aktivierbar): `kunsttherapie`, `musiktherapie`.
+> Hinweis: Kunst- und Musiktherapie sind im offiziellen Online-Angebot (noch) nicht
+> aufgeführt, gehören aber zum tatsächlichen Leistungsspektrum und sind daher von
+> Anfang an aktiv.
 
 ---
 
