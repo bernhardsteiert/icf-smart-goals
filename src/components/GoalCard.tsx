@@ -3,13 +3,35 @@
 import { useState } from "react";
 import type { Foerderziel } from "@/lib/types";
 
+export type RefineModus =
+  | "einfacher"
+  | "ambitionierter"
+  | "umformulieren"
+  | "elterngerecht";
+
 interface Props {
   ziel: Foerderziel;
+  busy?: boolean;
+  onRefine: (modus: RefineModus) => void;
+  onRemove: () => void;
 }
 
-export default function GoalCard({ ziel }: Props) {
+const REFINE_BUTTONS: { modus: RefineModus; label: string }[] = [
+  { modus: "einfacher", label: "Einfacher" },
+  { modus: "ambitionierter", label: "Ambitionierter" },
+  { modus: "umformulieren", label: "Anders formulieren" },
+  { modus: "elterngerecht", label: "Für Eltern" },
+];
+
+export default function GoalCard({ ziel, busy = false, onRefine, onRemove }: Props) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
+    <div className="relative rounded-lg border border-gray-200 bg-white shadow-sm">
+      {busy && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-white/70">
+          <span className="inline-block h-5 w-5 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+        </div>
+      )}
+
       {/* Header */}
       <div className="border-b border-gray-100 px-5 py-4">
         <div className="flex flex-wrap items-start justify-between gap-2">
@@ -41,6 +63,30 @@ export default function GoalCard({ ziel }: Props) {
         {ziel.unterziele.map((uz, i) => (
           <UnterzielRow key={i} unterziel={uz} />
         ))}
+      </div>
+
+      {/* Verfeinern / Verwerfen */}
+      <div className="flex flex-wrap items-center gap-2 border-t border-gray-100 px-5 py-3">
+        <span className="mr-1 text-xs text-gray-400">Verfeinern:</span>
+        {REFINE_BUTTONS.map((b) => (
+          <button
+            key={b.modus}
+            type="button"
+            disabled={busy}
+            onClick={() => onRefine(b.modus)}
+            className="rounded-full border border-gray-300 px-3 py-1 text-xs text-gray-700 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {b.label}
+          </button>
+        ))}
+        <button
+          type="button"
+          disabled={busy}
+          onClick={onRemove}
+          className="ml-auto rounded-full px-3 py-1 text-xs text-red-600 transition-colors hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Verwerfen
+        </button>
       </div>
     </div>
   );

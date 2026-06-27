@@ -91,10 +91,12 @@ export function buildGoalsUserPrompt(input: GenerateGoalsInput): string {
   // Verfeinerungsbezug (bei Folge-Anfragen)
   if (input.bezugsziel) {
     parts.push(
-      `Bezug auf: Oberziel "${input.bezugsziel.oberziel}"` +
+      `Überarbeite gezielt das Förderziel zum Oberziel "${input.bezugsziel.oberziel}"` +
         (input.bezugsziel.unterziel
-          ? ` → Unterziel "${input.bezugsziel.unterziel}"`
-          : ""),
+          ? ` (insbesondere das Unterziel "${input.bezugsziel.unterziel}")`
+          : "") +
+        ` gemäß dem gewählten Modus. Gib GENAU EIN überarbeitetes Förderziel ` +
+        `zurück (nicht mehrere), das auf demselben Bereich und denselben Codes aufbaut.`,
     );
   }
 
