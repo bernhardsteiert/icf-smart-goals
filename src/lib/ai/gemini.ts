@@ -24,8 +24,13 @@ type GeminiRequest = {
   generationConfig: {
     responseMimeType: string;
     responseSchema: object;
+    maxOutputTokens?: number;
+    thinkingConfig?: { thinkingBudget: number };
   };
 };
+
+// Reicht für mehrere Förderziele mit je mehreren SMART-Unterzielen.
+const MAX_OUTPUT_TOKENS = 8192;
 
 async function callGemini(body: GeminiRequest): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -35,20 +40,33 @@ async function callGemini(body: GeminiRequest): Promise<string> {
   const model = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
+  // gemini-2.5-flash ist ein Thinking-Modell: Ohne Begrenzung kann das
+  // „Nachdenken" das Output-Budget aufbrauchen und eine leere Antwort
+  // (finishReason MAX_TOKENS) liefern. Für die strukturierte JSON-Ausgabe
+  // schalten wir Thinking ab und setzen ein großzügiges Output-Limit.
+  const requestBody: GeminiRequest = {
+    ...body,
+    generationConfig: {
+      ...body.generationConfig,
+      maxOutputTokens: MAX_OUTPUT_TOKENS,
+      thinkingConfig: { thinkingBudget: 0 },
+    },
+  };
+
   const doFetch = () => {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
     return fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
+      body: JSON.stringify(requestBody),
       signal: controller.signal,
     }).finally(() => clearTimeout(timer));
   };
 
   let res = await doFetch();
 
-  // Ein Retry bei Server-Fehlern (5xx)
+  // Ein Retry bei Server-Fehlern (5xx, inkl. 503 „überlastet")
   if (res.status >= 500) {
     await new Promise((r) => setTimeout(r, 2000));
     res = await doFetch();
@@ -58,13 +76,20 @@ async function callGemini(body: GeminiRequest): Promise<string> {
     throw new Error("429 KI-Kontingent erschöpft. Bitte später erneut versuchen.");
   }
 
+  if (res.status === 503) {
+    throw new Error("503 Die KI ist momentan überlastet. Bitte kurz warten und erneut versuchen.");
+  }
+
   if (!res.ok) {
     const text = await res.text().catch(() => "");
     throw new Error(`Gemini API Fehler ${res.status}: ${text.slice(0, 200)}`);
   }
 
   const json = (await res.json()) as {
-    candidates?: { content?: { parts?: { text?: string }[] } }[];
+    candidates?: {
+      content?: { parts?: { text?: string }[] };
+      finishReason?: string;
+    }[];
     error?: { message?: string };
   };
 
@@ -72,9 +97,21 @@ async function callGemini(body: GeminiRequest): Promise<string> {
     throw new Error(`Gemini Fehler: ${json.error.message ?? "Unbekannt"}`);
   }
 
-  const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
+  const candidate = json.candidates?.[0];
+  const text = candidate?.content?.parts?.[0]?.text;
   if (!text) {
-    throw new Error("Gemini hat keine Textantwort zurückgegeben.");
+    const reason = candidate?.finishReason;
+    if (reason === "MAX_TOKENS") {
+      throw new Error(
+        "Die KI-Antwort wurde abgeschnitten (zu lang). Bitte mit weniger Codes erneut versuchen.",
+      );
+    }
+    if (reason === "SAFETY" || reason === "RECITATION") {
+      throw new Error("Die KI hat die Antwort blockiert. Bitte Eingaben anpassen.");
+    }
+    throw new Error(
+      `Gemini hat keine Textantwort zurückgegeben (finishReason: ${reason ?? "unbekannt"}).`,
+    );
   }
   return text;
 }

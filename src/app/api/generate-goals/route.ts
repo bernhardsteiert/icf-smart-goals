@@ -76,6 +76,24 @@ export async function POST(req: NextRequest) {
         { status: 429 },
       );
     }
+    if (msg.includes("503") || msg.includes("überlastet")) {
+      return NextResponse.json(
+        { error: "Die KI ist momentan überlastet. Bitte kurz warten und erneut versuchen." },
+        { status: 503 },
+      );
+    }
+    if (msg.includes("abgeschnitten")) {
+      return NextResponse.json(
+        { error: "Die KI-Antwort war zu lang. Bitte mit weniger Codes erneut versuchen." },
+        { status: 502 },
+      );
+    }
+    if (msg.includes("blockiert")) {
+      return NextResponse.json(
+        { error: "Die KI hat die Antwort blockiert. Bitte Eingaben anpassen und erneut versuchen." },
+        { status: 502 },
+      );
+    }
     if (msg.includes("GEMINI_API_KEY")) {
       return NextResponse.json(
         { error: "Kein API-Schlüssel konfiguriert. Bitte GEMINI_API_KEY in .env.local eintragen." },
