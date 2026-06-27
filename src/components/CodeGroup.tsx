@@ -2,14 +2,7 @@
 
 import { useState } from "react";
 import type { IcfCode, IcfSelection, Hauptbereich } from "@/lib/types";
-
-const QUALIFIER_LABELS: Record<number, string> = {
-  0: "Kein",
-  1: "Leicht",
-  2: "Mäßig",
-  3: "Erheblich",
-  4: "Vollständig",
-};
+import { QUALIFIER_LABELS } from "@/lib/format";
 
 interface Props {
   gruppe: Hauptbereich;
