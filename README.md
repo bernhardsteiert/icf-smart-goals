@@ -1,4 +1,7 @@
-# icf-smart-goals
+# Förderkompass
+
+> ICF-CY-basierte SMART-Förderziele für die Frühförderung.
+> (Repository: `icf-smart-goals`)
 
 Webapp für die **heilpädagogische Frühförderung**: Sie unterstützt Fachkräfte
 dabei, (A) zum Therapiestart passende **ICF‑CY‑Codes** zu überprüfen/anzupassen

@@ -2,10 +2,10 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "ICF SMART Goals – Frühförderung",
-    short_name: "ICF Goals",
+    name: "Förderkompass – ICF-CY-basierte SMART-Förderziele für die Frühförderung",
+    short_name: "Förderkompass",
     description:
-      "ICF-CY-basierte SMART-Förderziele in der Frühförderung – als Entwurfshilfe.",
+      "ICF-CY-basierte SMART-Förderziele für die Frühförderung.",
     start_url: "/",
     display: "standalone",
     background_color: "#f9fafb",

@@ -2,13 +2,13 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ICF SMART Goals – Frühförderung",
+  title: "Förderkompass – ICF-CY-basierte SMART-Förderziele für die Frühförderung",
   description:
-    "Unterstützung bei der Formulierung von ICF-CY-basierten SMART-Förderzielen in der Frühförderung.",
+    "ICF-CY-basierte SMART-Förderziele für die Frühförderung.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
-    title: "ICF Goals",
+    title: "Förderkompass",
     statusBarStyle: "default",
   },
   icons: {
