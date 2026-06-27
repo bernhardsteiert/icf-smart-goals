@@ -23,7 +23,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#2563eb",
+  // Header-Farbe (bg-blue-700) – nahtlose Android-Statusleiste, vgl. manifest.ts.
+  themeColor: "#1d4ed8",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",

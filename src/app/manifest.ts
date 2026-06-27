@@ -9,7 +9,9 @@ export default function manifest(): MetadataRoute.Manifest {
     start_url: "/",
     display: "standalone",
     background_color: "#f9fafb",
-    theme_color: "#2563eb",
+    // Identisch zur Header-Farbe (bg-blue-700), damit die Android-Statusleiste
+    // nahtlos in den App-Header übergeht (keine sichtbare Kante).
+    theme_color: "#1d4ed8",
     lang: "de",
     icons: [
       { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },

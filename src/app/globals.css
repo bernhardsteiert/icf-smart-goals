@@ -29,9 +29,12 @@ body {
   /* Grauen Tap-Blitz auf Touch-Geräten unterdrücken. */
   -webkit-tap-highlight-color: transparent;
   /* iOS-Momentum-Scrolling + vertikales Rubber-Band („magnetisches Band")
-     bewusst erlaubt; nur horizontales Überscrollen unterbinden. */
+     bewusst erlaubt; horizontales Überscrollen unterbinden. */
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: none;
+  /* Android: „Pull-to-Refresh" am Seitenanfang unterbinden (lädt sonst die App
+     neu und fühlt sich nicht app-like an); iOS-Rubber-Band bleibt erhalten. */
+  overscroll-behavior-y: contain;
   text-rendering: optimizeLegibility;
 }
 
