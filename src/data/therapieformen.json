@@ -1,0 +1,32 @@
+[
+  {
+    "id": "heilpaedagogik",
+    "label": "Heilpädagogische Entwicklungsförderung",
+    "hinweis": "Ganzheitliche Entwicklungsförderung mit Schwerpunkt auf Spiel, Selbstständigkeit, sozial-emotionaler und kognitiver Entwicklung.",
+    "aktiv": true
+  },
+  {
+    "id": "logopaedie",
+    "label": "Logopädie / Sprachtherapie",
+    "hinweis": "Förderung von Sprache, Kommunikation, Mundmotorik und Sprachverständnis.",
+    "aktiv": false
+  },
+  {
+    "id": "physiotherapie",
+    "label": "Physiotherapie",
+    "hinweis": "Förderung von Grobmotorik, Bewegungskoordination und Körperhaltung.",
+    "aktiv": false
+  },
+  {
+    "id": "ergotherapie",
+    "label": "Ergotherapie",
+    "hinweis": "Förderung von Feinmotorik, Wahrnehmungsverarbeitung und Handlungsfähigkeit im Alltag.",
+    "aktiv": false
+  },
+  {
+    "id": "systemische_familientherapie",
+    "label": "Systemische Familientherapie",
+    "hinweis": "Arbeit mit dem Familiensystem, Interaktionsmustern und familiären Ressourcen.",
+    "aktiv": false
+  }
+]

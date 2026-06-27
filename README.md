@@ -25,11 +25,12 @@ Anwendungscode** – nur Spezifikation, Datengrundlage und Bauplan.
 
 ## Datengrundlage
 
-- **[`data/icf-cy.json`](data/icf-cy.json)** – kuratierter ICF‑CY‑Codesatz
+- **[`src/data/icf-cy.json`](src/data/icf-cy.json)** – kuratierter ICF‑CY‑Codesatz
   (Fokus Kapitel d), alltagsnah beschrieben. Erweiter- und veränderbar.
-- **[`data/masken.json`](data/masken.json)** – Zuordnung der Codes zu den fünf
-  Hauptbereichen der Heilpädagogik (sozial-emotional, sprachlich, fein-/
+- **[`src/data/masken.json`](src/data/masken.json)** – Zuordnung der Codes zu den
+  fünf Hauptbereichen der Heilpädagogik (sozial-emotional, sprachlich, fein-/
   grafomotorik, alltagshandeln, spiel-/lernverhalten).
+- Weitere Stammdaten: `src/data/therapieformen.json`, `src/data/merkmale.json`.
 
 ## Umsetzung (mit einem Coding-Agenten iterieren)
 
@@ -46,7 +47,7 @@ SMART-Förderziele in der Frühförderung.
 Lies zuerst:
 - docs/spezifikation.md       (fachliche Spezifikation, v3)
 - docs/implementierungsplan.md (Bauplan mit Meilensteinen M0–M8 + Leitplanken)
-- data/icf-cy.json, data/masken.json (Stammdaten)
+- src/data/*.json (Stammdaten: ICF-Codes, Masken, Therapieformen, Merkmale)
 
 Aufgabe:
 1. Ermittle den NÄCHSTEN noch nicht abgeschlossenen Meilenstein aus §10 des
@@ -55,7 +56,7 @@ Aufgabe:
 2. Implementiere GENAU DIESEN EINEN Meilenstein vollständig – nicht mehr.
 3. Halte die Leitplanken aus §0 strikt ein (privacy-first, API-Key nur
    serverseitig, keine DB/Auth, KI nur hinter dem AiProvider-Interface, strikte
-   JSON-Ausgabe, Daten aus data/*.json, UI auf Deutsch).
+   JSON-Ausgabe, Daten aus src/data/*.json, UI auf Deutsch).
 4. Stelle sicher, dass das Akzeptanzkriterium erfüllt ist (npm run dev baut und
    startet ohne Fehler, der beschriebene Zustand ist erreichbar). Beschreibe
    kurz, wie du es verifiziert hast.
