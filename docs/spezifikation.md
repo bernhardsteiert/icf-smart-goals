@@ -7,8 +7,10 @@
 oder anzupassen und (2) daraus **SMART-formulierte Förderziele** (Oberziele mit
 messbaren Unterzielen) als Entwurf zu erhalten.
 
-> **Status dieses Dokuments:** Abstimmungsgrundlage *vor* der Implementierung.
-> Bitte kommentieren / freigeben, dann beginnt die Umsetzung des Grundgerüsts.
+> **Status dieses Dokuments:** Fachliche Referenz für den umgesetzten MVP. Der
+> Kern-Flow (M0–M5) ist implementiert und deployed; offene Punkte (§12) sowie
+> KI-Code-Vorschläge und Folgestufen stehen noch aus. Bei fachlichen Änderungen
+> bitte dieses Dokument mitführen.
 
 ## 0. Praxis-Kontext (warum die App so aussieht)
 
