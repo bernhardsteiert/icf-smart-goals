@@ -17,6 +17,7 @@ export type IcfSelection = {
 export type Hauptbereich = {
   id: string;
   label: string;
+  chapter?: "b" | "d" | "e" | "s"; // ICF-Kapitel – für die Abschnitts-Gruppierung in der UI
   codes: string[];
 };
 

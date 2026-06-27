@@ -1,5 +1,5 @@
 {
-  "_hinweis": "Kuratierter ICF-CY-Startvorschlag (Fokus Kapitel d). Bewusst kompakt; jederzeit erweiter- und veränderbar. Titel/Beschreibungen alltagsnah formuliert.",
+  "_hinweis": "Kuratierter ICF-CY-Codesatz (Kapitel b, d, e). Alltagsnah formuliert; jederzeit erweiter- und veränderbar. Zuordnung zu Bereichen in masken.json.",
   "codes": [
     {
       "code": "d250",
@@ -11,14 +11,14 @@
     {
       "code": "d710",
       "chapter": "d",
-      "title": "Elementare interpersonelle Aktivitäten",
+      "title": "Einfache zwischenmenschliche Interaktionen",
       "description": "Grundlegender Umgang mit anderen: Rücksicht, Wärme, angemessenes Reagieren.",
       "keywords": ["kontakt", "rücksicht", "begrüßen", "interaktion"]
     },
     {
       "code": "d720",
       "chapter": "d",
-      "title": "Komplexe interpersonelle Interaktionen",
+      "title": "Komplexe zwischenmenschliche Interaktionen",
       "description": "Beziehungen gestalten: Gefühle steuern, Konflikte lösen, Nähe/Distanz regulieren.",
       "keywords": ["konflikt", "beziehung", "regeln", "kooperation"]
     },
@@ -42,6 +42,13 @@
       "title": "Gesprochene Mitteilungen verstehen",
       "description": "Gesprochene Sprache und einfache Aufforderungen verstehen.",
       "keywords": ["sprachverständnis", "verstehen", "aufforderung", "zuhören"]
+    },
+    {
+      "code": "d315",
+      "chapter": "d",
+      "title": "Nichtverbale Mitteilungen verstehen",
+      "description": "Gesten, Mimik, Bilder und Symbole verstehen.",
+      "keywords": ["nonverbal", "gesten", "mimik", "symbole", "verstehen"]
     },
     {
       "code": "d330",
@@ -100,6 +107,13 @@
       "keywords": ["waschen", "hygiene", "hände", "abtrocknen"]
     },
     {
+      "code": "d520",
+      "chapter": "d",
+      "title": "Körperpflege",
+      "description": "Sich um Haut, Haare, Zähne und Nägel kümmern.",
+      "keywords": ["körperpflege", "zähne", "haare", "pflege", "zähneputzen"]
+    },
+    {
       "code": "d530",
       "chapter": "d",
       "title": "Die Toilette benutzen",
@@ -109,9 +123,9 @@
     {
       "code": "d540",
       "chapter": "d",
-      "title": "Sich kleiden",
+      "title": "Sich an- und ausziehen",
       "description": "An- und Ausziehen, Schuhe, Knöpfe, Reißverschluss.",
-      "keywords": ["anziehen", "ausziehen", "schuhe", "knöpfe"]
+      "keywords": ["anziehen", "ausziehen", "schuhe", "knöpfe", "kleiden"]
     },
     {
       "code": "d550",
@@ -128,11 +142,39 @@
       "keywords": ["trinken", "becher", "glas"]
     },
     {
+      "code": "d110",
+      "chapter": "d",
+      "title": "Zuschauen",
+      "description": "Bewusst hinschauen und etwas mit den Augen verfolgen.",
+      "keywords": ["zuschauen", "sehen", "beobachten", "blickkontakt"]
+    },
+    {
+      "code": "d115",
+      "chapter": "d",
+      "title": "Zuhören",
+      "description": "Bewusst hinhören und Geräuschen oder Sprache folgen.",
+      "keywords": ["zuhören", "hören", "lauschen", "aufmerksam"]
+    },
+    {
+      "code": "d130",
+      "chapter": "d",
+      "title": "Nachahmen",
+      "description": "Bewegungen, Laute oder Handlungen anderer nachmachen.",
+      "keywords": ["nachahmen", "imitieren", "nachmachen", "vormachen"]
+    },
+    {
       "code": "d131",
       "chapter": "d",
       "title": "Lernen durch Handlungen mit Gegenständen",
       "description": "Durch Ausprobieren, Sortieren und Hantieren mit Material lernen.",
       "keywords": ["ausprobieren", "sortieren", "material", "explorieren"]
+    },
+    {
+      "code": "d132",
+      "chapter": "d",
+      "title": "Informationen erwerben",
+      "description": "Neue Informationen aufnehmen, sammeln und behalten.",
+      "keywords": ["informationen", "lernen", "aufnehmen", "wissen"]
     },
     {
       "code": "d137",
@@ -156,11 +198,326 @@
       "keywords": ["ausdauer", "dranbleiben", "aufmerksamkeitswechsel"]
     },
     {
+      "code": "d163",
+      "chapter": "d",
+      "title": "Denken",
+      "description": "Ideen entwickeln, Zusammenhänge herstellen, gedanklich durchspielen.",
+      "keywords": ["denken", "ideen", "problemlösen", "überlegen"]
+    },
+    {
+      "code": "d166",
+      "chapter": "d",
+      "title": "Lesen",
+      "description": "Geschriebenes erfassen und verstehen (bei älteren Kindern).",
+      "keywords": ["lesen", "schrift", "verstehen", "buchstaben"]
+    },
+    {
+      "code": "d170",
+      "chapter": "d",
+      "title": "Schreiben",
+      "description": "Buchstaben und Wörter schreiben, Gedanken verschriftlichen (Schulalter).",
+      "keywords": ["schreiben", "schrift", "buchstaben", "wörter"]
+    },
+    {
+      "code": "d172",
+      "chapter": "d",
+      "title": "Rechnen",
+      "description": "Mit Mengen und Zahlen umgehen, einfache Rechenschritte (Schulalter).",
+      "keywords": ["rechnen", "zahlen", "mengen", "mathematik"]
+    },
+    {
+      "code": "d210",
+      "chapter": "d",
+      "title": "Einzelne Aufgaben durchführen",
+      "description": "Eine einzelne Aufgabe beginnen, durchhalten und abschließen.",
+      "keywords": ["aufgabe", "durchführen", "beenden", "ausdauer"]
+    },
+    {
+      "code": "d220",
+      "chapter": "d",
+      "title": "Mehrere Aufgaben durchführen",
+      "description": "Mehrere Aufgaben nacheinander oder gleichzeitig bewältigen.",
+      "keywords": ["mehrere aufgaben", "abfolge", "planen", "wechseln"]
+    },
+    {
+      "code": "d230",
+      "chapter": "d",
+      "title": "Tägliche Routine durchführen",
+      "description": "Tagesablauf und wiederkehrende Abläufe selbst bewältigen.",
+      "keywords": ["routine", "tagesablauf", "struktur", "alltag"]
+    },
+    {
+      "code": "d240",
+      "chapter": "d",
+      "title": "Mit Stress umgehen",
+      "description": "Anforderungen, Stress und Frust angemessen bewältigen.",
+      "keywords": ["stress", "frust", "belastung", "bewältigen"]
+    },
+    {
+      "code": "d410",
+      "chapter": "d",
+      "title": "Körperposition wechseln",
+      "description": "Position ändern: hinlegen, aufsetzen, aufstehen, drehen.",
+      "keywords": ["position wechseln", "aufstehen", "drehen", "lage"]
+    },
+    {
+      "code": "d415",
+      "chapter": "d",
+      "title": "Körperposition halten",
+      "description": "Eine Haltung beibehalten, z.B. sitzen oder stehen bleiben.",
+      "keywords": ["halten", "sitzen", "stehen", "haltung"]
+    },
+    {
+      "code": "d450",
+      "chapter": "d",
+      "title": "Gehen",
+      "description": "Sicher gehen und sich gehend fortbewegen.",
+      "keywords": ["gehen", "laufen", "fortbewegung", "schritte"]
+    },
+    {
       "code": "d880",
       "chapter": "d",
-      "title": "Spielerisches Engagement",
+      "title": "Spielen",
       "description": "Sich auf Spiel einlassen: allein, parallel, kooperativ, Rollenspiel.",
       "keywords": ["spiel", "rollenspiel", "spielen", "fantasie"]
+    },
+    {
+      "code": "b117",
+      "chapter": "b",
+      "title": "Intellektuelle Funktionen",
+      "description": "Allgemeine geistige Fähigkeiten: Erfassen, Verstehen und gedankliches Verarbeiten.",
+      "keywords": ["intelligenz", "kognition", "verstehen", "geistig"]
+    },
+    {
+      "code": "b122",
+      "chapter": "b",
+      "title": "Globale psychosoziale Funktionen",
+      "description": "Grundlegende Fähigkeit, im sozialen Miteinander altersgemäß zurechtzukommen.",
+      "keywords": ["psychosozial", "sozial", "entwicklung", "miteinander"]
+    },
+    {
+      "code": "b125",
+      "chapter": "b",
+      "title": "Dispositionen und intrapersonelle Funktionen",
+      "description": "Antrieb und innere Steuerung von Verhalten, z.B. Neugier, Ausdauer, Motivation.",
+      "keywords": ["motivation", "antrieb", "neugier", "ausdauer"]
+    },
+    {
+      "code": "b126",
+      "chapter": "b",
+      "title": "Temperaments- und Persönlichkeitsfunktionen",
+      "description": "Grundzüge von Temperament und Persönlichkeit, z.B. Offenheit, Zurückhaltung.",
+      "keywords": ["temperament", "persönlichkeit", "charakter", "offenheit"]
+    },
+    {
+      "code": "b130",
+      "chapter": "b",
+      "title": "Energie- und Antriebsfunktionen",
+      "description": "Energieniveau, Antrieb und Motivation für Aktivitäten.",
+      "keywords": ["energie", "antrieb", "motivation", "ausdauer"]
+    },
+    {
+      "code": "b134",
+      "chapter": "b",
+      "title": "Schlaffunktionen",
+      "description": "Ein- und Durchschlafen, Schlafqualität und -rhythmus.",
+      "keywords": ["schlaf", "einschlafen", "rhythmus", "müdigkeit"]
+    },
+    {
+      "code": "b140",
+      "chapter": "b",
+      "title": "Aufmerksamkeitsfunktionen",
+      "description": "Aufmerksamkeit aufbauen, halten und auf mehrere Dinge verteilen.",
+      "keywords": ["aufmerksamkeit", "konzentration", "fokus"]
+    },
+    {
+      "code": "b144",
+      "chapter": "b",
+      "title": "Gedächtnisfunktionen",
+      "description": "Sich Dinge merken und erinnern (Kurz- und Langzeitgedächtnis).",
+      "keywords": ["gedächtnis", "merken", "erinnern"]
+    },
+    {
+      "code": "b147",
+      "chapter": "b",
+      "title": "Psychomotorische Funktionen",
+      "description": "Steuerung und Tempo von Bewegung und Verhalten, z.B. Unruhe oder Verlangsamung.",
+      "keywords": ["psychomotorik", "unruhe", "tempo", "bewegung"]
+    },
+    {
+      "code": "b152",
+      "chapter": "b",
+      "title": "Emotionale Funktionen",
+      "description": "Gefühle wahrnehmen, ausdrücken und angemessen regulieren.",
+      "keywords": ["gefühle", "emotionen", "regulation", "stimmung"]
+    },
+    {
+      "code": "b156",
+      "chapter": "b",
+      "title": "Wahrnehmungsfunktionen",
+      "description": "Reize aus der Umwelt wahrnehmen und einordnen.",
+      "keywords": ["wahrnehmung", "sinne", "reize"]
+    },
+    {
+      "code": "b160",
+      "chapter": "b",
+      "title": "Denkfunktionen",
+      "description": "Gedankliches Verarbeiten: Ideen bilden, ordnen und verknüpfen.",
+      "keywords": ["denken", "gedanken", "vorstellung"]
+    },
+    {
+      "code": "b164",
+      "chapter": "b",
+      "title": "Höhere kognitive Funktionen",
+      "description": "Planen, Problemlösen, Selbststeuerung und vorausschauendes Handeln.",
+      "keywords": ["planen", "problemlösen", "selbstregulation", "exekutiv"]
+    },
+    {
+      "code": "b167",
+      "chapter": "b",
+      "title": "Mentale Funktionen der Sprache",
+      "description": "Sprache im Kopf verstehen und bilden (Wortschatz, Grammatik).",
+      "keywords": ["sprache", "wortschatz", "grammatik", "verstehen"]
+    },
+    {
+      "code": "b310",
+      "chapter": "b",
+      "title": "Stimmfunktionen",
+      "description": "Stimmbildung: Lautstärke, Klang und Stimmgebung.",
+      "keywords": ["stimme", "lautstärke", "klang"]
+    },
+    {
+      "code": "b320",
+      "chapter": "b",
+      "title": "Artikulationsfunktionen",
+      "description": "Laute und Wörter deutlich aussprechen.",
+      "keywords": ["artikulation", "aussprache", "laute"]
+    },
+    {
+      "code": "b235",
+      "chapter": "b",
+      "title": "Vestibuläre Funktionen",
+      "description": "Gleichgewicht sowie Lage- und Bewegungssinn.",
+      "keywords": ["gleichgewicht", "vestibulär", "balance"]
+    },
+    {
+      "code": "b260",
+      "chapter": "b",
+      "title": "Propriozeptive Funktionen",
+      "description": "Körperwahrnehmung: Lage und Bewegung der eigenen Glieder spüren.",
+      "keywords": ["propriozeption", "körperwahrnehmung", "tiefensensibilität"]
+    },
+    {
+      "code": "b265",
+      "chapter": "b",
+      "title": "Berührungsfunktionen",
+      "description": "Tastsinn: Berührung wahrnehmen und unterscheiden.",
+      "keywords": ["tastsinn", "berührung", "taktil"]
+    },
+    {
+      "code": "b270",
+      "chapter": "b",
+      "title": "Sensorische Funktionen für Temperatur und andere Reize",
+      "description": "Wahrnehmung von Temperatur, Druck und anderen Reizen.",
+      "keywords": ["temperatur", "reize", "sensorik", "druck"]
+    },
+    {
+      "code": "b710",
+      "chapter": "b",
+      "title": "Beweglichkeit der Gelenke",
+      "description": "Beweglichkeit und Bewegungsumfang der Gelenke.",
+      "keywords": ["gelenke", "beweglichkeit", "mobilität"]
+    },
+    {
+      "code": "b730",
+      "chapter": "b",
+      "title": "Muskelkraftfunktionen",
+      "description": "Kraft der Muskulatur für Bewegung und Halten.",
+      "keywords": ["kraft", "muskeln", "stärke"]
+    },
+    {
+      "code": "b735",
+      "chapter": "b",
+      "title": "Muskeltonusfunktionen",
+      "description": "Grundspannung der Muskulatur (zu hoch oder zu niedrig).",
+      "keywords": ["muskeltonus", "spannung", "hypotonie"]
+    },
+    {
+      "code": "b760",
+      "chapter": "b",
+      "title": "Kontrolle willkürlicher Bewegungen",
+      "description": "Gezielte Bewegungen koordiniert steuern.",
+      "keywords": ["bewegungssteuerung", "koordination", "willkürlich"]
+    },
+    {
+      "code": "e310",
+      "chapter": "e",
+      "title": "Unmittelbare Familie",
+      "description": "Eltern und engste Bezugspersonen als Unterstützung.",
+      "keywords": ["familie", "eltern", "bezugspersonen"]
+    },
+    {
+      "code": "e315",
+      "chapter": "e",
+      "title": "Erweiterte Familie",
+      "description": "Großeltern und weitere Verwandte als Unterstützung.",
+      "keywords": ["großeltern", "verwandte", "familie"]
+    },
+    {
+      "code": "e320",
+      "chapter": "e",
+      "title": "Freunde",
+      "description": "Freundschaften als Unterstützung und Anregung.",
+      "keywords": ["freunde", "freundschaft"]
+    },
+    {
+      "code": "e325",
+      "chapter": "e",
+      "title": "Bekannte und Gleichaltrige",
+      "description": "Gleichaltrige und Bekannte im sozialen Umfeld.",
+      "keywords": ["gleichaltrige", "peers", "bekannte"]
+    },
+    {
+      "code": "e340",
+      "chapter": "e",
+      "title": "Persönliche Assistenz",
+      "description": "Personen, die im Alltag unterstützen und begleiten.",
+      "keywords": ["assistenz", "unterstützung", "betreuung"]
+    },
+    {
+      "code": "e355",
+      "chapter": "e",
+      "title": "Gesundheitsfachkräfte",
+      "description": "Ärztinnen, Therapeutinnen und Pflegekräfte.",
+      "keywords": ["ärzte", "therapeuten", "gesundheit", "pflege"]
+    },
+    {
+      "code": "e360",
+      "chapter": "e",
+      "title": "Andere Fachkräfte",
+      "description": "Frühförderung, Heilpädagogik und weitere Fachpersonen.",
+      "keywords": ["frühförderung", "heilpädagogik", "fachkräfte"]
+    },
+    {
+      "code": "e410",
+      "chapter": "e",
+      "title": "Einstellungen der unmittelbaren Familie",
+      "description": "Haltungen und Erwartungen der engsten Familie.",
+      "keywords": ["einstellung", "haltung", "familie", "erwartung"]
+    },
+    {
+      "code": "e580",
+      "chapter": "e",
+      "title": "Gesundheitsdienste, -systeme und -politik",
+      "description": "Angebote und Strukturen des Gesundheitswesens.",
+      "keywords": ["gesundheitssystem", "dienste", "versorgung"]
+    },
+    {
+      "code": "e585",
+      "chapter": "e",
+      "title": "Bildungs- und Ausbildungsdienste",
+      "description": "Angebote von Kita, Schule und Bildung.",
+      "keywords": ["bildung", "kita", "schule", "ausbildung"]
     }
   ]
 }

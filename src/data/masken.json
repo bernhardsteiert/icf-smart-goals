@@ -1,33 +1,80 @@
 {
-  "_hinweis": "Masken ordnen ICF-CY-Codes den Hauptbereichen je Therapieform zu. Startvorschlag, frei erweiter- und veränderbar.",
+  "_hinweis": "Masken ordnen ICF-CY-Codes den Kategorien je Therapieform zu (gruppiert nach ICF-Kapitel b/d/e). Startvorschlag, frei erweiter- und veränderbar.",
   "masken": [
     {
       "therapieform": "heilpaedagogik",
       "gruppen": [
         {
-          "id": "sozial_emotional",
-          "label": "Sozial-emotionale Entwicklung",
-          "codes": ["d250", "d710", "d720", "d750", "d760"]
+          "id": "b_mental",
+          "label": "Mentale Funktionen",
+          "chapter": "b",
+          "codes": ["b117", "b122", "b125", "b126", "b130", "b134", "b140", "b144", "b147", "b152", "b156", "b160", "b164"]
         },
         {
-          "id": "sprachlich",
-          "label": "Sprachliche Entwicklung",
-          "codes": ["d310", "d330", "d331", "d335", "d350"]
+          "id": "b_sprache",
+          "label": "Sprache & Stimme",
+          "chapter": "b",
+          "codes": ["b167", "b310", "b320"]
         },
         {
-          "id": "feinmotorik_grafomotorik",
-          "label": "Feinmotorik / Grafomotorik",
-          "codes": ["d440", "d445", "d145"]
+          "id": "b_motorik_sensorik",
+          "label": "Motorik & Sensorik",
+          "chapter": "b",
+          "codes": ["b235", "b260", "b265", "b270", "b710", "b730", "b735", "b760"]
         },
         {
-          "id": "alltagshandeln",
-          "label": "Alltagshandeln (ADL)",
-          "codes": ["d510", "d530", "d540", "d550", "d560"]
+          "id": "d_lernen",
+          "label": "Lernen",
+          "chapter": "d",
+          "codes": ["d110", "d115", "d130", "d131", "d132", "d137", "d145"]
         },
         {
-          "id": "spiel_lernverhalten",
-          "label": "Spiel- und Lernverhalten",
-          "codes": ["d131", "d137", "d160", "d161", "d880"]
+          "id": "d_aufmerksamkeit",
+          "label": "Aufmerksamkeit & Aufgaben",
+          "chapter": "d",
+          "codes": ["d160", "d161", "d163", "d166", "d170", "d172"]
+        },
+        {
+          "id": "d_aufgaben",
+          "label": "Aufgaben ausführen",
+          "chapter": "d",
+          "codes": ["d210", "d220", "d230", "d240", "d250"]
+        },
+        {
+          "id": "d_kommunikation",
+          "label": "Kommunikation",
+          "chapter": "d",
+          "codes": ["d310", "d315", "d330", "d331", "d335", "d350"]
+        },
+        {
+          "id": "d_mobilitaet",
+          "label": "Mobilität",
+          "chapter": "d",
+          "codes": ["d410", "d415", "d440", "d445", "d450"]
+        },
+        {
+          "id": "d_selbstversorgung",
+          "label": "Selbstversorgung",
+          "chapter": "d",
+          "codes": ["d510", "d520", "d530", "d540", "d550", "d560"]
+        },
+        {
+          "id": "d_interaktion",
+          "label": "Soziale Interaktionen",
+          "chapter": "d",
+          "codes": ["d710", "d720", "d750", "d760"]
+        },
+        {
+          "id": "d_spiel",
+          "label": "Spiel",
+          "chapter": "d",
+          "codes": ["d880"]
+        },
+        {
+          "id": "e_umwelt",
+          "label": "Umweltfaktoren",
+          "chapter": "e",
+          "codes": ["e310", "e315", "e320", "e325", "e340", "e355", "e360", "e410", "e580", "e585"]
         }
       ]
     }

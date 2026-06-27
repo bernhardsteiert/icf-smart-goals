@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
 import type { IcfCode, Hauptbereich } from "@/lib/types";
+import CodeCatalog from "./CodeCatalog";
 
 interface Props {
   allCodes: IcfCode[];
@@ -16,8 +16,6 @@ export default function StepAusgangslage({
   vorgespraechCodes,
   onChange,
 }: Props) {
-  const [search, setSearch] = useState("");
-
   const codeMap = new Map(allCodes.map((c) => [c.code, c]));
 
   const toggle = (code: string) => {
@@ -28,16 +26,6 @@ export default function StepAusgangslage({
     );
   };
 
-  const matches = (code: IcfCode) => {
-    const q = search.toLowerCase().trim();
-    if (!q) return true;
-    return (
-      code.code.toLowerCase().includes(q) ||
-      code.title.toLowerCase().includes(q) ||
-      code.keywords.some((k) => k.toLowerCase().includes(q))
-    );
-  };
-
   return (
     <div className="space-y-4">
       <p className="text-sm text-gray-600">
@@ -45,7 +33,7 @@ export default function StepAusgangslage({
         festgelegt? Diese werden als &bdquo;Stand Vorgespräch&ldquo; übernommen.
       </p>
 
-      {/* Selected chips */}
+      {/* Ausgewählte Codes als Chips */}
       {vorgespraechCodes.length > 0 && (
         <div className="flex flex-wrap items-center gap-2 rounded-lg bg-blue-50 p-3">
           <span className="text-xs font-medium text-blue-600">Stand Vorgespräch:</span>
@@ -67,55 +55,12 @@ export default function StepAusgangslage({
         </div>
       )}
 
-      {/* Search */}
-      <input
-        type="search"
-        value={search}
-        onChange={(e) => setSearch(e.target.value)}
-        placeholder="Codes suchen (z.B. d330, Sprechen, Impulskontrolle) …"
-        className="min-h-[44px] w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+      <CodeCatalog
+        gruppen={gruppen}
+        allCodes={allCodes}
+        selectedCodes={vorgespraechCodes}
+        onToggle={toggle}
       />
-
-      {/* Code list grouped by Hauptbereich */}
-      <div className="space-y-5">
-        {gruppen.map((gruppe) => {
-          const visible = gruppe.codes
-            .map((c) => codeMap.get(c))
-            .filter((c): c is IcfCode => !!c && matches(c));
-          if (visible.length === 0) return null;
-          return (
-            <div key={gruppe.id}>
-              <h3 className="mb-2 text-sm font-semibold text-gray-700">{gruppe.label}</h3>
-              <div className="space-y-1">
-                {visible.map((code) => {
-                  const checked = vorgespraechCodes.includes(code.code);
-                  return (
-                    <label
-                      key={code.code}
-                      className={[
-                        "flex cursor-pointer items-start gap-3 rounded p-2 transition-colors",
-                        checked ? "bg-blue-50" : "hover:bg-gray-50",
-                      ].join(" ")}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        onChange={() => toggle(code.code)}
-                        className="mt-0.5 h-5 w-5 flex-shrink-0"
-                      />
-                      <div>
-                        <span className="font-mono text-sm text-gray-500">{code.code}</span>
-                        <span className="ml-2 text-sm text-gray-800">{code.title}</span>
-                        <p className="mt-0.5 text-xs text-gray-500">{code.description}</p>
-                      </div>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </div>
     </div>
   );
 }
