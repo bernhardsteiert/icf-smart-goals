@@ -105,10 +105,13 @@ export default function CollapsingHeader({ onReset }: Props) {
                 className="h-5 w-5"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth={2.2}
+                strokeWidth={2.1}
                 strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                <path d="M12 5v14M5 12h14" />
+                {/* Refresh / „neu anfangen" – Kreis-Pfeil */}
+                <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+                <path d="M21 3v5h-5" />
               </svg>
             </span>
           </button>
