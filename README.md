@@ -24,6 +24,40 @@ Implementierungsplans plus einem plattformübergreifenden UI-Feinschliff
 **Noch offen:** KI-gestützte Code-Vorschläge (M6, `/api/suggest-codes`),
 aufbauende Folgestufen (M7, `/api/next-step`) sowie weiterer Feinschliff (M8).
 
+## Setup & Entwicklung
+
+Voraussetzungen: **Node ≥ 20** und npm.
+
+```bash
+npm install
+cp .env.example .env.local   # GEMINI_API_KEY eintragen (nur serverseitig!)
+npm run dev                  # Entwicklung auf http://localhost:3000
+```
+
+Weitere Skripte:
+
+```bash
+npm run build   # Produktions-Build
+npm run start   # gebaute App lokal starten
+npm run lint    # ESLint
+```
+
+**Stack:** Next.js 16 (App Router) + TypeScript + Tailwind CSS v4. State lokal
+im Browser (`localStorage`), keine Datenbank/Auth. KI über einen austauschbaren
+Provider (Default Gemini Flash) hinter der Serverless-Route `/api/generate-goals`.
+
+**Environment** (siehe [`.env.example`](.env.example)):
+
+| Variable | Zweck |
+|---|---|
+| `AI_PROVIDER` | KI-Anbieter, Standard `gemini`. |
+| `GEMINI_API_KEY` | API-Key für die Zielerstellung – **nur serverseitig**. Ohne Key läuft die App, zeigt beim Zielvorschlag aber eine klare Fehlermeldung. |
+| `GEMINI_MODEL` | optional, Standard `gemini-2.5-flash`. |
+
+**Deployment:** Vercel (EU-Region). `main` wird automatisch in Produktion
+deployed, jeder PR erhält ein Preview-Deployment; `GEMINI_API_KEY` liegt in den
+Vercel-Projekt-Einstellungen.
+
 ## Dokumentation
 
 - **[`docs/spezifikation.md`](docs/spezifikation.md)** – fachliche Spezifikation (v3):
@@ -43,7 +77,7 @@ aufbauende Folgestufen (M7, `/api/next-step`) sowie weiterer Feinschliff (M8).
 
 ## Umsetzung (mit einem Coding-Agenten iterieren)
 
-Geplante Basis: Next.js (App Router) + TypeScript + Tailwind, lokal (privacy-first,
+Basis: Next.js (App Router) + TypeScript + Tailwind, lokal (privacy-first,
 `localStorage`, Text-Export), KI über austauschbaren Provider (Default Gemini
 Flash) hinter einem Serverless-Proxy.
 
