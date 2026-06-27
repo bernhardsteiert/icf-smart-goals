@@ -1,0 +1,22 @@
+[
+  {
+    "id": "alter",
+    "label": "Alter",
+    "typ": "auswahl"
+  },
+  {
+    "id": "kontext",
+    "label": "Kontext der Auffälligkeit (z.B. Kindergarten, zu Hause, Gruppe)",
+    "typ": "kurztext"
+  },
+  {
+    "id": "sprachbarriere",
+    "label": "Sprachbarriere / Mehrsprachigkeit",
+    "typ": "toggle"
+  },
+  {
+    "id": "koerperlich",
+    "label": "Körperliche Einschränkung",
+    "typ": "toggle"
+  }
+]
