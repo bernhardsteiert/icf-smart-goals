@@ -357,3 +357,49 @@ interface AiProvider {
 4. Soll die Ziel-Formulierung primär fachintern oder elterngerecht sein
    (oder umschaltbar – aktueller Plan)?
 5. Form des **Text-Exports** (Struktur/Reihenfolge für das größere Dokument)?
+
+---
+
+## Anhang A: Vorgeschlagene ICF-CY-Codes je Hauptbereich (Startvorschlag)
+
+Bewusst kompakter Startsatz (Fokus Kapitel d). **Alles erweiter- und
+veränderbar** – gepflegt in `data/icf-cy.json` (Codes) und `data/masken.json`
+(Zuordnung zu den Bereichen). Das Team kann Codes streichen, ergänzen oder
+verschieben, ohne dass Code geändert werden muss.
+
+**Sozial-emotionale Entwicklung**
+- d250 Das eigene Verhalten steuern
+- d710 Elementare interpersonelle Aktivitäten
+- d720 Komplexe interpersonelle Interaktionen
+- d750 Informelle soziale Beziehungen
+- d760 Familienbeziehungen
+
+**Sprachliche Entwicklung**
+- d310 Gesprochene Mitteilungen verstehen
+- d330 Sprechen
+- d331 Vorsprachliche Lautäußerungen
+- d335 Nonverbale Mitteilungen produzieren
+- d350 Konversation
+
+**Feinmotorik / Grafomotorik**
+- d440 Feinmotorischer Handgebrauch
+- d445 Hand- und Armgebrauch
+- d145 Schreiben lernen (Grafomotorik)
+
+**Alltagshandeln (ADL)**
+- d510 Sich waschen
+- d530 Die Toilette benutzen
+- d540 Sich kleiden
+- d550 Essen
+- d560 Trinken
+
+**Spiel- und Lernverhalten**
+- d131 Lernen durch Handlungen mit Gegenständen
+- d137 Erwerb von Konzepten
+- d160 Aufmerksamkeit fokussieren
+- d161 Die Aufmerksamkeit lenken
+- d880 Spielerisches Engagement
+
+> Hinweis: Kapitel-b-Codes (Körperfunktionen, z.B. b167 Sprachfunktionen) sind
+> bewusst nicht enthalten, da sie oft außerhalb des Ermessens der Heilpädagogik
+> liegen. Sie lassen sich später jederzeit ergänzen.
