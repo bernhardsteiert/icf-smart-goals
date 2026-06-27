@@ -1,9 +1,39 @@
 @import "tailwindcss";
 
+@theme {
+  /* System-Font-Stack: wirkt auf iOS wie San Francisco, auf Android wie
+     Roboto, am Desktop wie Segoe UI – überall „heimisch" und ohne Ladezeit. */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+
+  /* Wärmere neutrale Flächen (leicht ins Warme gezogenes Grau). */
+  --color-gray-50: #faf8f5;
+  --color-gray-100: #f3f0ea;
+  --color-gray-200: #e8e3da;
+
+  /* Global rundere Ecken für einen weicheren Look. */
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+}
+
+html {
+  /* Kein „Gummiband"-Overscroll – fühlt sich appiger an, weniger wie Webseite. */
+  overscroll-behavior-y: none;
+}
+
 body {
-  font-family: Arial, Helvetica, sans-serif;
-  /* Im PWA-Standalone-Modus (iPhone Home-Bildschirm) Inhalt nicht unter
-     Notch / Home-Indicator schieben. */
-  padding: env(safe-area-inset-top) env(safe-area-inset-right)
-    env(safe-area-inset-bottom) env(safe-area-inset-left);
+  font-family: var(--font-sans);
+  background-color: var(--color-gray-50);
+  /* Grauen Tap-Blitz auf Touch-Geräten unterdrücken. */
+  -webkit-tap-highlight-color: transparent;
+  text-rendering: optimizeLegibility;
+}
+
+/* Formularfelder mind. 16px – sonst zoomt iOS Safari beim Fokus automatisch
+   hinein. Dient als Sicherheitsnetz; die Felder setzen zusätzlich text-base. */
+input,
+select,
+textarea {
+  font-size: max(16px, 1rem);
 }

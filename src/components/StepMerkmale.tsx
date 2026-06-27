@@ -39,7 +39,7 @@ export default function StepMerkmale({
         <select
           value={alterHalbjahre}
           onChange={(e) => onAlterChange(Number(e.target.value))}
-          className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none"
+          className="min-h-[44px] w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
         >
           {Array.from({ length: 15 }, (_, i) => (
             <option key={i} value={i}>
@@ -86,7 +86,7 @@ function MerkmalInput({
           type="checkbox"
           checked={Boolean(value)}
           onChange={(e) => onChange(e.target.checked)}
-          className="h-4 w-4"
+          className="h-5 w-5"
         />
         <span className="text-sm text-gray-700">{merkmal.label}</span>
       </label>
@@ -102,7 +102,7 @@ function MerkmalInput({
           value={typeof value === "string" ? value : ""}
           onChange={(e) => onChange(e.target.value)}
           placeholder="Stichwort (kein Klarname) …"
-          className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none"
+          className="min-h-[44px] w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
         />
       </div>
     );

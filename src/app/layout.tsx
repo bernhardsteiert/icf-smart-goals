@@ -36,7 +36,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="de" className="h-full">
-      <body className="min-h-full flex flex-col bg-gray-50 text-gray-900 antialiased">
+      <body className="flex min-h-full flex-col bg-gray-50 text-gray-900 antialiased">
         {children}
       </body>
     </html>

@@ -72,7 +72,7 @@ export default function CodeGroup({
                     type="checkbox"
                     checked={isSelected}
                     onChange={() => onToggle(code.code)}
-                    className="mt-0.5 flex-shrink-0"
+                    className="mt-0.5 h-5 w-5 flex-shrink-0"
                   />
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">

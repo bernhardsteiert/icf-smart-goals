@@ -73,7 +73,7 @@ export default function StepAusgangslage({
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder="Codes suchen (z.B. d330, Sprechen, Impulskontrolle) …"
-        className="w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none"
+        className="min-h-[44px] w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
       />
 
       {/* Code list grouped by Hauptbereich */}
@@ -101,7 +101,7 @@ export default function StepAusgangslage({
                         type="checkbox"
                         checked={checked}
                         onChange={() => toggle(code.code)}
-                        className="mt-0.5 flex-shrink-0"
+                        className="mt-0.5 h-5 w-5 flex-shrink-0"
                       />
                       <div>
                         <span className="font-mono text-sm text-gray-500">{code.code}</span>
