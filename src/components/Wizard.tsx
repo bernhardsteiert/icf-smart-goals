@@ -71,9 +71,9 @@ export default function Wizard() {
       <header className="bg-blue-700 px-6 py-4 text-white shadow">
         <div className="mx-auto flex max-w-2xl items-center justify-between">
           <div>
-            <h1 className="text-xl font-bold">ICF SMART Goals</h1>
+            <h1 className="text-xl font-bold">Förderkompass</h1>
             <p className="mt-0.5 text-sm text-blue-200">
-              Heilpädagogische Frühförderung
+              ICF-CY-basierte SMART-Förderziele für die Frühförderung
             </p>
           </div>
           <button
