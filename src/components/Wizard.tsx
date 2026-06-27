@@ -8,6 +8,7 @@ import {
   getHauptbereicheForTherapieform,
   getAllMerkmale,
 } from "@/lib/icf";
+import CollapsingHeader from "./CollapsingHeader";
 import DisclaimerBanner from "./DisclaimerBanner";
 import StepTherapieform from "./StepTherapieform";
 import StepAusgangslage from "./StepAusgangslage";
@@ -67,35 +68,12 @@ export default function Wizard() {
 
   return (
     <div className="flex min-h-dvh flex-col">
-      {/* Header – Hintergrund reicht randlos bis unter die Statusleiste
-          (Safe-Area), nur der Inhalt wird nach unten geschoben. */}
-      <header
-        className="sticky top-0 z-20 bg-blue-700 text-white shadow-sm"
-        style={{
-          paddingTop: "max(1rem, env(safe-area-inset-top))",
-          paddingBottom: "1rem",
-          paddingLeft: "max(1.5rem, env(safe-area-inset-left))",
-          paddingRight: "max(1.5rem, env(safe-area-inset-right))",
-        }}
-      >
-        <div className="mx-auto flex max-w-2xl items-center justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="text-xl font-bold">Förderkompass</h1>
-            <p className="mt-0.5 text-sm text-blue-200">
-              ICF-CY-basierte SMART-Förderziele für die Frühförderung
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={handleReset}
-            className="min-h-[40px] flex-shrink-0 rounded-lg border border-blue-500 px-3 py-2 text-sm text-blue-100 transition-colors hover:border-blue-300 hover:text-white active:bg-blue-800"
-          >
-            Neuer Fall
-          </button>
-        </div>
-      </header>
+      {/* iOS-„Large Title"-Header: kollabiert beim Scrollen zu kompakter
+          Leiste (kleiner Titel + „+"-Button). */}
+      <CollapsingHeader onReset={handleReset} />
 
-      {/* Progress indicator */}
+      {/* Progress indicator – scrollt wie ein Segmented-Control unter dem
+          Large-Title weg; nur die kompakte Header-Leiste bleibt. */}
       <div className="border-b border-gray-200 bg-white px-4 py-4 sm:px-6">
         <div className="mx-auto max-w-2xl">
           <StepIndicator current={step} labels={STEP_LABELS} />
