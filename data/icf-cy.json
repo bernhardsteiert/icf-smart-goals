@@ -1,0 +1,166 @@
+{
+  "_hinweis": "Kuratierter ICF-CY-Startvorschlag (Fokus Kapitel d). Bewusst kompakt; jederzeit erweiter- und veränderbar. Titel/Beschreibungen alltagsnah formuliert.",
+  "codes": [
+    {
+      "code": "d250",
+      "chapter": "d",
+      "title": "Das eigene Verhalten steuern",
+      "description": "Reaktionen, Impulse und Bedürfnisse situationsangemessen regulieren.",
+      "keywords": ["impulskontrolle", "selbstregulation", "frust", "wut", "verhalten"]
+    },
+    {
+      "code": "d710",
+      "chapter": "d",
+      "title": "Elementare interpersonelle Aktivitäten",
+      "description": "Grundlegender Umgang mit anderen: Rücksicht, Wärme, angemessenes Reagieren.",
+      "keywords": ["kontakt", "rücksicht", "begrüßen", "interaktion"]
+    },
+    {
+      "code": "d720",
+      "chapter": "d",
+      "title": "Komplexe interpersonelle Interaktionen",
+      "description": "Beziehungen gestalten: Gefühle steuern, Konflikte lösen, Nähe/Distanz regulieren.",
+      "keywords": ["konflikt", "beziehung", "regeln", "kooperation"]
+    },
+    {
+      "code": "d750",
+      "chapter": "d",
+      "title": "Informelle soziale Beziehungen",
+      "description": "Beziehungen zu anderen Kindern, Freundschaften, Spielpartner finden.",
+      "keywords": ["freunde", "peers", "spielpartner", "gruppe"]
+    },
+    {
+      "code": "d760",
+      "chapter": "d",
+      "title": "Familienbeziehungen",
+      "description": "Beziehungen innerhalb der Familie, z.B. zu Eltern und Geschwistern.",
+      "keywords": ["familie", "eltern", "geschwister", "bindung"]
+    },
+    {
+      "code": "d310",
+      "chapter": "d",
+      "title": "Gesprochene Mitteilungen verstehen",
+      "description": "Gesprochene Sprache und einfache Aufforderungen verstehen.",
+      "keywords": ["sprachverständnis", "verstehen", "aufforderung", "zuhören"]
+    },
+    {
+      "code": "d330",
+      "chapter": "d",
+      "title": "Sprechen",
+      "description": "Wörter, Sätze und Mitteilungen lautsprachlich ausdrücken.",
+      "keywords": ["sprechen", "wortschatz", "sätze", "aussprache"]
+    },
+    {
+      "code": "d331",
+      "chapter": "d",
+      "title": "Vorsprachliche Lautäußerungen",
+      "description": "Lallen, Laute und vorsprachliche Äußerungen als Vorstufe des Sprechens.",
+      "keywords": ["lallen", "laute", "vorsprachlich", "brabbeln"]
+    },
+    {
+      "code": "d335",
+      "chapter": "d",
+      "title": "Nonverbale Mitteilungen produzieren",
+      "description": "Sich über Gestik, Mimik, Zeigen oder Gebärden mitteilen.",
+      "keywords": ["gestik", "mimik", "zeigen", "gebärden", "nonverbal"]
+    },
+    {
+      "code": "d350",
+      "chapter": "d",
+      "title": "Konversation",
+      "description": "Ein Gespräch beginnen, aufrechterhalten und beenden; Sprecherwechsel.",
+      "keywords": ["gespräch", "dialog", "sprecherwechsel", "zuhören"]
+    },
+    {
+      "code": "d440",
+      "chapter": "d",
+      "title": "Feinmotorischer Handgebrauch",
+      "description": "Greifen, Halten, Loslassen und Manipulieren kleiner Gegenstände.",
+      "keywords": ["greifen", "feinmotorik", "pinzettengriff", "manipulieren"]
+    },
+    {
+      "code": "d445",
+      "chapter": "d",
+      "title": "Hand- und Armgebrauch",
+      "description": "Hände und Arme koordiniert einsetzen, z.B. ziehen, drehen, werfen.",
+      "keywords": ["arm", "hand", "koordination", "werfen", "drehen"]
+    },
+    {
+      "code": "d145",
+      "chapter": "d",
+      "title": "Schreiben lernen (Grafomotorik)",
+      "description": "Vorläuferfähigkeiten des Schreibens: Stifthaltung, Malen, Kritzeln, Formen.",
+      "keywords": ["grafomotorik", "malen", "stift", "kritzeln", "schreiben"]
+    },
+    {
+      "code": "d510",
+      "chapter": "d",
+      "title": "Sich waschen",
+      "description": "Körperteile waschen und abtrocknen, Hände waschen.",
+      "keywords": ["waschen", "hygiene", "hände", "abtrocknen"]
+    },
+    {
+      "code": "d530",
+      "chapter": "d",
+      "title": "Die Toilette benutzen",
+      "description": "Toilettengang anzeigen und selbstständig bewältigen (Sauberkeit).",
+      "keywords": ["toilette", "sauberkeit", "windel", "trocken"]
+    },
+    {
+      "code": "d540",
+      "chapter": "d",
+      "title": "Sich kleiden",
+      "description": "An- und Ausziehen, Schuhe, Knöpfe, Reißverschluss.",
+      "keywords": ["anziehen", "ausziehen", "schuhe", "knöpfe"]
+    },
+    {
+      "code": "d550",
+      "chapter": "d",
+      "title": "Essen",
+      "description": "Selbstständig essen, Besteck nutzen, kauen und schlucken.",
+      "keywords": ["essen", "besteck", "kauen", "selbstständig"]
+    },
+    {
+      "code": "d560",
+      "chapter": "d",
+      "title": "Trinken",
+      "description": "Selbstständig aus Becher oder Glas trinken.",
+      "keywords": ["trinken", "becher", "glas"]
+    },
+    {
+      "code": "d131",
+      "chapter": "d",
+      "title": "Lernen durch Handlungen mit Gegenständen",
+      "description": "Durch Ausprobieren, Sortieren und Hantieren mit Material lernen.",
+      "keywords": ["ausprobieren", "sortieren", "material", "explorieren"]
+    },
+    {
+      "code": "d137",
+      "chapter": "d",
+      "title": "Erwerb von Konzepten",
+      "description": "Begriffe und Konzepte erwerben, z.B. Farben, Formen, Mengen.",
+      "keywords": ["konzepte", "farben", "formen", "mengen", "begriffe"]
+    },
+    {
+      "code": "d160",
+      "chapter": "d",
+      "title": "Aufmerksamkeit fokussieren",
+      "description": "Die Aufmerksamkeit gezielt auf etwas richten und halten.",
+      "keywords": ["aufmerksamkeit", "konzentration", "fokus"]
+    },
+    {
+      "code": "d161",
+      "chapter": "d",
+      "title": "Die Aufmerksamkeit lenken",
+      "description": "Aufmerksamkeit über eine Zeit aufrechterhalten und wechseln.",
+      "keywords": ["ausdauer", "dranbleiben", "aufmerksamkeitswechsel"]
+    },
+    {
+      "code": "d880",
+      "chapter": "d",
+      "title": "Spielerisches Engagement",
+      "description": "Sich auf Spiel einlassen: allein, parallel, kooperativ, Rollenspiel.",
+      "keywords": ["spiel", "rollenspiel", "spielen", "fantasie"]
+    }
+  ]
+}
