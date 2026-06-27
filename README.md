@@ -15,8 +15,14 @@ Kontext: Interdisziplinäre Frühförderstelle der Lebenshilfe Lörrach e.V.
 
 ## Projektstatus
 
-Planung abgeschlossen, Implementierung steht an. Es gibt noch **keinen
-Anwendungscode** – nur Spezifikation, Datengrundlage und Bauplan.
+Lauffähiger MVP – auf Vercel deployed. Der Kern-Flow (Therapieform →
+Ausgangslage → Codes → Alter/Merkmale → SMART-Zielentwurf mit Verfeinern und
+Text-Export) ist umgesetzt; das entspricht den Meilensteinen **M0–M5** des
+Implementierungsplans plus einem plattformübergreifenden UI-Feinschliff
+(iOS/Android/Browser).
+
+**Noch offen:** KI-gestützte Code-Vorschläge (M6, `/api/suggest-codes`),
+aufbauende Folgestufen (M7, `/api/next-step`) sowie weiterer Feinschliff (M8).
 
 ## Dokumentation
 
