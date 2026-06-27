@@ -3,22 +3,26 @@
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 interface Props {
-  /** Wird vom „+"-Button ausgelöst (neuer Fall). */
+  /** Wird vom Aktions-Button ausgelöst (neuer Fall). */
   onReset: () => void;
 }
 
+const clamp = (v: number, lo = 0, hi = 1) => Math.min(Math.max(v, lo), hi);
+
+// Scrollstrecke (px), über die der Header von „groß" auf „kompakt" zusammenfährt.
+const COLLAPSE = 72;
+
 /**
- * iOS-„Large Title"-Navigationsleiste: Beim Scrollen nach unten kollabiert der
- * große Titel + Untertitel in eine kompakte Leiste, in der nur der kleine
- * „Förderkompass"-Schriftzug und der „+"-Button stehen bleiben. Der Kollaps ist
- * direkt an die Scrollposition gekoppelt (kein Snap), wie bei nativen iOS-Apps.
+ * iOS-„Large Title"-Navigationsleiste: Derselbe „Förderkompass"-Titel schrumpft
+ * beim Scrollen von groß auf klein (keine leere Leiste über dem großen Titel).
+ * Der Aktions-Button zeigt in der großen Ansicht den Text „Neuer Fall" und
+ * blendet beim Kollabieren zu einem reinen „+"-Button über. Untertitel fährt weg.
  */
 export default function CollapsingHeader({ onReset }: Props) {
   const [scrollY, setScrollY] = useState(0);
-  const [maxHeight, setMaxHeight] = useState(64);
-  const largeRef = useRef<HTMLDivElement>(null);
+  const [subHeight, setSubHeight] = useState(20);
+  const subRef = useRef<HTMLParagraphElement>(null);
 
-  // Scrollposition (gedrosselt via requestAnimationFrame) verfolgen.
   useEffect(() => {
     let raf = 0;
     const onScroll = () => {
@@ -33,27 +37,28 @@ export default function CollapsingHeader({ onReset }: Props) {
     };
   }, []);
 
-  // Natürliche Höhe des großen Titelblocks messen (für sauberes Kollabieren,
-  // auch wenn der Untertitel auf schmalen Geräten umbricht).
+  // Natürliche Höhe des Untertitels messen (für sauberes Wegfahren).
   useLayoutEffect(() => {
     const measure = () => {
-      if (largeRef.current) setMaxHeight(largeRef.current.offsetHeight);
+      if (subRef.current) setSubHeight(subRef.current.offsetHeight);
     };
     measure();
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  // Kollaps-Fortschritt 0 (offen) … 1 (kompakt).
-  const p = Math.min(Math.max(scrollY / Math.max(maxHeight, 1), 0), 1);
-  const largeOpacity = Math.max(1 - p * 1.6, 0);
-  const smallOpacity = Math.max((p - 0.45) / 0.55, 0);
+  const p = clamp(scrollY / COLLAPSE); // 0 = groß, 1 = kompakt
+  const titleFontRem = 1.5 - 0.5 * p; // text-2xl (1.5rem) → text-base (1rem)
+  const subOpacity = clamp(1 - p * 1.5);
+  const textOpacity = clamp(1 - p * 1.9); // „Neuer Fall"-Text
+  const iconOpacity = clamp((p - 0.35) / 0.65); // „+"-Icon
 
   return (
     <header
       className="sticky top-0 z-30 bg-blue-700 text-white"
       style={{
         paddingTop: "max(0.5rem, env(safe-area-inset-top))",
+        paddingBottom: "0.5rem",
         paddingLeft: "max(1rem, env(safe-area-inset-left))",
         paddingRight: "max(1rem, env(safe-area-inset-right))",
         boxShadow: p > 0.5 ? "0 1px 4px rgba(0,0,0,0.18)" : "none",
@@ -61,49 +66,63 @@ export default function CollapsingHeader({ onReset }: Props) {
       }}
     >
       <div className="mx-auto max-w-2xl">
-        {/* Kompaktleiste – bleibt immer sichtbar */}
-        <div className="flex h-11 items-center justify-between gap-3">
-          <span
-            className="text-base font-semibold"
-            style={{
-              opacity: smallOpacity,
-              transform: `translateY(${(1 - smallOpacity) * 6}px)`,
-            }}
+        {/* Titelzeile: großer Titel links, Aktion rechts – direkt am oberen Rand,
+            keine leere Leiste darüber. */}
+        <div className="flex min-h-9 items-center justify-between gap-3">
+          <h1
+            className="font-bold leading-tight"
+            style={{ fontSize: `${titleFontRem}rem` }}
           >
             Förderkompass
-          </span>
+          </h1>
+
+          {/* Aktions-Button: Text „Neuer Fall" ↔ „+" (überblendet) */}
           <button
             type="button"
             onClick={onReset}
             aria-label="Neuer Fall (aktuellen Fall verwerfen)"
             title="Neuer Fall"
-            className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-blue-400/60 text-white transition-colors hover:bg-blue-600 active:bg-blue-800"
+            className="relative flex h-9 flex-shrink-0 items-center justify-end"
           >
-            <svg
-              viewBox="0 0 24 24"
-              className="h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2.2}
-              strokeLinecap="round"
+            <span
+              className="whitespace-nowrap rounded-lg border border-blue-400/70 px-3 py-1.5 text-sm transition-colors"
+              style={{
+                opacity: textOpacity,
+                visibility: textOpacity <= 0.01 ? "hidden" : "visible",
+              }}
             >
-              <path d="M12 5v14M5 12h14" />
-            </svg>
+              Neuer Fall
+            </span>
+            <span
+              className="absolute right-0 flex h-9 w-9 items-center justify-center rounded-full border border-blue-400/60"
+              style={{
+                opacity: iconOpacity,
+                visibility: iconOpacity <= 0.01 ? "hidden" : "visible",
+              }}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                className="h-5 w-5"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2.2}
+                strokeLinecap="round"
+              >
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+            </span>
           </button>
         </div>
 
-        {/* Großer Titel – kollabiert beim Scrollen */}
+        {/* Untertitel: fährt beim Scrollen weg */}
         <div
           className="overflow-hidden"
-          style={{ height: maxHeight * (1 - p), opacity: largeOpacity }}
+          style={{ height: subHeight * (1 - p), opacity: subOpacity }}
           aria-hidden={p > 0.9}
         >
-          <div ref={largeRef} className="pb-3">
-            <h1 className="text-2xl font-bold leading-tight">Förderkompass</h1>
-            <p className="mt-0.5 text-sm text-blue-200">
-              ICF-CY-basierte SMART-Förderziele für die Frühförderung
-            </p>
-          </div>
+          <p ref={subRef} className="pt-0.5 text-sm text-blue-200">
+            ICF-CY-basierte SMART-Förderziele für die Frühförderung
+          </p>
         </div>
       </div>
     </header>
