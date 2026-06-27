@@ -18,8 +18,9 @@
 }
 
 html {
-  /* Kein „Gummiband"-Overscroll – fühlt sich appiger an, weniger wie Webseite. */
-  overscroll-behavior-y: none;
+  /* Hinter dem Inhalt die Header-Farbe (blue-700), damit das iOS-„Überschießen"
+     am oberen Rand nahtlos blau bouncet, statt einen Streifen freizulegen. */
+  background-color: #1d4ed8;
 }
 
 body {
@@ -27,6 +28,10 @@ body {
   background-color: var(--color-gray-50);
   /* Grauen Tap-Blitz auf Touch-Geräten unterdrücken. */
   -webkit-tap-highlight-color: transparent;
+  /* iOS-Momentum-Scrolling + vertikales Rubber-Band („magnetisches Band")
+     bewusst erlaubt; nur horizontales Überscrollen unterbinden. */
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: none;
   text-rendering: optimizeLegibility;
 }
 
