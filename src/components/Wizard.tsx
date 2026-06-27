@@ -11,6 +11,7 @@ import {
 import DisclaimerBanner from "./DisclaimerBanner";
 import StepTherapieform from "./StepTherapieform";
 import StepAusgangslage from "./StepAusgangslage";
+import StepCodes from "./StepCodes";
 import StepMerkmale from "./StepMerkmale";
 
 const STEP_LABELS = [
@@ -49,6 +50,18 @@ export default function Wizard() {
       resetFall();
       setStep(1);
     }
+  };
+
+  // When entering step 3 for the first time, pre-populate auswahl from Vorgespräch-Codes
+  const goNext = () => {
+    const next = step + 1;
+    if (next === 3 && state.auswahl.length === 0 && state.vorgespraechCodes.length > 0) {
+      update("auswahl", state.vorgespraechCodes.map((code) => ({
+        code,
+        quelle: "vorgespraech" as const,
+      })));
+    }
+    setStep(next);
   };
 
   return (
@@ -107,10 +120,13 @@ export default function Wizard() {
             )}
 
             {step === 3 && (
-              <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-8 text-center text-gray-500">
-                <p className="font-medium">ICF-Code-Maske</p>
-                <p className="mt-1 text-sm">Wird in Meilenstein M3 implementiert.</p>
-              </div>
+              <StepCodes
+                gruppen={gruppen}
+                allCodes={ALL_CODES}
+                auswahl={state.auswahl}
+                vorgespraechCodes={state.vorgespraechCodes}
+                onChange={(auswahl) => update("auswahl", auswahl)}
+              />
             )}
 
             {step === 4 && (
@@ -146,7 +162,7 @@ export default function Wizard() {
           </button>
           <button
             type="button"
-            onClick={() => setStep((s) => Math.min(TOTAL_STEPS, s + 1))}
+            onClick={goNext}
             disabled={!canAdvance}
             className="rounded bg-blue-600 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
           >
