@@ -13,6 +13,7 @@ import StepTherapieform from "./StepTherapieform";
 import StepAusgangslage from "./StepAusgangslage";
 import StepCodes from "./StepCodes";
 import StepMerkmale from "./StepMerkmale";
+import StepZiele from "./StepZiele";
 
 const STEP_LABELS = [
   "Therapieform",
@@ -140,10 +141,15 @@ export default function Wizard() {
             )}
 
             {step === 5 && (
-              <div className="rounded-lg border border-dashed border-gray-300 bg-gray-50 p-8 text-center text-gray-500">
-                <p className="font-medium">Förderziele</p>
-                <p className="mt-1 text-sm">Wird in Meilenstein M4 / M5 implementiert.</p>
-              </div>
+              <StepZiele
+                therapieformen={state.therapieformen}
+                auswahl={state.auswahl}
+                alterHalbjahre={state.alterHalbjahre}
+                merkmale={state.merkmale}
+                beobachtung={state.beobachtung}
+                ziele={state.ziele}
+                onZieleChange={(ziele) => update("ziele", ziele)}
+              />
             )}
           </div>
         </div>
