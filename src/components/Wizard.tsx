@@ -66,11 +66,20 @@ export default function Wizard() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
-      {/* Header */}
-      <header className="bg-blue-700 px-6 py-4 text-white shadow">
-        <div className="mx-auto flex max-w-2xl items-center justify-between">
-          <div>
+    <div className="flex min-h-dvh flex-col">
+      {/* Header – Hintergrund reicht randlos bis unter die Statusleiste
+          (Safe-Area), nur der Inhalt wird nach unten geschoben. */}
+      <header
+        className="sticky top-0 z-20 bg-blue-700 text-white shadow-sm"
+        style={{
+          paddingTop: "max(1rem, env(safe-area-inset-top))",
+          paddingBottom: "1rem",
+          paddingLeft: "max(1.5rem, env(safe-area-inset-left))",
+          paddingRight: "max(1.5rem, env(safe-area-inset-right))",
+        }}
+      >
+        <div className="mx-auto flex max-w-2xl items-center justify-between gap-3">
+          <div className="min-w-0">
             <h1 className="text-xl font-bold">Förderkompass</h1>
             <p className="mt-0.5 text-sm text-blue-200">
               ICF-CY-basierte SMART-Förderziele für die Frühförderung
@@ -79,7 +88,7 @@ export default function Wizard() {
           <button
             type="button"
             onClick={handleReset}
-            className="rounded border border-blue-500 px-3 py-1 text-sm text-blue-200 transition-colors hover:border-blue-300 hover:text-white"
+            className="min-h-[40px] flex-shrink-0 rounded-lg border border-blue-500 px-3 py-2 text-sm text-blue-100 transition-colors hover:border-blue-300 hover:text-white active:bg-blue-800"
           >
             Neuer Fall
           </button>
@@ -87,7 +96,7 @@ export default function Wizard() {
       </header>
 
       {/* Progress indicator */}
-      <div className="border-b border-gray-200 bg-white px-6 py-4">
+      <div className="border-b border-gray-200 bg-white px-4 py-4 sm:px-6">
         <div className="mx-auto max-w-2xl">
           <StepIndicator current={step} labels={STEP_LABELS} />
         </div>
@@ -155,14 +164,23 @@ export default function Wizard() {
         </div>
       </main>
 
-      {/* Navigation */}
-      <footer className="border-t border-gray-200 bg-white px-4 py-4">
-        <div className="mx-auto flex max-w-2xl justify-between">
+      {/* Navigation – bleibt am unteren Rand klebend, respektiert die
+          Safe-Area (Home-Indicator) am unteren iPhone-Rand. */}
+      <footer
+        className="sticky bottom-0 z-20 border-t border-gray-200 bg-white"
+        style={{
+          paddingTop: "0.75rem",
+          paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))",
+          paddingLeft: "max(1rem, env(safe-area-inset-left))",
+          paddingRight: "max(1rem, env(safe-area-inset-right))",
+        }}
+      >
+        <div className="mx-auto flex max-w-2xl justify-between gap-3">
           <button
             type="button"
             onClick={() => setStep((s) => Math.max(1, s - 1))}
             disabled={step === 1}
-            className="rounded border border-gray-300 px-4 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+            className="min-h-[44px] rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
           >
             ← Zurück
           </button>
@@ -170,7 +188,7 @@ export default function Wizard() {
             type="button"
             onClick={goNext}
             disabled={!canAdvance}
-            className="rounded bg-blue-600 px-4 py-2 text-sm text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-40"
+            className="min-h-[44px] rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 active:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {step === TOTAL_STEPS ? "Abschluss" : "Weiter →"}
           </button>

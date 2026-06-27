@@ -74,7 +74,7 @@ export default function GoalCard({ ziel, busy = false, onRefine, onRemove }: Pro
             type="button"
             disabled={busy}
             onClick={() => onRefine(b.modus)}
-            className="rounded-full border border-gray-300 px-3 py-1 text-xs text-gray-700 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="min-h-[36px] rounded-full border border-gray-300 px-3 py-1 text-xs text-gray-700 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 active:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {b.label}
           </button>
