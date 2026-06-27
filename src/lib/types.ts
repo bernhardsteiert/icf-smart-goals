@@ -42,14 +42,9 @@ export type Merkmal = {
 // ── Zielmodell ────────────────────────────────────────────────────────────────
 
 export type SmartUnterziel = {
+  // Ein einzelnes, ausformuliertes SMART-Ziel: in sich spezifisch, messbar,
+  // erreichbar, relevant und terminiert – keine Aufschlüsselung nach Kriterien.
   ziel: string;
-  smart: {
-    spezifisch: string;
-    messbar: string;
-    erreichbar: string;
-    relevant: string;
-    terminiert: string;
-  };
   status: "offen" | "erreicht";
   naechsteStufe?: string;
   begruendung: string;

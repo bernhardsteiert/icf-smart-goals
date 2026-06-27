@@ -98,43 +98,31 @@ function UnterzielRow({
   unterziel: Foerderziel["unterziele"][number];
 }) {
   const [expanded, setExpanded] = useState(false);
+  const erreicht = unterziel.status === "erreicht";
 
   return (
     <div className="py-3">
       <div className="flex items-start justify-between gap-2">
-        <p className="text-sm text-gray-800">{unterziel.ziel}</p>
-        <button
-          type="button"
-          onClick={() => setExpanded((e) => !e)}
-          className="flex-shrink-0 text-xs text-blue-600 hover:text-blue-800"
-        >
-          {expanded ? "SMART ▲" : "SMART ▼"}
-        </button>
+        <p className="text-sm text-gray-800">
+          {erreicht && <span className="mr-1 text-green-600">✓</span>}
+          {unterziel.ziel}
+        </p>
+        {unterziel.begruendung && (
+          <button
+            type="button"
+            onClick={() => setExpanded((e) => !e)}
+            className="flex-shrink-0 text-xs text-blue-600 hover:text-blue-800"
+          >
+            {expanded ? "Warum ▲" : "Warum ▼"}
+          </button>
+        )}
       </div>
 
-      {expanded && (
-        <div className="mt-2 rounded-md bg-gray-50 px-3 py-2 text-xs space-y-1.5">
-          <SmartRow label="Spezifisch" value={unterziel.smart.spezifisch} />
-          <SmartRow label="Messbar" value={unterziel.smart.messbar} />
-          <SmartRow label="Erreichbar" value={unterziel.smart.erreichbar} />
-          <SmartRow label="Relevant" value={unterziel.smart.relevant} />
-          <SmartRow label="Terminiert" value={unterziel.smart.terminiert} />
-          {unterziel.begruendung && (
-            <p className="mt-1.5 border-t border-gray-200 pt-1.5 italic text-gray-500">
-              {unterziel.begruendung}
-            </p>
-          )}
-        </div>
+      {expanded && unterziel.begruendung && (
+        <p className="mt-2 rounded-md bg-gray-50 px-3 py-2 text-xs italic text-gray-500">
+          {unterziel.begruendung}
+        </p>
       )}
-    </div>
-  );
-}
-
-function SmartRow({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex gap-2">
-      <span className="w-20 flex-shrink-0 font-medium text-gray-500">{label}:</span>
-      <span className="text-gray-700">{value}</span>
     </div>
   );
 }

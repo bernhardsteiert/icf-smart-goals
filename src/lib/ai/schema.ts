@@ -9,13 +9,6 @@ const qualifierSchema = z.union([
 
 export const smartUnterzielSchema = z.object({
   ziel: z.string(),
-  smart: z.object({
-    spezifisch: z.string(),
-    messbar: z.string(),
-    erreichbar: z.string(),
-    relevant: z.string(),
-    terminiert: z.string(),
-  }),
   status: z.enum(["offen", "erreicht"]),
   naechsteStufe: z.string().optional(),
   begruendung: z.string(),
@@ -43,28 +36,15 @@ export const codeVorschlagArraySchema = z.array(codeVorschlagSchema);
 // ── Gemini responseSchema (JSON-Schema-Subset für strukturierte Ausgabe) ──────
 // Gemini erwartet uppercase type-Strings und keine Zod-Konstrukte.
 
-const SMART_SCHEMA = {
-  type: "OBJECT",
-  properties: {
-    spezifisch: { type: "STRING" },
-    messbar: { type: "STRING" },
-    erreichbar: { type: "STRING" },
-    relevant: { type: "STRING" },
-    terminiert: { type: "STRING" },
-  },
-  required: ["spezifisch", "messbar", "erreichbar", "relevant", "terminiert"],
-};
-
 const UNTERZIEL_SCHEMA = {
   type: "OBJECT",
   properties: {
     ziel: { type: "STRING" },
-    smart: SMART_SCHEMA,
     status: { type: "STRING", enum: ["offen", "erreicht"] },
     naechsteStufe: { type: "STRING" },
     begruendung: { type: "STRING" },
   },
-  required: ["ziel", "smart", "status", "begruendung"],
+  required: ["ziel", "status", "begruendung"],
 };
 
 export const GEMINI_GOALS_SCHEMA = {

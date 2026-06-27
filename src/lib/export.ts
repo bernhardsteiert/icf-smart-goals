@@ -18,12 +18,7 @@ export function zieleToText(ziele: Foerderziel[]): string {
 
     ziel.unterziele.forEach((uz) => {
       const erreicht = uz.status === "erreicht" ? " [erreicht]" : "";
-      lines.push(`  - Unterziel: ${uz.ziel}${erreicht}`);
-      lines.push(`      spezifisch:  ${uz.smart.spezifisch}`);
-      lines.push(`      messbar:     ${uz.smart.messbar}`);
-      lines.push(`      erreichbar:  ${uz.smart.erreichbar}`);
-      lines.push(`      relevant:    ${uz.smart.relevant}`);
-      lines.push(`      terminiert:  ${uz.smart.terminiert}`);
+      lines.push(`  - Ziel: ${uz.ziel}${erreicht}`);
       if (uz.naechsteStufe) {
         lines.push(`      nächste Stufe: ${uz.naechsteStufe}`);
       }
