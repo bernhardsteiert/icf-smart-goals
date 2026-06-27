@@ -1,4 +1,5 @@
 import type { GenerateGoalsInput, SuggestCodesInput, NextStepInput } from "./provider";
+import { halbjahreToText } from "@/lib/format";
 
 // ── Qualifier-Bedeutungen (fließen in den User-Prompt) ────────────────────────
 
@@ -11,15 +12,6 @@ const QUALIFIER_TEXT: Record<number, string> = {
 };
 
 // ── Hilfsfunktionen ───────────────────────────────────────────────────────────
-
-function halbjahreToText(halbjahre: number): string {
-  if (halbjahre === 0) return "unter 6 Monate";
-  const years = Math.floor(halbjahre / 2);
-  const months = (halbjahre % 2) * 6;
-  if (years === 0) return `${months} Monate`;
-  if (months === 0) return `${years} Jahr${years !== 1 ? "e" : ""}`;
-  return `${years} Jahr${years !== 1 ? "e" : ""} und ${months} Monate`;
-}
 
 function merkmaleToText(merkmale: Record<string, unknown>): string {
   const lines: string[] = [];

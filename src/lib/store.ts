@@ -20,8 +20,12 @@ export function useFallState() {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    // Einmalige Hydration aus localStorage beim Mount. setState im Effect ist
+    // hier bewusst gewählt (Wert steht erst clientseitig fest) und durch den
+    // `hydrated`-Guard gegen Überschreiben abgesichert.
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       if (raw) setStateRaw(JSON.parse(raw) as FallState);
     } catch {
       // localStorage not available or corrupted

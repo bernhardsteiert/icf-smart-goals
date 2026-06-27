@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { Foerderziel, IcfSelection } from "@/lib/types";
+import { halbjahreToText } from "@/lib/format";
 import GoalCard from "./GoalCard";
 
 interface Props {
@@ -114,13 +115,4 @@ export default function StepZiele({
       )}
     </div>
   );
-}
-
-function halbjahreToText(h: number): string {
-  if (h === 0) return "unter 6 Monate";
-  const y = Math.floor(h / 2);
-  const m = (h % 2) * 6;
-  if (y === 0) return `${m} Monate`;
-  if (m === 0) return `${y} Jahr${y !== 1 ? "e" : ""}`;
-  return `${y} Jahr${y !== 1 ? "e" : ""} ${m} Mon.`;
 }

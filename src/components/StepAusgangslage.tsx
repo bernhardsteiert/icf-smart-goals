@@ -42,7 +42,7 @@ export default function StepAusgangslage({
     <div className="space-y-4">
       <p className="text-sm text-gray-600">
         Optional: Welche ICF-CY-Codes wurden im Vorgespräch mit dem Diagnostikteam
-        festgelegt? Diese werden als „Stand Vorgespräch" übernommen.
+        festgelegt? Diese werden als &bdquo;Stand Vorgespräch&ldquo; übernommen.
       </p>
 
       {/* Selected chips */}
