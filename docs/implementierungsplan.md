@@ -84,6 +84,7 @@ src/
     CodeCatalog.tsx           # Suche + ausklappbare Kategorien + Desc-auf-Klick + Schweregrad-Slider
     SelectionSummary.tsx      # Zusammenfassung der Auswahl (in Schritt 5)
     ConfirmDialog.tsx         # Eigener Bestätigungs-Dialog (ersetzt window.confirm)
+    LoadingOverlay.tsx        # Vollbild-Lade-Overlay (Zielerstellung Schritt 5)
     GoalCard.tsx              # Oberziel-Karte; Verfeinern + Export-Checkbox je Unterziel
   lib/
     types.ts                  # zentrale Typen (siehe §3)
@@ -349,7 +350,12 @@ Schritt-Wizard (Spec §6), oben Fortschrittsanzeige, unten Weiter/Zurück:
    annehmbare Vorschläge).
 4. **Alter & Merkmale** – Alter als Dropdown in Halbjahrschritten; Merkmale aus
    `merkmale.json`.
-5. **Ziele** – Button „Ziele vorschlagen" (`/api/generate-goals`). Anzeige als
+5. **Übersicht** – Zusammenfassung der Auswahl. Die Zielerstellung
+   (`/api/generate-goals`) läuft über den normalen „Weiter →"-Button der
+   Wizard-Navigation (konsistent zu den übrigen Schritten); während der Anfrage
+   blendet `LoadingOverlay` ein Vollbild-Lade-Overlay ein. Bestehen bereits
+   Ziele, führt „Weiter" direkt zu Schritt 6 (ohne neue KI-Anfrage).
+6. **Ziele** – Anzeige als
    `GoalCard` (Oberziel + Unterziele mit SMART-Details + `abgeleitetAus`-Codes).
    Pro Karte: Verfeinern-Buttons, je Unterziel „erreicht"-Toggle → bei erreicht
    Button „Nächste Stufe vorschlagen" (`/api/next-step`). Export-Button (Text).
