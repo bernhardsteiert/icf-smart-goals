@@ -1,16 +1,26 @@
 # ICF SMART Goals – Spezifikation (MVP)
 
-**Stand:** 2026-06-27 (v3 nach Praxis-Feedback)
+**Stand:** 2026-06-28 (v4 nach mehreren Runden Praxis-Feedback)
 **Kontext:** Interdisziplinäre Frühförderstelle der Lebenshilfe Lörrach e.V.
 **Ziel:** Webapp, die Fachkräfte der Frühförderung dabei unterstützt,
 (1) aus dem **aktuellen Entwicklungsstand passende ICF‑CY‑Codes** zu bestätigen
 oder anzupassen und (2) daraus **SMART-formulierte Förderziele** (Oberziele mit
-messbaren Unterzielen) als Entwurf zu erhalten.
+ausformulierten SMART-Unterzielen) als Entwurf zu erhalten.
 
 > **Status dieses Dokuments:** Fachliche Referenz für den umgesetzten MVP. Der
-> Kern-Flow (M0–M5) ist implementiert und deployed; offene Punkte (§12) sowie
-> KI-Code-Vorschläge und Folgestufen stehen noch aus. Bei fachlichen Änderungen
-> bitte dieses Dokument mitführen.
+> Kern-Flow (M0–M5) ist implementiert, deployed und durch Praxis-Feedback
+> erweitert. Wesentliche Änderungen ggü. v3:
+> - ICF-Katalog auf Kapitel **b/d/e** erweitert (~74 Codes, §4, Anhang A).
+> - Jedes **Unterziel ist ein einzelner ausformulierter SMART-Satz** (keine
+>   Aufschlüsselung in spezifisch/messbar/… mehr; §7).
+> - **Verfeinern pro Unterziel** inkl. Freitext (§6, §8).
+> - **Semantische Stichwortsuche** über einen Synonym-Thesaurus (§6a).
+> - **Disclaimer als Einstiegsseite**; **freie Beobachtung in Schritt 4**;
+>   Ergebnisse auf **eigener Seite** (§6).
+>
+> Offen: KI-Code-Vorschläge (M6) und Folgestufen (M7), siehe §12 und
+> `docs/implementierungsplan.md` §10. Bei fachlichen Änderungen bitte dieses
+> Dokument mitführen.
 
 ## 0. Praxis-Kontext (warum die App so aussieht)
 
@@ -107,10 +117,16 @@ Beobachtungsfeld ist überall **optional**.
 
 ## 4. ICF-CY Datenmodell
 
-Kuratierte Teilmenge. **Fokus auf Kapitel d** (Aktivitäten & Teilhabe) – das sind
-die im Ermessensbereich der Heilpädagogik veränderbaren Codes. Kapitel **b**
-(Körperfunktionen) liegt oft *nicht* im Ermessen der Heilpädagogik und wird im
-MVP zurückhaltend einbezogen; das Datenmodell bleibt aber langfristig flexibel.
+Kuratierte Teilmenge (~74 Codes) über **drei Kapitel** – auf Wunsch der Praxis
+erweitert:
+- **d** (Aktivitäten & Teilhabe) – Schwerpunkt, im Ermessen der Heilpädagogik.
+- **b** (Körperfunktionen) – z.B. mentale Funktionen, Sprache/Stimme, Motorik &
+  Sensorik (Aufmerksamkeit, Emotion, Wahrnehmung, Tonus …).
+- **e** (Umweltfaktoren) – Familie, Bezugspersonen, Fachkräfte, Dienste.
+
+Die Codes sind in `masken.json` Kategorien zugeordnet und nach Kapitel in
+ausklappbaren Abschnitten gruppiert (siehe §6a). Das Datenmodell bleibt flexibel
+erweiterbar.
 
 ```ts
 type IcfCode = {
@@ -164,53 +180,63 @@ type Therapieform = {
 
 ## 6. User-Flow
 
-Geführter Ablauf; alles über Auswahl, Freitext nur optional.
+Geführter 6-Schritt-Wizard mit Fortschrittsanzeige; alles über Auswahl, Freitext
+nur optional. **Vorgeschaltet:** ein **Disclaimer-Einstieg** mit Button
+„Gelesen und verstanden" – erscheint bei jedem Start und nach „Neuer Fall".
 
 1. **Therapieform(en) wählen** – Mehrfachauswahl. MVP: Heilpädagogik.
-2. **Ausgangslage (optional)** – Vorgespräch-Codes als Chips (Quelle = Diagnostikteam).
-   Werden als „Stand Vorgespräch" angezeigt.
-3. **Codes überprüfen/anpassen (Aufgabe A)** – über die Maske der Hauptbereiche:
-   - Bereiche durchgehen, passende Codes bestätigen/anwählen, unpassende abwählen.
-   - *(optional)* Schweregrad 0–4 pro Code.
-   - *(optional)* **Beobachtungsfeld** (Stichworte, Klarnamen-Warnung).
-   - *(optional)* **„Passende Codes vorschlagen"** → KI ergänzt/bestätigt aus
-     Ausgangslage + Beobachtung + Gewähltem (nur Codes aus dem Katalog).
+2. **Ausgangslage (optional)** – Vorgespräch-Codes als Chips (Quelle = Diagnostik-
+   team). Werden als „Stand Vorgespräch" angezeigt. Mit Suche + ausklappbaren
+   Kategorien (§6a).
+3. **Codes überprüfen/anpassen (Aufgabe A)** – über die Kategorien-Maske:
+   - Kategorien aufklappen, passende Codes an-/abwählen; Erklärung erscheint erst
+     **auf Klick** auf den Code (sonst nur Code + Name).
+   - **Suche** (semantisch, §6a) über alle Codes.
+   - *(optional)* **Schweregrad 0–4** pro Code per Schieber.
+   - *(geplant, M6)* **„Passende Codes vorschlagen"** → KI ergänzt/bestätigt.
 4. **Alter & Merkmale** – Alter in **Halbjahrschritten**; wenige
-   nicht-identifizierende Merkmale (§6b).
-5. **Ziele vorschlagen (Aufgabe B)** – Oberziele mit messbaren Unterzielen,
-   geplant für **~1 Jahr Förderung (Richtwert 42 Therapieeinheiten)**.
-6. **Pro Ziel verfeinern** – *einfacher · ambitionierter · anders formulieren ·
-   für Eltern formulieren · verwerfen*.
-7. **Fortschritt / Folgestufen** – ein Unterziel als **erreicht** markieren →
-   App schlägt eine **darauf aufbauende nächste Stufe** vor (updatebar).
-8. **Sammeln & Export** – ausgewählte Ziele bearbeiten, **als Text exportieren**
-   (Copy/Plaintext für die Weiterverarbeitung in einem größeren Dokument).
+   nicht-identifizierende Merkmale (§6b); **freies Beobachtungsfeld** (anonym,
+   Stichworte) mit Klarnamen-Hinweis.
+5. **Übersicht** – Zusammenfassung der Auswahl (Therapieform, Codes inkl.
+   Schweregrad/Quelle, Alter, Merkmale, Beobachtung) und Button
+   **„Ziele vorschlagen (Aufgabe B)"**. Bei Erfolg automatischer Wechsel zu 6.
+6. **Ziele** (eigene Ergebnisseite) – Oberziele mit ausformulierten
+   SMART-Unterzielen (§7). Pro **Unterziel**:
+   - **Verfeinern**: *einfacher · ambitionierter · anders formulieren · für
+     Eltern* **plus Freitext** („eigene Änderung"). Wirkt nur auf das Unterziel.
+   - *(geplant, M7)* Unterziel als **erreicht** markieren → **nächste Stufe**.
+   - **Begründung** auf Klick einblendbar.
+   Pro Oberziel: Mülleimer-Icon zum Verwerfen, „Ziele neu vorschlagen".
+   **Export**: einzelne Unterziele per Checkbox auswählen; Umfang „ausgewählte
+   Ziele" oder „kompletter Förderplan"; Kopieren / `.txt`.
 
-> Reiner Auswahl-Pfad: Schritte 1, 3 (nur Bereiche+Codes), 4, 5 – ohne Freitext.
+> Reiner Auswahl-Pfad: Schritte 1, 3 (nur Kategorien+Codes), 4 (nur Alter), 5 – ohne Freitext.
 
-## 6a. Hauptbereiche der Heilpädagogik (Maske)
+## 6a. Kategorien & Suche (Maske)
 
-Die fünf Hauptbereiche der Heilpädagogik strukturieren die Code-Auswahl
-(Schwerpunkt d-Codes):
+Codes sind je Therapieform in **Kategorien** organisiert, gruppiert nach
+ICF-Kapitel in ausklappbaren Abschnitten (Körperfunktionen b · Aktivitäten &
+Teilhabe d · Umweltfaktoren e). Beispiel-Kategorien: *Mentale Funktionen*,
+*Sprache & Stimme*, *Motorik & Sensorik*, *Lernen*, *Aufmerksamkeit & Aufgaben*,
+*Kommunikation*, *Mobilität*, *Selbstversorgung*, *Soziale Interaktionen*,
+*Spiel*, *Umweltfaktoren*.
 
 ```ts
 type Hauptbereich = {
   id: string;
   label: string;
-  codes: string[];   // zugeordnete ICF-CY-Codes (v.a. Kapitel d)
+  chapter?: "b" | "d" | "e" | "s";  // für die Abschnitts-Gruppierung in der UI
+  codes: string[];                  // zugeordnete ICF-CY-Codes
 };
 ```
 
-| id | Hauptbereich |
-|---|---|
-| `sozial_emotional` | Sozial-emotionale Entwicklung |
-| `sprachlich` | Sprachliche Entwicklung |
-| `feinmotorik_grafomotorik` | Feinmotorik / Grafomotorik |
-| `alltagshandeln` | Alltagshandeln (ADL) |
-| `spiel_lernverhalten` | Spiel- und Lernverhalten |
+**Semantische Suche:** Die Stichwortsuche trifft nicht nur Code/Name/Keywords,
+sondern auch fachlich **verwandte** Codes über einen Konzept-Thesaurus
+(`/data/synonyme.json`). Beispiel: „Selbstbewusstsein" → b122/b125/b126/d250/…,
+„Entspannung" → b134/b147/b152/d240. Frei erweiterbar.
 
-Datenquelle: `/data/masken.json`. Pro Therapieform eine Maske; weitere Formen
-ergänzen eigene Bereiche.
+Datenquelle: `/data/masken.json` (Kategorien) + `/data/synonyme.json` (Thesaurus).
+Pro Therapieform eine Maske; weitere Formen ergänzen eigene Kategorien.
 
 ## 6b. Nicht-identifizierende Merkmale
 
@@ -233,33 +259,36 @@ type Merkmal = {
 
 ## 7. Zielmodell (Oberziele & Unterziele)
 
-Förderziele sind zweistufig: ein **Oberziel** (Richtung) mit mehreren **messbaren
-Unterzielen** (SMART). Beispiel: *Oberziel „Erweiterung des Wortschatzes" →
-Unterziel „lernt 5 neue Wörter".*
+Förderziele sind zweistufig: ein **Oberziel** (Richtung) mit mehreren
+**Unterzielen**. **Jedes Unterziel ist GENAU EIN ausformuliertes SMART-Ziel** –
+ein zusammenhängender Satz, der alle SMART-Kriterien (spezifisch, messbar,
+erreichbar, relevant, terminiert) **zugleich** erfüllt. Es gibt **keine**
+Aufschlüsselung in Einzelfelder mehr (Praxis-Feedback v4).
+
+Beispiel-Unterziel: *„Das Kind benennt bis zum Ende des Förderzeitraums in
+Spielsituationen selbstständig mindestens 5 neue Wörter, beobachtbar an drei
+aufeinanderfolgenden Terminen."*
 
 ```ts
 type Foerderziel = {
   oberziel: string;             // z.B. "Erweiterung des Wortschatzes"
-  bereich: string;              // Hauptbereich.id
-  zeithorizont: string;         // "ca. 1 Jahr / ~42 Therapieeinheiten"
+  bereich: string;              // frei formulierter Bereich/Kategorie
   abgeleitetAus: string[];      // ICF-Codes → Transparenz
   unterziele: SmartUnterziel[];
 };
 
 type SmartUnterziel = {
-  ziel: string;                 // "lernt 5 neue Wörter"
-  smart: {
-    spezifisch: string;
-    messbar: string;            // konkreter Beobachtungs-/Messindikator
-    erreichbar: string;
-    relevant: string;
-    terminiert: string;         // Zeithorizont, z.B. "in 3 Monaten"
-  };
+  ziel: string;                 // EIN ausformulierter SMART-Satz (alle Kriterien zugleich)
   status: "offen" | "erreicht";
-  naechsteStufe?: string;       // bei "erreicht": aufbauender Folgevorschlag
-  begruendung: string;
+  naechsteStufe?: string;       // bei "erreicht": aufbauender Folgevorschlag (M7)
+  begruendung: string;          // kurze fachliche Begründung, auf Klick einblendbar
 };
 ```
+
+> **Kein Zeithorizont-Feld mehr:** Der Planungshorizont (~1 Jahr / ~42 Einheiten)
+> ist nur interner Prompt-Hintergrund für realistischen Anspruch und wird **nicht**
+> ausgegeben; der Zeitbezug steht allgemein im Zielsatz (z.B. „bis zum Ende des
+> Förderzeitraums"), siehe §8.
 
 ### Ausgabeformat je Code-Vorschlag (Aufgabe A)
 
@@ -279,29 +308,35 @@ type CodeVorschlag = {
 Der Fachkontext (Rolle, ICF-CY, Frühförderung, Anonymisierung, SMART-Regeln,
 Planungshorizont ~1 Jahr / 42 Einheiten) ist **fest im System-Prompt**.
 
-**Aufgabe A – Code-Vorschläge (`/api/suggest-codes`):**
+**Aufgabe A – Code-Vorschläge (`/api/suggest-codes`, geplant M6):**
 - System: ICF-CY-Fachkraft; ordne aktuellen Stand passenden Codes der gewählten
-  Therapieform(en) zu, **Fokus Kapitel d**. Nur Codes aus dem mitgelieferten
-  Katalog, keine Erfindung. Ausgabe strikt als JSON (`CodeVorschlag[]`).
+  Therapieform(en) zu (Kapitel b/d/e gemäß Katalog, Schwerpunkt d). Nur Codes aus
+  dem mitgelieferten Katalog, keine Erfindung. Ausgabe strikt als JSON
+  (`CodeVorschlag[]`).
 - User: Therapieform(en), Vorgespräch-Codes, bereits gewählte Codes, optionale
   Beobachtung, Merkmale.
 
 **Aufgabe B – Förderziele (`/api/generate-goals`):**
-- System: erstelle **Oberziele mit messbaren SMART-Unterzielen**, realistisch für
-  ~1 Jahr (Richtwert 42 Therapieeinheiten). Regeln:
+- System: erstelle **Oberziele mit ausformulierten SMART-Unterzielen**. Regeln:
+  - Jedes Unterziel ist **EIN Satz** im Feld `ziel`, der alle SMART-Kriterien
+    zugleich erfüllt – **nicht** in Einzelfelder aufschlüsseln.
+  - **Planungshintergrund (nicht im Text nennen):** ~1 Jahr / ~42 Einheiten – nur
+    für realistischen Anspruch. **Keine** Monats-/Einheitenzahlen ausgeben;
+    Zeitbezug allgemein, z.B. „bis zum Ende des Förderzeitraums".
   - Ziele **ausschließlich** aus Codes + Merkmalen (+ optional Beobachtung) ableiten.
   - **Keine** erfundenen Testnormen/Diagnosen.
-  - Jedes Unterziel gegen alle SMART-Kriterien prüfen, messbarer Indikator Pflicht.
   - Sprache an Modus anpassen (fachintern vs. elterngerecht).
   - Ausgabe **strikt als JSON** (`Foerderziel[]`).
 - User: Codes (+ optional Qualifier), Therapieform(en) + Fokus, Alter
   (Halbjahre), Merkmale, optionale Beobachtung, Modus.
 
-**Folgestufe (`/api/next-step`):** Bei erreichtem Unterziel ein darauf
-**aufbauendes** nächstes Unterziel vorschlagen (Progression).
+**Verfeinerung pro Unterziel (`/api/refine-goal`):** Ein einzelnes Unterziel wird
+gezielt überarbeitet (statt „alles neu" oder ganzes Oberziel). Modi: *einfacher,
+ambitionierter, umformulieren, elterngerecht* sowie **`freitext`** (eigene
+Anweisung der Fachkraft). Rückgabe: **genau ein** überarbeitetes `SmartUnterziel`.
 
-**Verfeinerung:** bei „nicht gut" wird das betreffende Ziel + gewünschte Richtung
-gezielt erneut gesendet (statt „alles neu").
+**Folgestufe (`/api/next-step`, geplant M7):** Bei erreichtem Unterziel ein darauf
+**aufbauendes** nächstes Unterziel vorschlagen (Progression).
 
 ---
 
@@ -317,9 +352,10 @@ gezielt erneut gesendet (statt „alles neu").
 ## 10. Roadmap
 
 - **Phase 1 (MVP):** Flow §6 für **Heilpädagogik**; Code-Überprüfung +
-  Zielentwurf (Ober-/Unterziele) + Folgestufen, Proxy mit Provider-Adapter
-  (Gemini Flash), 5 Hauptbereiche, kuratierter ICF-CY-Auszug (Fokus d),
-  Alter in Halbjahren, lokal + Text-Export.
+  Zielentwurf (Ober-/Unterziele) + Verfeinern pro Unterziel, Proxy mit
+  Provider-Adapter (Gemini Flash), Kategorien-Maske + semantische Suche,
+  kuratierter ICF-CY-Auszug (Kapitel b/d/e), Alter in Halbjahren, lokal +
+  Text-Export. **Umgesetzt** (außer M6 Code-Vorschläge, M7 Folgestufen).
 - **Phase 2:** Weitere Therapieformen (Logo/Physio/Ergo/Systemische
   Familientherapie als Daten/Masken), Ziel-Bibliothek/Vorlagen, Feedback
   verfeinern, ggf. Schweregrad nach Team-Klärung.
@@ -335,9 +371,10 @@ Start mit Gemini Flash, hinter einem schlanken Interface – Anbieterwechsel
 
 ```ts
 interface AiProvider {
-  suggestCodes(input: CodeInput): Promise<CodeVorschlag[]>;
-  generateGoals(input: GoalInput): Promise<Foerderziel[]>;
-  nextStep(input: NextStepInput): Promise<SmartUnterziel>;
+  suggestCodes(input: CodeInput): Promise<CodeVorschlag[]>;      // geplant (M6)
+  generateGoals(input: GoalInput): Promise<Foerderziel[]>;       // umgesetzt
+  refineUnterziel(input: RefineInput): Promise<SmartUnterziel>;  // umgesetzt
+  nextStep(input: NextStepInput): Promise<SmartUnterziel>;       // Gerüst, UI geplant (M7)
 }
 
 // Auswahl per Env, z.B. AI_PROVIDER=gemini | openai
@@ -352,9 +389,10 @@ interface AiProvider {
 
 ## 12. Offene Punkte zur Abstimmung mit dem Team
 
-1. **Code-Listen je Hauptbereich:** Welche konkreten d-Codes gehören in die fünf
-   Heilpädagogik-Bereiche? (wichtigster Input vom Team)
-2. **Schweregrad/Qualifier:** Wird er fachlich genutzt – und wie? (aktuell optional)
+1. **Code-Listen & Kategorien:** Passen die Kategorien (b/d/e) und die Code-
+   Zuordnung in `masken.json`? Fehlende/überflüssige Codes oder Suchbegriffe
+   (`synonyme.json`)? (laufender Input vom Team)
+2. **Schweregrad/Qualifier:** Wird er fachlich genutzt – und wie? (aktuell optional, Schieber)
 3. Welche **Merkmale** genau (über Alter/Kontext/Einschränkungen hinaus)?
 4. Soll die Ziel-Formulierung primär fachintern oder elterngerecht sein
    (oder umschaltbar – aktueller Plan)?
@@ -362,46 +400,33 @@ interface AiProvider {
 
 ---
 
-## Anhang A: Vorgeschlagene ICF-CY-Codes je Hauptbereich (Startvorschlag)
+## Anhang A: ICF-CY-Codes je Kategorie
 
-Bewusst kompakter Startsatz (Fokus Kapitel d). **Alles erweiter- und
-veränderbar** – gepflegt in `data/icf-cy.json` (Codes) und `data/masken.json`
-(Zuordnung zu den Bereichen). Das Team kann Codes streichen, ergänzen oder
-verschieben, ohne dass Code geändert werden muss.
+> **Stand v4:** Der ursprünglich d-only-Startsatz wurde auf Wunsch der Praxis auf
+> **~74 Codes über die Kapitel b/d/e** erweitert. **Maßgeblich sind die
+> Datendateien** `src/data/icf-cy.json` (Codes mit Beschreibung/Keywords) und
+> `src/data/masken.json` (Zuordnung zu Kategorien, mit `chapter`). Das Team kann
+> Codes/Kategorien/Synonyme dort frei pflegen, ohne Code zu ändern.
 
-**Sozial-emotionale Entwicklung**
-- d250 Das eigene Verhalten steuern
-- d710 Elementare interpersonelle Aktivitäten
-- d720 Komplexe interpersonelle Interaktionen
-- d750 Informelle soziale Beziehungen
-- d760 Familienbeziehungen
+Aktuelle Kategorien (Labels aus `masken.json`), gruppiert nach Kapitel:
 
-**Sprachliche Entwicklung**
-- d310 Gesprochene Mitteilungen verstehen
-- d330 Sprechen
-- d331 Vorsprachliche Lautäußerungen
-- d335 Nonverbale Mitteilungen produzieren
-- d350 Konversation
+**Körperfunktionen (b)**
+- *Mentale Funktionen:* b117, b122, b125, b126, b130, b134, b140, b144, b147, b152, b156, b160, b164
+- *Sprache & Stimme:* b167, b310, b320
+- *Motorik & Sensorik:* b235, b260, b265, b270, b710, b730, b735, b760
 
-**Feinmotorik / Grafomotorik**
-- d440 Feinmotorischer Handgebrauch
-- d445 Hand- und Armgebrauch
-- d145 Schreiben lernen (Grafomotorik)
+**Aktivitäten & Teilhabe (d)**
+- *Lernen:* d110, d115, d130, d131, d132, d137, d145
+- *Aufmerksamkeit & Aufgaben:* d160, d161, d163, d166, d170, d172
+- *Aufgaben ausführen:* d210, d220, d230, d240, d250
+- *Kommunikation:* d310, d315, d330, d331, d335, d350
+- *Mobilität:* d410, d415, d440, d445, d450
+- *Selbstversorgung:* d510, d520, d530, d540, d550, d560
+- *Soziale Interaktionen:* d710, d720, d750, d760
+- *Spiel:* d880
 
-**Alltagshandeln (ADL)**
-- d510 Sich waschen
-- d530 Die Toilette benutzen
-- d540 Sich kleiden
-- d550 Essen
-- d560 Trinken
+**Umweltfaktoren (e)**
+- *Umweltfaktoren:* e310, e315, e320, e325, e340, e355, e360, e410, e580, e585
 
-**Spiel- und Lernverhalten**
-- d131 Lernen durch Handlungen mit Gegenständen
-- d137 Erwerb von Konzepten
-- d160 Aufmerksamkeit fokussieren
-- d161 Die Aufmerksamkeit lenken
-- d880 Spielerisches Engagement
-
-> Hinweis: Kapitel-b-Codes (Körperfunktionen, z.B. b167 Sprachfunktionen) sind
-> bewusst nicht enthalten, da sie oft außerhalb des Ermessens der Heilpädagogik
-> liegen. Sie lassen sich später jederzeit ergänzen.
+> Titel/Beschreibungen siehe `icf-cy.json`. Die semantische Suche nutzt zusätzlich
+> `synonyme.json` (Alltagsbegriff → verwandte Codes).

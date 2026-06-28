@@ -5,8 +5,8 @@
 
 Webapp für die **heilpädagogische Frühförderung**: Sie unterstützt Fachkräfte
 dabei, (A) zum Therapiestart passende **ICF‑CY‑Codes** zu überprüfen/anzupassen
-und (B) daraus **SMART‑Förderziele** (Oberziele mit messbaren Unterzielen) als
-**Entwurf** vorzuschlagen.
+und (B) daraus **SMART‑Förderziele** (Oberziele mit ausformulierten
+SMART‑Unterzielen) als **Entwurf** vorzuschlagen.
 
 Kontext: Interdisziplinäre Frühförderstelle der Lebenshilfe Lörrach e.V.
 
@@ -15,14 +15,24 @@ Kontext: Interdisziplinäre Frühförderstelle der Lebenshilfe Lörrach e.V.
 
 ## Projektstatus
 
-Lauffähiger MVP – auf Vercel deployed. Der Kern-Flow (Therapieform →
-Ausgangslage → Codes → Alter/Merkmale → SMART-Zielentwurf mit Verfeinern und
-Text-Export) ist umgesetzt; das entspricht den Meilensteinen **M0–M5** des
-Implementierungsplans plus einem plattformübergreifenden UI-Feinschliff
-(iOS/Android/Browser).
+Lauffähiger MVP – auf Vercel deployed. Der geführte Kern-Flow ist umgesetzt
+(Meilensteine **M0–M5**) und durch mehrere Runden Praxis-Feedback erweitert:
+
+- **6-Schritt-Wizard:** Disclaimer-Einstieg → 1 Therapieform → 2 Ausgangslage →
+  3 ICF-Codes → 4 Alter & Merkmale (+ freie Beobachtung) → 5 Übersicht →
+  6 Ziele (eigene Ergebnisseite).
+- **Erweiterter ICF-CY-Katalog** (~74 Codes, Kapitel b/d/e), gruppiert in
+  ausklappbare Kategorien; **semantische Stichwortsuche** über einen Synonym-
+  Thesaurus; Code-Erklärung erst auf Klick.
+- **SMART-Ziele** als je ein ausformulierter Satz pro Unterziel; **Verfeinern
+  pro Unterziel** (Voreinstellungen + Freitext) über `/api/refine-goal`.
+- **Export** wahlweise ausgewählter Ziele oder kompletter Förderplan
+  (Zwischenablage / `.txt`).
+- Plattformübergreifender UI-Feinschliff (iOS/Android/Browser, PWA).
 
 **Noch offen:** KI-gestützte Code-Vorschläge (M6, `/api/suggest-codes`),
-aufbauende Folgestufen (M7, `/api/next-step`) sowie weiterer Feinschliff (M8).
+aufbauende Folgestufen (M7, `/api/next-step`) sowie restlicher Feinschliff
+(M8). Details und Akzeptanzkriterien in `docs/implementierungsplan.md` §10.
 
 ## Setup & Entwicklung
 
@@ -44,7 +54,8 @@ npm run lint    # ESLint
 
 **Stack:** Next.js 16 (App Router) + TypeScript + Tailwind CSS v4. State lokal
 im Browser (`localStorage`), keine Datenbank/Auth. KI über einen austauschbaren
-Provider (Default Gemini Flash) hinter der Serverless-Route `/api/generate-goals`.
+Provider (Default Gemini Flash) hinter den Serverless-Routen
+`/api/generate-goals` (Zielentwurf) und `/api/refine-goal` (Unterziel verfeinern).
 
 **Environment** (siehe [`.env.example`](.env.example)):
 
@@ -60,7 +71,7 @@ Vercel-Projekt-Einstellungen.
 
 ## Dokumentation
 
-- **[`docs/spezifikation.md`](docs/spezifikation.md)** – fachliche Spezifikation (v3):
+- **[`docs/spezifikation.md`](docs/spezifikation.md)** – fachliche Spezifikation (v4):
   Kontext, Datenschutz, Datenmodell, User-Flow, Zielmodell, Prompt-Konzept, Roadmap.
 - **[`docs/implementierungsplan.md`](docs/implementierungsplan.md)** – Bauplan für
   die Umsetzung: Tech-Stack, Repo-Struktur, API-Verträge, Prompt-Templates,
@@ -69,10 +80,13 @@ Vercel-Projekt-Einstellungen.
 ## Datengrundlage
 
 - **[`src/data/icf-cy.json`](src/data/icf-cy.json)** – kuratierter ICF‑CY‑Codesatz
-  (Fokus Kapitel d), alltagsnah beschrieben. Erweiter- und veränderbar.
-- **[`src/data/masken.json`](src/data/masken.json)** – Zuordnung der Codes zu den
-  fünf Hauptbereichen der Heilpädagogik (sozial-emotional, sprachlich, fein-/
-  grafomotorik, alltagshandeln, spiel-/lernverhalten).
+  (~74 Codes, Kapitel **b/d/e**), alltagsnah beschrieben. Erweiter- und veränderbar.
+- **[`src/data/masken.json`](src/data/masken.json)** – Zuordnung der Codes zu
+  ausklappbaren Kategorien je Therapieform, gruppiert nach ICF-Kapitel
+  (Körperfunktionen b · Aktivitäten & Teilhabe d · Umweltfaktoren e).
+- **[`src/data/synonyme.json`](src/data/synonyme.json)** – Konzept-Thesaurus für
+  die semantische Suche (Alltagsbegriff → verwandte Codes, z.B.
+  „Selbstbewusstsein", „Entspannung").
 - Weitere Stammdaten: `src/data/therapieformen.json`, `src/data/merkmale.json`.
 
 ## Umsetzung (mit einem Coding-Agenten iterieren)
@@ -88,9 +102,9 @@ Du arbeitest im Repo „icf-smart-goals" am MVP einer Webapp für ICF-CY-basiert
 SMART-Förderziele in der Frühförderung.
 
 Lies zuerst:
-- docs/spezifikation.md       (fachliche Spezifikation, v3)
+- docs/spezifikation.md       (fachliche Spezifikation, v4)
 - docs/implementierungsplan.md (Bauplan mit Meilensteinen M0–M8 + Leitplanken)
-- src/data/*.json (Stammdaten: ICF-Codes, Masken, Therapieformen, Merkmale)
+- src/data/*.json (Stammdaten: ICF-Codes, Masken, Therapieformen, Merkmale, Synonyme)
 
 Aufgabe:
 1. Ermittle den NÄCHSTEN noch nicht abgeschlossenen Meilenstein aus §10 des

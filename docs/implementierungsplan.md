@@ -1,11 +1,13 @@
 # Implementierungsplan – ICF SMART Goals MVP
 
-**Für:** Umsetzung mit einem Coding-Agenten (z.B. Claude Sonnet).
-**Grundlage:** `docs/spezifikation.md` (v3) und die Datendateien `data/icf-cy.json`,
-`data/masken.json`.
+**Für:** Umsetzung mit einem Coding-Agenten (z.B. Claude Sonnet 4.6).
+**Grundlage:** `docs/spezifikation.md` (v4) und die Datendateien unter
+`src/data/` (`icf-cy.json`, `masken.json`, `synonyme.json`, …).
 **Ziel des MVP:** Lokale Webapp (Heilpädagogik), die (A) ICF-CY-Codes überprüfen/
-anpassen und (B) SMART-Förderziele (Oberziele + messbare Unterziele) vorschlägt –
-privacy-first, KI über austauschbaren Provider (Default Gemini Flash).
+anpassen und (B) SMART-Förderziele (Oberziele + ausformulierte SMART-Unterziele)
+vorschlägt – privacy-first, KI über austauschbaren Provider (Default Gemini Flash).
+**Aktueller Stand:** M0–M5 + Feedback-Iterationen umgesetzt; offen sind **M6–M8**
+(siehe §10).
 
 Dieser Plan ist so geschnitten, dass er **Meilenstein für Meilenstein** abgearbeitet
 werden kann. Jeder Meilenstein hat ein klares Ergebnis und Akzeptanzkriterien.
@@ -56,44 +58,57 @@ verschieben und die Pfade in der Spec-Notiz vermerken.
 
 ---
 
-## 2. Repository-Struktur (Zielbild)
+## 2. Repository-Struktur (IST-Stand)
 
 ```
 src/
   app/
-    layout.tsx
-    page.tsx                  # Haupt-Flow (Schritt-Wizard)
+    layout.tsx                # Metadata, Viewport (themeColor #1d4ed8), PWA
+    page.tsx                  # rendert <Wizard/>
+    manifest.ts               # PWA-Manifest
     globals.css
     api/
-      suggest-codes/route.ts  # Aufgabe A
-      generate-goals/route.ts # Aufgabe B
-      next-step/route.ts      # Folgestufe
+      generate-goals/route.ts # Aufgabe B (umgesetzt)
+      refine-goal/route.ts    # Verfeinern EINES Unterziels (umgesetzt)
+      # suggest-codes/route.ts  -> NEU in M6 anlegen
+      # next-step/route.ts      -> NEU in M7 anlegen
   components/
-    StepTherapieform.tsx
-    StepAusgangslage.tsx
-    StepCodes.tsx             # Maske: Hauptbereiche + Codes (+ opt. Qualifier)
-    StepMerkmale.tsx          # Alter (Halbjahre) + Merkmale
-    StepZiele.tsx             # Zielanzeige, Verfeinern, Folgestufe, Export
-    CodeGroup.tsx
-    GoalCard.tsx
-    DisclaimerBanner.tsx
-    NameWarning.tsx
+    Wizard.tsx                # 6-Schritt-Wizard + Disclaimer-Gate + Navigation
+    DisclaimerIntro.tsx       # Einstiegsseite "Gelesen und verstanden"
+    CollapsingHeader.tsx      # iOS-Large-Title-Header
+    StepTherapieform.tsx      # Schritt 1
+    StepAusgangslage.tsx      # Schritt 2 (nutzt CodeCatalog)
+    StepCodes.tsx             # Schritt 3 (nutzt CodeCatalog, variant="qualifier")
+    StepMerkmale.tsx          # Schritt 4: Alter + Merkmale + freie Beobachtung
+    StepUebersicht.tsx        # Schritt 5: Zusammenfassung + "Ziele vorschlagen"
+    StepZiele.tsx             # Schritt 6: Ergebnisse, Verfeinern, Export
+    CodeCatalog.tsx           # Suche + ausklappbare Kategorien + Desc-auf-Klick + Schweregrad-Slider
+    SelectionSummary.tsx      # Zusammenfassung der Auswahl (in Schritt 5)
+    GoalCard.tsx              # Oberziel-Karte; Verfeinern + Export-Checkbox je Unterziel
   lib/
     types.ts                  # zentrale Typen (siehe §3)
-    store.ts                  # Client-State + localStorage
-    icf.ts                    # Laden/Lookup von Codes & Masken
+    store.ts                  # Client-State (FallState) + localStorage
+    icf.ts                    # Laden/Lookup Codes, Masken, Merkmale, Synonyme
+    format.ts                 # halbjahreToText, QUALIFIER_LABELS
     export.ts                 # Ziele -> Plaintext
+    goals-client.ts           # fetch-Helfer requestGoals / requestRefine (Client)
     ai/
-      provider.ts             # AiProvider-Interface + Factory
-      gemini.ts               # Gemini-Adapter
+      provider.ts             # AiProvider-Interface + Factory + Input-Typen
+      gemini.ts               # Gemini-Adapter (thinkingBudget 0, maxOutputTokens)
       prompts.ts              # Prompt-Templates (provider-neutral)
-      schema.ts               # JSON-Schemas der Antworten
+      schema.ts               # zod- + Gemini-responseSchemas
   data/
-    icf-cy.json
-    masken.json
-    merkmale.json             # NEU in M1 anlegen (siehe §3)
-    therapieformen.json       # NEU in M1 anlegen
+    icf-cy.json               # ~74 Codes, Kapitel b/d/e
+    masken.json               # Kategorien je Therapieform (mit chapter)
+    merkmale.json
+    therapieformen.json
+    synonyme.json             # Konzept-Thesaurus für die semantische Suche
 ```
+
+> Hinweis: `CodeGroup.tsx`, `DisclaimerBanner.tsx` und `NameWarning.tsx` aus der
+> ursprünglichen Planung existieren **nicht (mehr)**: Code-Liste/Qualifier sind in
+> `CodeCatalog.tsx` zusammengeführt, der Disclaimer ist eine eigene Einstiegsseite
+> (`DisclaimerIntro.tsx`), eine separate Klarnamen-Warnung steht noch aus (M8).
 
 ---
 
@@ -116,25 +131,26 @@ export type IcfSelection = {
   quelle: "vorgespraech" | "fachkraft";
 };
 
-export type Hauptbereich = { id: string; label: string; codes: string[] };
+// chapter optional – nur für die Abschnitts-Gruppierung in der UI
+export type Hauptbereich = { id: string; label: string; chapter?: "b" | "d" | "e" | "s"; codes: string[] };
 export type Maske = { therapieform: string; gruppen: Hauptbereich[] };
 
 export type Therapieform = { id: string; label: string; hinweis: string; aktiv: boolean };
 
 export type Merkmal = { id: string; label: string; typ: "auswahl" | "toggle" | "kurztext" };
 
+// Jedes Unterziel ist EIN ausformulierter SMART-Satz (keine Einzelfelder mehr).
 export type SmartUnterziel = {
   ziel: string;
-  smart: { spezifisch: string; messbar: string; erreichbar: string; relevant: string; terminiert: string };
   status: "offen" | "erreicht";
   naechsteStufe?: string;
   begruendung: string;
 };
 
+// Kein zeithorizont-Feld (Planungshorizont ist nur interner Prompt-Hintergrund).
 export type Foerderziel = {
   oberziel: string;
   bereich: string;
-  zeithorizont: string;               // "ca. 1 Jahr / ~42 Therapieeinheiten"
   abgeleitetAus: string[];
   unterziele: SmartUnterziel[];
 };
@@ -174,9 +190,10 @@ export type AlterHalbjahre = number;
 
 ```ts
 export interface AiProvider {
-  suggestCodes(input: SuggestCodesInput): Promise<CodeVorschlag[]>;
-  generateGoals(input: GenerateGoalsInput): Promise<Foerderziel[]>;
-  nextStep(input: NextStepInput): Promise<SmartUnterziel>;
+  suggestCodes(input: SuggestCodesInput): Promise<CodeVorschlag[]>;       // M6 (Route fehlt noch)
+  generateGoals(input: GenerateGoalsInput): Promise<Foerderziel[]>;       // umgesetzt
+  refineUnterziel(input: RefineUnterzielInput): Promise<SmartUnterziel>;  // umgesetzt
+  nextStep(input: NextStepInput): Promise<SmartUnterziel>;                // M7 (Route/UI fehlen)
 }
 
 export function getProvider(): AiProvider {
@@ -206,60 +223,76 @@ export function getProvider(): AiProvider {
 ## 5. Prompt-Templates (`src/lib/ai/prompts.ts`)
 
 Kontext steckt vollständig im System-Prompt – die UI liefert nur Bausteine.
+**Maßgeblich ist der Code in `prompts.ts`**; die folgenden Auszüge spiegeln den
+aktuellen Stand (gekürzt).
 
-**System-Prompt – Aufgabe B (Ziele):**
+**System-Prompt – Aufgabe B (Ziele), `SYSTEM_PROMPT_GOALS`:**
 
 ```
-Du bist eine erfahrene Fachkraft der heilpädagogischen Frühförderung und
-arbeitest auf Basis der ICF-CY (International Classification of Functioning,
-Children & Youth). Deine Aufgabe ist es, ENTWÜRFE für Förderziele zu erstellen,
-die eine Fachkraft anschließend prüft und verantwortet.
+… ENTWÜRFE für Förderziele …
 
 Regeln:
-- Erstelle Oberziele mit jeweils mehreren messbaren SMART-Unterzielen
-  (spezifisch, messbar, erreichbar, relevant, terminiert).
-- Plane realistisch für ca. ein Jahr Förderung (Richtwert 42 Therapieeinheiten).
-- Leite Ziele ausschließlich aus den übergebenen ICF-CY-Codes, dem Alter und den
-  Merkmalen ab. Erfinde keine Testnormen, Diagnosen oder Fakten.
-- Jedes Unterziel braucht einen konkreten, beobachtbaren Messindikator.
-- Schreibe auf Deutsch, wertschätzend und ressourcenorientiert.
-- Passe die Sprache an den Modus an (fachintern oder elterngerecht).
-- Antworte AUSSCHLIESSLICH mit JSON gemäß vorgegebenem Schema. Kein Fließtext.
+- Erstelle Oberziele (Richtung) mit jeweils mehreren Unterzielen.
+- Jedes Unterziel ist GENAU EIN Ziel, formuliert als EIN zusammenhängender,
+  ausformulierter Satz im Feld "ziel", der ALLE SMART-Kriterien zugleich erfüllt
+  (spezifisch, messbar, erreichbar, relevant, terminiert). Kriterien NICHT in
+  Einzelfelder aufschlüsseln.
+- Planungshintergrund (NICHT im Text erwähnen): ca. ein Jahr / ~42 Einheiten –
+  nur für realistischen Anspruch. KEINE Monats-/Einheitenzahlen nennen;
+  Zeitbezug allgemein, z.B. "bis zum Ende des Förderzeitraums".
+- Ziele ausschließlich aus Codes + Alter + Merkmalen ableiten; keine erfundenen
+  Testnormen/Diagnosen.
+- Deutsch, wertschätzend, ressourcenorientiert; Sprache an Modus anpassen.
+- AUSSCHLIESSLICH JSON gemäß Schema.
 ```
 
-**System-Prompt – Aufgabe A (Code-Vorschläge):**
+**Verfeinern eines Unterziels, `buildRefineUnterzielUserPrompt`:** übergibt
+Oberziel, bisherigen Zielsatz, Bezug-Codes, Alter, Merkmale, Beobachtung und den
+Modus (inkl. `freitext`-Vorgabe) und fordert **genau ein** überarbeitetes
+Unterziel als JSON.
+
+**System-Prompt – Aufgabe A (Code-Vorschläge), `SYSTEM_PROMPT_CODES` (für M6):**
 
 ```
-Du bist eine erfahrene Fachkraft der heilpädagogischen Frühförderung (ICF-CY).
-Aufgabe: Ordne den beschriebenen aktuellen Entwicklungsstand passenden ICF-CY-
-Codes zu. Verwende NUR Codes aus dem mitgelieferten Katalog (keine Erfindung),
-Schwerpunkt Kapitel d. Begründe je Code kurz. Antworte ausschließlich als JSON
-gemäß Schema.
+… Ordne den aktuellen Entwicklungsstand passenden ICF-CY-Codes zu. Verwende NUR
+Codes aus dem mitgelieferten Katalog (keine Erfindung). Begründe je Code kurz.
+Antworte ausschließlich als JSON gemäß Schema.
 ```
 
-**User-Prompt – Aufgabe B (Beispielstruktur, als zusammengesetzter Text):**
-
-```
-Therapieform(en): {labels + hinweise}
-Aktueller Stand – ausgewählte ICF-CY-Codes:
-{für jeden Code: code, title, description, (optional Qualifier 0–4 + Bedeutung)}
-Alter: {x} Jahre ({halbjahre}-Schritt)
-Merkmale: {gewählte Merkmale}
-{optional} Beobachtung (anonym): {Stichworte}
-Modus: {neu | einfacher | ambitionierter | umformulieren | elterngerecht}
-{bei Verfeinerung: Bezug auf konkretes Oberziel/Unterziel + gewünschte Richtung}
-```
-
-Qualifier-Bedeutung im Prompt mitgeben: `0 kein, 1 leichtes, 2 mäßiges,
-3 erhebliches, 4 vollständiges Problem`.
+Qualifier-Bedeutung im Prompt: `0 kein, 1 leichtes, 2 mäßiges, 3 erhebliches,
+4 vollständiges Problem` (siehe `QUALIFIER_TEXT` in `prompts.ts`).
 
 ---
 
 ## 6. API-Routen (Verträge)
 
 Alle Routen: `POST`, JSON rein/raus, laufen serverseitig, nutzen `getProvider()`.
+Body-Validierung mit `zod`. Der Route-Handler reichert Codes aus `src/data` zu
+`codeDetails` an (Client schickt nur Code-Keys/IcfSelection).
 
-**`POST /api/suggest-codes`**
+**`POST /api/generate-goals`** *(umgesetzt)*
+```ts
+// Request
+{ therapieformen: string[]; codes: IcfSelection[]; alterHalbjahre: number;
+  merkmale: Record<string,unknown>; beobachtung?: string;
+  modus: "neu" | "einfacher" | "ambitionierter" | "umformulieren" | "elterngerecht" }
+// Response
+{ ziele: Foerderziel[] }   // ohne zeithorizont-Feld
+```
+
+**`POST /api/refine-goal`** *(umgesetzt – verfeinert GENAU EIN Unterziel)*
+```ts
+// Request
+{ oberziel: string; bisherigesZiel: string;
+  modus: "einfacher" | "ambitionierter" | "umformulieren" | "elterngerecht" | "freitext";
+  freitext?: string;                       // bei modus "freitext"
+  alterHalbjahre: number; merkmale: Record<string,unknown>; beobachtung?: string;
+  codes: string[] }                        // ausgewählte Code-Keys (für Kontext)
+// Response
+{ unterziel: SmartUnterziel }
+```
+
+**`POST /api/suggest-codes`** *(NEU in M6)*
 ```ts
 // Request
 { therapieformen: string[]; vorgespraechCodes: string[]; merkmale: Record<string,unknown>; beobachtung?: string }
@@ -267,27 +300,18 @@ Alle Routen: `POST`, JSON rein/raus, laufen serverseitig, nutzen `getProvider()`
 { vorschlaege: CodeVorschlag[] }
 ```
 
-**`POST /api/generate-goals`**
+**`POST /api/next-step`** *(NEU in M7)*
 ```ts
 // Request
-{ therapieformen: string[]; codes: IcfSelection[]; alterHalbjahre: number;
-  merkmale: Record<string,unknown>; beobachtung?: string;
-  modus: "neu" | "einfacher" | "ambitionierter" | "umformulieren" | "elterngerecht";
-  bezugsziel?: { oberziel: string; unterziel?: string } }
-// Response
-{ ziele: Foerderziel[] }
-```
-
-**`POST /api/next-step`**
-```ts
-// Request
-{ erreichtesUnterziel: SmartUnterziel; oberziel: string; codes: IcfSelection[]; alterHalbjahre: number }
+{ erreichtesUnterziel: SmartUnterziel; oberziel: string; codes: string[]; alterHalbjahre: number }
 // Response
 { unterziel: SmartUnterziel }   // aufbauende nächste Stufe
 ```
 
-Fehlerfälle: 400 bei ungültigem Body (zod), 502 bei Provider-/Parse-Fehler mit
-kurzer, nicht-technischer Meldung für die UI.
+Fehlerfälle: 400 bei ungültigem Body (zod); 429 bei Quota; 503 bei Überlastung;
+502 bei Provider-/Parse-Fehler – jeweils mit kurzer, nicht-technischer Meldung für
+die UI (siehe `generate-goals/route.ts` als Vorlage). Client-Helfer für die fetch-
+Calls liegen in `src/lib/goals-client.ts`.
 
 ---
 
@@ -342,68 +366,147 @@ auftauchen – nur Warnung, kein harter Block.
 ## 9. Export (`src/lib/export.ts`)
 
 Ziele → strukturierter Plaintext zum Kopieren (für Weiterverarbeitung in einem
-größeren Dokument). Beispiel-Layout:
+größeren Dokument). Jedes Unterziel ist ein ausformulierter SMART-Satz; **kein**
+Planungshorizont-/SMART-Felder-Block mehr. Beispiel-Layout:
 
 ```
 Förderziele (Heilpädagogik) – Entwurf
-Planungshorizont: ca. 1 Jahr (~42 Therapieeinheiten)
 
 Bereich: Sprachliche Entwicklung
 Oberziel: Erweiterung des Wortschatzes
-  - Unterziel: lernt 5 neue Wörter
-      spezifisch: ...
-      messbar: ...
-      erreichbar: ...
-      relevant: ...
-      terminiert: in 3 Monaten
-  (abgeleitet aus: d330 Sprechen)
+  - Ziel: Das Kind benennt bis zum Ende des Förderzeitraums in Spielsituationen
+    selbstständig mindestens 5 neue Wörter (an drei Terminen beobachtbar).
+  (abgeleitet aus: d330)
 ```
 
-Button „In Zwischenablage kopieren" + „Als .txt herunterladen".
+`zieleToText(ziele)` akzeptiert eine ggf. **gefilterte** Zielliste (Export-Auswahl
+vs. kompletter Plan). Button „In Zwischenablage kopieren" + „Als .txt herunterladen".
 
 ---
 
-## 10. Meilensteine (geordnet, je mit Akzeptanzkriterium)
+## 10. Meilensteine
 
-**M0 – Projektgerüst.** Next.js/TS/Tailwind initialisiert, baut & startet
-(`npm run dev`), Disclaimer sichtbar, `data/`-JSON importierbar.
-*AK:* leere Startseite mit Titel + Disclaimer rendert ohne Fehler.
+> **Hinweis für den umsetzenden Agenten (z.B. Claude Sonnet 4.6):** M0–M5 sind
+> **abgeschlossen** und durch mehrere Runden Praxis-Feedback erweitert (siehe
+> Block darunter). **Offen sind nur M6, M7 und M8** – jeweils unten detailliert
+> mit konkreten Dateien und Akzeptanzkriterien. Halte vor jeder Umsetzung die
+> Leitplanken aus §0 ein und prüfe den IST-Code (Strukturen §2, Typen §3,
+> API-Verträge §6). Nimm `src/app/api/refine-goal/route.ts` als Vorlage für neue
+> Routen und `CodeCatalog.tsx` / `GoalCard.tsx` als UI-Vorlagen. Nach jeder
+> Änderung: `npm run lint` und `npm run build` müssen fehlerfrei sein.
 
-**M1 – Stammdaten & Typen.** `types.ts`, `icf.ts` (Laden/Lookup), neue Dateien
-`therapieformen.json`, `merkmale.json`.
-*AK:* Unit-Check/Skript listet alle Codes je Hauptbereich korrekt auf.
+### Abgeschlossen (M0–M5 + Feedback-Iterationen)
 
-**M2 – Flow-Skelett + State.** Wizard-Schritte 1,2,4 (ohne KI), `store.ts` mit
-localStorage.
-*AK:* Auswahl bleibt nach Reload erhalten; „Neuer Fall" leert.
+- **M0–M5:** Projektgerüst, Stammdaten/Typen, Wizard + `localStorage`,
+  Code-Maske, AI-Layer + `/api/generate-goals`, Zielanzeige/Verfeinern/Export.
+- **Iterationen nach M5 (umgesetzt):**
+  - ICF-Katalog auf **Kapitel b/d/e** erweitert (~74 Codes); `masken.json` in
+    Kategorien mit `chapter` gruppiert; **ausklappbare Kategorien**,
+    **Beschreibung erst auf Klick**, **Schweregrad-Schieber** (`CodeCatalog.tsx`).
+  - **Semantische Suche** über `synonyme.json` (`getConceptCodesForQuery`).
+  - **Zielmodell** auf je einen ausformulierten **SMART-Satz** umgestellt;
+    `smart`-Einzelfelder und `zeithorizont` entfernt.
+  - **Verfeinern pro Unterziel** inkl. Freitext über `/api/refine-goal`.
+  - **Export-Auswahl** (Checkbox je Unterziel) + „kompletter Förderplan".
+  - **Freie Beobachtung** in Schritt 4; **Disclaimer-Einstiegsseite** (bei jedem
+    Start/neuen Fall); **Ergebnisse auf eigener Seite** (Schritt 6).
+  - KI-Robustheit (`thinkingBudget: 0`, `maxOutputTokens`, spezifische Fehler).
 
-**M3 – Code-Maske (Schritt 3).** Hauptbereiche + Codes an-/abwählbar, optionaler
-Qualifier.
-*AK:* gewählte Codes landen korrekt im State inkl. Quelle.
+---
 
-**M4 – AI-Layer + `/api/generate-goals`.** Provider-Interface, Gemini-Adapter,
-Prompts, Schema/zod. UI „Ziele vorschlagen".
-*AK:* mit Test-Eingabe kommen valide `Foerderziel[]` zurück und werden angezeigt;
-ohne `GEMINI_API_KEY` klare Fehlermeldung.
+### M6 – KI-Code-Vorschläge (`/api/suggest-codes`)
 
-**M5 – Zielanzeige, Verfeinern, Export.** `GoalCard`, Verfeinern-Modi, Plaintext-
-Export.
-*AK:* Verfeinern erzeugt angepasste Ziele; Export liefert lesbaren Text.
+**Ziel:** In Schritt 3 schlägt die KI passende Katalog-Codes vor (Aufgabe A).
 
-**M6 – Code-Vorschläge (`/api/suggest-codes`).** Beobachtungsfeld + Button;
-Übernahme der Vorschläge in die Auswahl.
-*AK:* Vorschläge erscheinen, sind annehmbar, nur Katalog-Codes.
+**Gerüst, das schon existiert (nutzen, nicht neu bauen):**
+`AiProvider.suggestCodes` + `GeminiProvider.suggestCodes` (in `gemini.ts`),
+`SYSTEM_PROMPT_CODES` + `buildCodesUserPrompt` (`prompts.ts`),
+`GEMINI_CODES_SCHEMA` + `codeVorschlagArraySchema` (`schema.ts`),
+Typ `CodeVorschlag` (§3) und `SuggestCodesInput` (`provider.ts`, Feld
+`catalogCodes`).
 
-**M7 – Folgestufen (`/api/next-step`).** „erreicht"-Toggle + aufbauender
-Vorschlag.
-*AK:* erreichtes Unterziel erzeugt sinnvolle nächste Stufe.
+**Zu bauen:**
+1. **Route** `src/app/api/suggest-codes/route.ts` (Vorlage: `refine-goal/route.ts`):
+   - Request validieren (zod): `{ therapieformen: string[]; vorgespraechCodes:
+     string[]; merkmale: Record<string,unknown>; beobachtung?: string }`.
+   - `catalogCodes` aus `getAllCodes()` zusammenbauen (`{code,title,description}`).
+   - `getProvider().suggestCodes({...data, catalogCodes})` aufrufen.
+   - Response `{ vorschlaege: CodeVorschlag[] }`; Fehler 400/429/503/502 wie in
+     den bestehenden Routen.
+2. **Client-Helfer** `requestSuggestCodes(...)` in `src/lib/goals-client.ts`.
+3. **UI in `StepCodes.tsx`** (Schritt 3): Button „Passende Codes vorschlagen"
+   (Ladezustand + Fehleranzeige). Kontext = Therapieform(en),
+   `vorgespraechCodes`, bereits gewählte Codes, `merkmale`, optional Beobachtung.
+   Ergebnis als annehmbare Vorschläge zeigen (Code + Titel + Begründung,
+   empfohlener Schweregrad optional). „Übernehmen" fügt den Code zur `auswahl`
+   hinzu (`quelle: "fachkraft"`, ggf. `qualifier`).
+   - Hinweis: Die freie Beobachtung liegt erst in Schritt 4. Für M6 entweder ohne
+     Beobachtung arbeiten **oder** ein optionales, kurzes Stichwortfeld direkt in
+     Schritt 3 anbieten (Klarnamen-Hinweis nicht vergessen).
 
-**M8 – Feinschliff.** Ladezustände, Fehlertoasts, Klarnamen-Warnung, mobile
-Darstellung, README mit Setup & Env.
-*AK:* Durchlauf Schritt 1→Export ohne Konsolenfehler; Lighthouse ok.
+**Leitplanken:** Nur Codes aus dem Katalog übernehmen (Antwort serverseitig gegen
+`getAllCodes()` filtern). API-Key bleibt serverseitig. UI deutsch.
 
-> Reihenfolge-Tipp: M4 früh, damit der Kernnutzen (Ziele) schnell sichtbar ist.
-> M6/M7 sind additiv und können separat erfolgen.
+*AK:* Button liefert Vorschläge (nur existierende Codes); „Übernehmen" landet
+korrekt in `auswahl`; ohne `GEMINI_API_KEY` klare Fehlermeldung; `lint`+`build` ok.
+
+---
+
+### M7 – Folgestufen (`/api/next-step`)
+
+**Ziel:** Ein als **erreicht** markiertes Unterziel erzeugt eine darauf
+aufbauende nächste Stufe (Progression).
+
+**Gerüst, das schon existiert:** `AiProvider.nextStep` + `GeminiProvider.nextStep`,
+`buildNextStepUserPrompt`, `GEMINI_NEXT_STEP_SCHEMA`, `smartUnterzielSchema`.
+Im Modell vorhanden: `SmartUnterziel.status` ("offen" | "erreicht") und
+`naechsteStufe?`. `GoalCard` zeigt bei `status === "erreicht"` bereits einen Haken,
+aber es gibt **noch keinen Umschalter** und **keine Route**.
+
+**Zu bauen:**
+1. **Route** `src/app/api/next-step/route.ts` (Vorlage: `refine-goal/route.ts`):
+   - Request (zod): `{ erreichtesUnterziel: { ziel,status,begruendung,
+     naechsteStufe? }; oberziel: string; codes: string[]; alterHalbjahre: number }`.
+   - `getProvider().nextStep(...)` aufrufen, Response `{ unterziel: SmartUnterziel }`.
+2. **Client-Helfer** `requestNextStep(...)` in `goals-client.ts`.
+3. **UI in `GoalCard.tsx` + `StepZiele.tsx`:**
+   - Pro Unterziel ein **„erreicht"-Umschalter** (z.B. neben dem Haken). Setzt
+     `status` und meldet die Änderung über `onZieleChange` nach oben.
+   - Bei `status === "erreicht"` Button **„Nächste Stufe vorschlagen"**
+     (busy/Fehler je Unterziel, wie beim Verfeinern). Ergebnis als **neues
+     Unterziel** (`status: "offen"`) an dasselbe Oberziel **anhängen** (empfohlen,
+     klare Progression) – alternativ in `naechsteStufe` speichern und anzeigen.
+   - Export (`export.ts`) zeigt `[erreicht]` bereits an; ggf. neue Stufe ergänzen.
+
+**Leitplanken:** Strikte JSON-Ausgabe gegen Schema; Entwurfscharakter
+(editierbar). API-Key serverseitig.
+
+*AK:* „erreicht" lässt sich umschalten und bleibt nach Reload erhalten;
+„Nächste Stufe" erzeugt ein sinnvolles, schwierigeres Unterziel; `lint`+`build` ok.
+
+---
+
+### M8 – Restlicher Feinschliff
+
+Vieles ist bereits erledigt (Ladezustände, spezifische Fehlermeldungen,
+mobile/PWA-Darstellung, Android-Politur, README mit Setup/Env, Disclaimer-
+Einstieg). **Offen:**
+
+1. **Klarnamen-Warnung (Client):** an den Freitextfeldern (Beobachtung in
+   `StepMerkmale.tsx`, Freitext in `GoalCard.tsx`) eine **aktive** Warnung, wenn
+   typische Muster auftauchen (z.B. großgeschriebenes Wort + „heißt"/„Name"/
+   Geburtsdatum). Nur Hinweis, **kein** harter Block. (Bisher nur statischer
+   Hinweistext.)
+2. **Ziele manuell editieren (optional):** Zielsatz direkt in `GoalCard`
+   bearbeitbar machen (Textfeld), Änderung über `onZieleChange` speichern.
+3. **A11y/Lighthouse-Durchsicht:** Fokus-Reihenfolge, `aria`-Labels an Icon-
+   Buttons (Mülleimer ist gesetzt), Kontrast; vollständiger Durchlauf Schritt
+   1 → Export ohne Konsolenfehler.
+
+*AK:* Klarnamen-Muster lösen sichtbare Warnung aus; Durchlauf ohne
+Konsolenfehler; `lint`+`build` ok.
+
+> Reihenfolge: M6 und M7 sind additiv und unabhängig. M8 begleitend.
 
 ---
 

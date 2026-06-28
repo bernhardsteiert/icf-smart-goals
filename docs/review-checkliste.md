@@ -11,35 +11,37 @@ leicht einarbeiten lassen.
 1. App auf dem iPhone/Browser öffnen (Vercel-Link, ggf. „Zum Home-Bildschirm").
 2. **5–10 reale, aber anonyme Fälle** durchspielen (keine Namen/Geburtsdaten –
    nur „das Kind", Alter, Auffälligkeiten).
-3. Jeweils: Codes wählen → Alter & Merkmale → „Ziele vorschlagen" → verfeinern →
-   exportieren.
+3. Jeweils: Codes wählen (gern auch über die **Suche**, z.B. „Selbstbewusstsein",
+   „Entspannung") → Alter, Merkmale & Beobachtung → Übersicht → „Ziele
+   vorschlagen" → einzelne **Unterziele verfeinern** → exportieren.
 4. Unten ankreuzen und Notizen machen. Bei „nein/teilweise" bitte ein kurzes
    **Beispiel** notieren – das hilft am meisten.
 
 ---
 
 ## 1. Ablauf / Bedienung
-- [ ] Die Reihenfolge (Therapieform → Ausgangslage → Codes → Alter/Merkmale → Ziele) passt zu meiner Arbeitsweise.
+- [ ] Die Reihenfolge (Therapieform → Ausgangslage → Codes → Alter/Merkmale → Übersicht → Ziele) passt zu meiner Arbeitsweise.
 - [ ] Ich finde mich ohne Erklärung zurecht.
 - [ ] Es fehlt kein wichtiger Schritt.
 
 Notizen:
 
 
-## 2. ICF-Codes & die 5 Bereiche
-(Bereiche: sozial-emotional · sprachlich · fein-/grafomotorik · alltagshandeln · spiel-/lernverhalten)
-- [ ] Die 5 Hauptbereiche decken die Heilpädagogik gut ab.
-- [ ] Die angebotenen Codes je Bereich sind sinnvoll und verständlich beschrieben.
+## 2. ICF-Codes, Kategorien & Suche
+(Kategorien nach ICF-Kapitel: Körperfunktionen b · Aktivitäten & Teilhabe d · Umweltfaktoren e)
+- [ ] Die Kategorien decken die Heilpädagogik gut ab.
+- [ ] Die angebotenen Codes je Kategorie sind sinnvoll und verständlich beschrieben (Erklärung erscheint auf Klick).
+- [ ] Die **Suche** findet die erwarteten Codes (auch bei Alltagsbegriffen wie „Wut", „Konzentration").
 - [ ] Mir fehlen keine wichtigen Codes (falls doch: welche?).
 - [ ] Es sind keine unpassenden/überflüssigen Codes dabei.
 
-Fehlende/zu ändernde Codes:
+Fehlende/zu ändernde Codes / Suchbegriffe:
 
 
 ## 3. Qualität der Förderziele (das Wichtigste)
 - [ ] Die **Oberziele** treffen fachlich das Richtige.
-- [ ] Die **Unterziele** sind konkret und **messbar** (man könnte sie beobachten/abhaken).
-- [ ] Die Ziele sind **realistisch für ~1 Jahr / ~42 Therapieeinheiten**.
+- [ ] Jedes **Unterziel** ist ein **ein** stimmiger, konkret **messbarer** SMART-Satz (beobachtbar/abhakbar).
+- [ ] Die Ziele sind **realistisch für den Förderzeitraum** (~1 Jahr; Zahl wird bewusst nicht genannt).
 - [ ] Die Ableitung aus den Codes ist nachvollziehbar (Feld „abgeleitet aus").
 - [ ] Keine erfundenen Fakten/Testnormen/Diagnosen.
 - [ ] Die Anzahl/Detailtiefe der Ziele passt (nicht zu viel/zu wenig).
@@ -47,11 +49,12 @@ Fehlende/zu ändernde Codes:
 Beispiele für gute / schlechte Ziele:
 
 
-## 4. Verfeinern
+## 4. Verfeinern (pro Unterziel)
 - [ ] „Einfacher" senkt den Anspruch sinnvoll.
 - [ ] „Ambitionierter" hebt ihn sinnvoll.
 - [ ] „Anders formulieren" liefert eine brauchbare Alternative.
 - [ ] „Für Eltern" klingt wirklich elterngerecht/wertschätzend.
+- [ ] Die **eigene Änderung** (Freitext) wird sinnvoll umgesetzt.
 
 Notizen:
 
