@@ -93,12 +93,6 @@ export default function StepCodes({
     setVorschlaege((prev) => prev.filter((p) => p.code !== v.code));
   };
 
-  const totalSelected = auswahl.length;
-  const fachkraftCount = auswahl.filter((a) => a.quelle === "fachkraft").length;
-  const vorgespraechCount = auswahl.filter(
-    (a) => a.quelle === "vorgespraech",
-  ).length;
-
   const selectedCodes = auswahl.map((a) => a.code);
   const qualifierOf = (code: string) =>
     auswahl.find((a) => a.code === code)?.qualifier;
@@ -111,23 +105,6 @@ export default function StepCodes({
         Tippen Sie auf einen Code für die Erklärung. Der Schweregrad (Qualifier)
         ist optional.
       </p>
-
-      {/* Auswahl-Zusammenfassung */}
-      {totalSelected > 0 && (
-        <div className="flex flex-wrap gap-2 rounded-lg bg-blue-50 px-4 py-3 text-sm">
-          <span className="font-medium text-blue-800">
-            {totalSelected} Code{totalSelected !== 1 ? "s" : ""} ausgewählt
-          </span>
-          {vorgespraechCount > 0 && (
-            <span className="text-blue-600">· {vorgespraechCount} aus Vorgespräch</span>
-          )}
-          {fachkraftCount > 0 && (
-            <span className="text-blue-600">
-              · {fachkraftCount} von Fachkraft ergänzt
-            </span>
-          )}
-        </div>
-      )}
 
       {/* KI-Code-Vorschläge */}
       <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 space-y-3">
