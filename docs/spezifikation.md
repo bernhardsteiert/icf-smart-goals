@@ -18,9 +18,8 @@ ausformulierten SMART-Unterzielen) als Entwurf zu erhalten.
 > - **Disclaimer als Einstiegsseite**; **freie Beobachtung in Schritt 4**;
 >   Ergebnisse auf **eigener Seite** (§6).
 >
-> M6 (KI-Code-Vorschläge) und M7 (Folgestufen) sind umgesetzt (2026-06-28).
-> Offen: Restfeinschliff (M8), siehe `docs/implementierungsplan.md` §10. Bei
-> fachlichen Änderungen bitte dieses Dokument mitführen.
+> **MVP vollständig umgesetzt** (M0–M8, Stand 2026-06-28). Alle Meilensteine
+> abgeschlossen. Bei fachlichen Änderungen bitte dieses Dokument mitführen.
 
 ## 0. Praxis-Kontext (warum die App so aussieht)
 

@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import type { Merkmal } from "@/lib/types";
+import { detectsKlarname } from "@/lib/privacy";
 
 interface Props {
   alterHalbjahre: number;
@@ -30,17 +32,19 @@ export default function StepMerkmale({
   onMerkmaleChange,
   onBeobachtungChange,
 }: Props) {
-  // "alter" is handled by the dedicated dropdown; skip it in the loop
+  const [beobachtungDirty, setBeobachtungDirty] = useState(false);
   const otherMerkmale = alleMerkmale.filter((m) => m.id !== "alter");
+  const showKlarnamenWarnung = beobachtungDirty && detectsKlarname(beobachtung);
 
   return (
     <div className="space-y-6">
       {/* Alter */}
       <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">
+        <label htmlFor="alter-select" className="mb-1 block text-sm font-medium text-gray-700">
           Alter des Kindes
         </label>
         <select
+          id="alter-select"
           value={alterHalbjahre}
           onChange={(e) => onAlterChange(Number(e.target.value))}
           className="min-h-[44px] w-full rounded-lg border border-gray-300 px-3 py-2.5 text-base focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
@@ -59,7 +63,8 @@ export default function StepMerkmale({
       {/* Other merkmale */}
       <div className="space-y-4">
         <h3 className="text-sm font-medium text-gray-700">
-          Weitere Merkmale <span className="font-normal text-gray-400">(nicht identifizierend, optional)</span>
+          Weitere Merkmale{" "}
+          <span className="font-normal text-gray-400">(nicht identifizierend, optional)</span>
         </h3>
         {otherMerkmale.map((m) => (
           <MerkmalInput
@@ -73,21 +78,41 @@ export default function StepMerkmale({
 
       {/* Freie Beobachtungen (anonym) */}
       <div>
-        <label className="mb-1 block text-sm font-medium text-gray-700">
+        <label htmlFor="beobachtung-textarea" className="mb-1 block text-sm font-medium text-gray-700">
           Weitere Beobachtungen{" "}
           <span className="font-normal text-gray-400">(anonym, optional)</span>
         </label>
         <textarea
+          id="beobachtung-textarea"
           value={beobachtung}
-          onChange={(e) => onBeobachtungChange(e.target.value)}
+          onChange={(e) => {
+            setBeobachtungDirty(true);
+            onBeobachtungChange(e.target.value);
+          }}
           rows={3}
           placeholder="Stichworte zum Kind, die für die Ziele hilfreich sind (z.B. 'spielt gern draußen, wird bei Wechseln schnell unruhig') …"
-          className="w-full resize-y rounded-lg border border-gray-300 px-3 py-2.5 text-base focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+          aria-describedby="beobachtung-hint"
+          className={`w-full resize-y rounded-lg border px-3 py-2.5 text-base focus:outline-none focus:ring-2 ${
+            showKlarnamenWarnung
+              ? "border-amber-400 focus:border-amber-400 focus:ring-amber-100"
+              : "border-gray-300 focus:border-blue-400 focus:ring-blue-100"
+          }`}
         />
-        <p className="mt-1 text-xs text-gray-500">
-          Bitte keine echten Namen, Geburtsdaten oder Einrichtungen – nur
-          &bdquo;das Kind&ldquo;. Fließt anonym in die Zielerstellung ein.
-        </p>
+        {showKlarnamenWarnung ? (
+          <p
+            id="beobachtung-hint"
+            role="alert"
+            className="mt-1 rounded-md bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800"
+          >
+            Hinweis: Möglicher Klarname oder Geburtsdatum erkannt – bitte nur
+            anonyme Stichworte verwenden (z.B. &bdquo;das Kind&ldquo; statt echtem Namen).
+          </p>
+        ) : (
+          <p id="beobachtung-hint" className="mt-1 text-xs text-gray-500">
+            Bitte keine echten Namen, Geburtsdaten oder Einrichtungen – nur
+            &bdquo;das Kind&ldquo;. Fließt anonym in die Zielerstellung ein.
+          </p>
+        )}
       </div>
     </div>
   );

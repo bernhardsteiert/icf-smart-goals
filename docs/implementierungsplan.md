@@ -6,7 +6,7 @@
 **Ziel des MVP:** Lokale Webapp (Heilpädagogik), die (A) ICF-CY-Codes überprüfen/
 anpassen und (B) SMART-Förderziele (Oberziele + ausformulierte SMART-Unterziele)
 vorschlägt – privacy-first, KI über austauschbaren Provider (Default Gemini Flash).
-**Aktueller Stand:** M0–M7 umgesetzt; offen ist **M8** (siehe §10).
+**Aktueller Stand:** M0–M8 vollständig umgesetzt – MVP abgeschlossen.
 
 Dieser Plan ist so geschnitten, dass er **Meilenstein für Meilenstein** abgearbeitet
 werden kann. Jeder Meilenstein hat ein klares Ergebnis und Akzeptanzkriterien.
@@ -429,6 +429,16 @@ vs. kompletter Plan). Button „In Zwischenablage kopieren" + „Als .txt herunt
     für den Export vorausgewählt. Verfeinern-Panel blendet bei erreichtem Ziel aus.
   - `StepZiele.tsx`: `handleToggleStatus` + `handleNextStep` + `nextStepKey`-State;
     Status-Änderung wird über `onZieleChange` in localStorage persistiert.
+- **M8 (umgesetzt 2026-06-28):**
+  - `src/lib/privacy.ts`: `detectsKlarname(text)` – heuristische Pattern-Erkennung
+    (Klarname + Schlüsselwort, Datumsformat, Geburtsjahresbereich 2015–2026).
+  - `StepMerkmale.tsx`: aktive Klarnamen-Warnung am Beobachtungsfeld (amber-Banner
+    mit `role="alert"`, Feld-Outline färbt sich); `htmlFor`/`id`-Labels; `aria-describedby`.
+  - `GoalCard.tsx`: Klarnamen-Warnung am Freitext-Verfeinern-Feld; manuelles
+    Editieren des Zielsatzes (Bearbeiten ▼ → Textarea → Speichern/Abbrechen,
+    persistiert via `onEditZiel`); `aria-expanded`/`aria-pressed`/`aria-label`/
+    `aria-hidden` an allen relevanten Buttons; Spinner mit `aria-label`.
+  - `StepZiele.tsx`: `handleEditZiel` + prop `onEditZiel` an GoalCard.
 
 ---
 
@@ -504,7 +514,7 @@ aber es gibt **noch keinen Umschalter** und **keine Route**.
 
 ---
 
-### M8 – Restlicher Feinschliff
+### M8 – Restlicher Feinschliff ✅ ABGESCHLOSSEN
 
 Vieles ist bereits erledigt (Ladezustände, spezifische Fehlermeldungen,
 mobile/PWA-Darstellung, Android-Politur, README mit Setup/Env, Disclaimer-
