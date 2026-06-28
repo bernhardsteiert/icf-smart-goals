@@ -14,6 +14,7 @@ import StepTherapieform from "./StepTherapieform";
 import StepAusgangslage from "./StepAusgangslage";
 import StepCodes from "./StepCodes";
 import StepMerkmale from "./StepMerkmale";
+import StepUebersicht from "./StepUebersicht";
 import StepZiele from "./StepZiele";
 
 const STEP_LABELS = [
@@ -21,6 +22,7 @@ const STEP_LABELS = [
   "Ausgangslage",
   "ICF-Codes",
   "Alter & Merkmale",
+  "Übersicht",
   "Ziele",
 ];
 const TOTAL_STEPS = STEP_LABELS.length;
@@ -137,6 +139,26 @@ export default function Wizard() {
             )}
 
             {step === 5 && (
+              <StepUebersicht
+                therapieformen={state.therapieformen}
+                auswahl={state.auswahl}
+                alterHalbjahre={state.alterHalbjahre}
+                merkmale={state.merkmale}
+                beobachtung={state.beobachtung}
+                hasZiele={state.ziele.length > 0}
+                onGenerated={(ziele) => {
+                  update("ziele", ziele);
+                  setStep(6);
+                  window.scrollTo({ top: 0 });
+                }}
+                onGoToZiele={() => {
+                  setStep(6);
+                  window.scrollTo({ top: 0 });
+                }}
+              />
+            )}
+
+            {step === 6 && (
               <StepZiele
                 therapieformen={state.therapieformen}
                 auswahl={state.auswahl}
@@ -171,14 +193,18 @@ export default function Wizard() {
           >
             ← Zurück
           </button>
-          <button
-            type="button"
-            onClick={goNext}
-            disabled={!canAdvance}
-            className="min-h-[44px] rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 active:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {step === TOTAL_STEPS ? "Abschluss" : "Weiter →"}
-          </button>
+          {/* Auf Schritt 5 (Übersicht) erfolgt der Vorwärtsschritt über den
+              Inhalts-Button „Ziele vorschlagen"; Schritt 6 ist der Abschluss. */}
+          {step !== 5 && step !== TOTAL_STEPS && (
+            <button
+              type="button"
+              onClick={goNext}
+              disabled={!canAdvance}
+              className="min-h-[44px] rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 active:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Weiter →
+            </button>
+          )}
         </div>
       </footer>
     </div>
