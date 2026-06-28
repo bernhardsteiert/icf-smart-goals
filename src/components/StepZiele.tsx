@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { Foerderziel, IcfSelection } from "@/lib/types";
 import type { RefineModus } from "@/lib/ai/provider";
 import { zieleToText } from "@/lib/export";
-import { requestGoals, requestRefine, requestNextStep } from "@/lib/goals-client";
+import { requestGoals, requestRefine } from "@/lib/goals-client";
 import GoalCard from "./GoalCard";
 
 // Alle Export-Auswahl-Schlüssel (Karten-Index : Unterziel-Index).
@@ -51,7 +51,6 @@ export default function StepZiele({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refiningKey, setRefiningKey] = useState<string | null>(null);
-  const [nextStepKey, setNextStepKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(() =>
     allSelectionKeys(ziele),
@@ -126,51 +125,6 @@ export default function StepZiele({
             },
       ),
     );
-  }
-
-  function handleToggleStatus(zi: number, ui: number) {
-    onZieleChange(
-      ziele.map((z, i) =>
-        i !== zi
-          ? z
-          : {
-              ...z,
-              unterziele: z.unterziele.map((u, j) =>
-                j !== ui
-                  ? u
-                  : { ...u, status: u.status === "erreicht" ? "offen" : "erreicht" },
-              ),
-            },
-      ),
-    );
-  }
-
-  async function handleNextStep(zi: number, ui: number) {
-    setNextStepKey(`${zi}:${ui}`);
-    setError(null);
-    try {
-      const neu = await requestNextStep({
-        erreichtesUnterziel: ziele[zi].unterziele[ui],
-        oberziel: ziele[zi].oberziel,
-        codes,
-        alterHalbjahre,
-      });
-      const neueZiele = ziele.map((z, i) => {
-        if (i !== zi) return z;
-        return {
-          ...z,
-          unterziele: [...z.unterziele, { ...neu, status: "offen" as const }],
-        };
-      });
-      onZieleChange(neueZiele);
-      // Neues Unterziel automatisch für Export vorauswählen
-      const newUi = neueZiele[zi].unterziele.length - 1;
-      setSelected((prev) => new Set([...prev, `${zi}:${newUi}`]));
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Unbekannter Fehler.");
-    } finally {
-      setNextStepKey(null);
-    }
   }
 
   function handleRemove(index: number) {
@@ -303,13 +257,6 @@ export default function StepZiele({
               : null
           }
           onEditZiel={(ui, newZiel) => handleEditZiel(i, ui, newZiel)}
-          onToggleStatus={(ui) => handleToggleStatus(i, ui)}
-          onNextStep={(ui) => handleNextStep(i, ui)}
-          busyNextStep={
-            nextStepKey?.startsWith(`${i}:`)
-              ? Number(nextStepKey.split(":")[1])
-              : null
-          }
           onRemove={() => handleRemove(i)}
         />
       ))}
