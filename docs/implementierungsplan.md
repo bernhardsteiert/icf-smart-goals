@@ -594,71 +594,72 @@ GEMINI_MODEL=gemini-2.5-flash
 
 ## 14. Bekannte Probleme / Nächste Schritte
 
-### iOS-Scroll-Jitter im CollapsingHeader ← NÄCHSTER SCHRITT
+### iOS-Scroll-Jitter im CollapsingHeader ✅ GELÖST (Hysterese-Latch)
 
 **Problem:**
 
-`CollapsingHeader.tsx` (Zeile 29–44) hört auf `window.scrollY` und animiert den
-Header von groß (Titel groß + Untertitel) auf kompakt (Titel klein, kein Untertitel).
-Die Animation läuft über `COLLAPSE = 72` Scroll-Pixel (`p = scrollY / 72`).
+`CollapsingHeader.tsx` hört auf `window.scrollY` und animiert den Header von groß
+(Titel groß + Untertitel) auf kompakt (Titel klein, kein Untertitel). Die Animation
+läuft über `COLLAPSE = 72` Scroll-Pixel (`p = scrollY / 72`).
 
-Auf kurzen Seiten (z.B. Schritt 1 „Therapieform") kann das Seiten-Layout
-nahezu in den Viewport passen — `maxScrollable = scrollHeight - innerHeight` ist
-dann sehr klein (< 72 px) oder sogar 0. iOS-Safari erzeugt trotzdem einen
-**Rubber-Band-Bounce-Effekt** wenn der Nutzer am unteren oder oberen Rand
-weiter „drückt": `window.scrollY` springt kurz auf einen positiven Wert (z.B. 20)
-und schnellt dann zurück auf 0.
+Der Header ist `sticky` und **schrumpft beim Kollabieren** (Untertitel-Höhe → 0,
+Titel kleiner ≈ 30 px). Dadurch verkürzt sich das Dokument, also sinkt
+`max = scrollHeight − innerHeight`. Auf kurzen Seiten (z.B. Schritt 1 „Therapieform")
+koppelt das die **Scrollposition an den Header-Zustand zurück**, zusätzlich verstärkt
+durch den iOS-Safari-**Rubber-Band-Bounce** (negativer / über `max` liegender
+`scrollY` am Rand). Sichtbares **Zucken**: der Header beginnt zu schrumpfen und
+schnellt sofort zurück.
 
-Das führt zu sichtbarem **Zucken**: der Header beginnt kurz zu schrumpfen, schnellt
-sofort wieder zurück.
-
-**Was bisher versucht wurde (und warum es noch nicht reicht):**
+**Was nicht reichte:**
 
 - **Versuch 1 (PR #21, rückgängig in PR #22):** `ResizeObserver` auf `document.body`,
-  `maxScroll` als React-State → erzeugte eine **Rückkopplungsschleife**: Header
-  kollabiert → Untertitel-Höhe ändert sich → `document.body` resized → Observer feuert →
-  `setMaxScroll` → Re-render → Header berechnet sich neu → Höhe ändert sich …
-  Machte das Zucken deutlich schlimmer.
+  `maxScroll` als React-State → **Rückkopplungsschleife** (Kollaps → resize → Observer →
+  setState → Re-render → …). Verschlimmerte das Zucken.
 
-- **Versuch 2 (PR #22, aktuell):** Kein Observer, `max` inline im Scroll-Handler
-  berechnet via `document.documentElement.scrollHeight - window.innerHeight`, dann
-  `setScrollY(Math.min(Math.max(scrollY, 0), max))`. Verhindert Bounce am BODEN
-  (scrollY > max wird geclampt). **Aber:** Wenn `max` klein ist (z.B. 30), kann der
-  Nutzer durch normales Scrollen bis `scrollY = 30` kommen. Beim iOS-Bounce-Snap-back
-  fällt scrollY von 30 auf 0 — das löst `p` von 0,42 auf 0 aus: Header expandiert
-  sichtbar. Problem bleibt.
+- **Versuch 2 (PR #22):** `max` inline berechnet, `setScrollY(clamp(scrollY, 0, max))`.
+  Clampt zwar Bounce am Boden, behebt aber den Layout-Rückkopplungs-Effekt nicht.
 
-**Empfohlene Lösung für den nächsten Agenten:**
+- **Verworfene Einzelschwelle (`if (max < COLLAPSE) setScrollY(0)`):** scheitert für
+  Seiten, deren `max` knapp über COLLAPSE liegt. Da `max` selbst vom Kollaps-Zustand
+  abhängt, kippt das Schrumpfen `max` unter die Schwelle → Header expandiert → `max`
+  steigt → kollabiert … = neue 60-fps-Oszillation. Die Annahme „`max` ist konstant"
+  ist falsch.
 
-Änderung in `src/components/CollapsingHeader.tsx`, nur im `requestAnimationFrame`-
-Callback des Scroll-Handlers (ca. Zeile 34–38):
+**Umgesetzte Lösung (PR auf `claude/context-review-next-steps-…`):**
+
+Hysterese über einen **Latch in der Effekt-Closure** (kein State, kein Observer):
 
 ```typescript
-raf = requestAnimationFrame(() => {
-  const max = Math.max(
-    0,
-    document.documentElement.scrollHeight - window.innerHeight,
-  );
-  // Wenn die Seite zu kurz ist, um den Header vollständig einzuklappen,
-  // Animation komplett deaktivieren — jeder Bounce würde sonst sichtbar zucken.
-  if (max < COLLAPSE) {
-    setScrollY(0);
-  } else {
-    setScrollY(Math.min(Math.max(window.scrollY, 0), max));
-  }
-});
+let collapseEnabled = false;
+const onScroll = () => {
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(() => {
+    const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+    if (collapseEnabled) {
+      if (max < COLLAPSE) collapseEnabled = false;
+    } else if (max >= COLLAPSE + COLLAPSE_ENABLE_MARGIN) {
+      collapseEnabled = true;
+    }
+    setScrollY(collapseEnabled ? Math.min(Math.max(window.scrollY, 0), max) : 0);
+  });
+};
 ```
 
 **Warum das funktioniert:**
-- `max < COLLAPSE`: Header bleibt immer groß, kein Bounce kann ihn bewegen. ✓
-- `max >= COLLAPSE`: Seite ist lang genug für volle Kollaps-Animation. Scroll-Ende
-  liegt bei `max`, der weit genug vom Start entfernt ist, dass der Header-Zustand
-  beim Bounce-Snap-back nicht springt (der Header ist zu diesem Zeitpunkt schon
-  kollabiert). ✓
-- Kein State für `maxScroll`, kein Observer → keine Rückkopplungsschleife. ✓
-- `max` wird frisch pro Frame berechnet, passt sich automatisch an, wenn der Nutzer
-  zwischen Schritten mit unterschiedlicher Seitenhöhe wechselt. ✓
+- Zwei Schwellen: einschalten erst bei `max ≥ COLLAPSE + MARGIN`, ausschalten erst bei
+  `max < COLLAPSE`. Weil `MARGIN` (48 px) größer ist als die Header-Schrumpfung
+  (~30 px), kann das Kollabieren `max` **nie** unter die Ausschalt-Schwelle drücken →
+  der per-Frame-Flip ist ausgeschlossen. ✓
+- Kurze Seiten (`max < COLLAPSE+MARGIN`): Header bleibt groß, kein Bounce bewegt ihn. ✓
+- `collapseEnabled` lebt in der Closure (wie `raf`) → kein Re-Render, keine
+  Rückkopplung. ✓
+- `resize`-Listener ruft denselben Handler → Latch passt sich an Rotation /
+  eingeblendete Tastatur an. ✓
 
-**Datei:** `src/components/CollapsingHeader.tsx`, nur der `requestAnimationFrame`-
-Callback. Sonst keine Änderungen. Lint + Build + manuelle Prüfung auf Schritt 1
-(kurz) und Schritt 6 mit Zielen (lang) genügen.
+**Trade-off:** Seiten mit `max` zwischen COLLAPSE und COLLAPSE+MARGIN (Inhalt nur knapp
+höher als der Viewport) kollabieren bewusst **nicht** — dort gibt es ohnehin kaum etwas
+zu scrollen, und ein stehender Titel ist harmlos. Das ist der Preis für die garantierte
+Jitter-Freiheit.
+
+**Verifikation:** `npm run lint` + `npm run build` grün; manuell auf Schritt 1 (kurz)
+und Schritt 6 mit Zielen (lang) prüfen.

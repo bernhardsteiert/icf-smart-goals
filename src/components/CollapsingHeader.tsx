@@ -12,6 +12,13 @@ const clamp = (v: number, lo = 0, hi = 1) => Math.min(Math.max(v, lo), hi);
 // Scrollstrecke (px), über die der Header von „groß" auf „kompakt" zusammenfährt.
 const COLLAPSE = 72;
 
+// Zusätzlicher Scrollraum (px), den eine Seite über COLLAPSE hinaus bieten muss,
+// damit die Kollaps-Animation überhaupt freigeschaltet wird. Muss GRÖSSER sein als
+// die Höhe, um die der Header beim Kollabieren schrumpft (Untertitel + Titel-
+// Verkleinerung ≈ 30 px). Bildet zusammen mit COLLAPSE eine Hysterese, die das
+// Zucken auf kurzen Seiten verhindert (siehe useEffect unten).
+const COLLAPSE_ENABLE_MARGIN = 48;
+
 /**
  * iOS-„Large Title"-Navigationsleiste: Derselbe „Förderkompass"-Titel schrumpft
  * beim Scrollen von groß auf klein (keine leere Leiste über dem großen Titel).
@@ -25,20 +32,42 @@ export default function CollapsingHeader({ onReset }: Props) {
 
   useEffect(() => {
     let raf = 0;
+    // Latch (in der Effekt-Closure, KEIN State → kein Re-Render): ist die Kollaps-
+    // Animation gerade aktiv? Hintergrund: Der Header ist sticky und schrumpft beim
+    // Kollabieren, wodurch sich das Dokument verkürzt und `max` sinkt. Auf kurzen
+    // Seiten koppelt das die Scrollposition an den Header-Zustand zurück → Zucken,
+    // verstärkt durch iOS-Rubber-Band-Bounce.
+    //
+    // Eine einfache Schwelle (`if (max < COLLAPSE) p = 0`) genügt NICHT: Für Seiten,
+    // deren `max` knapp über COLLAPSE liegt, kippt das Schrumpfen des Headers `max`
+    // wieder unter die Schwelle → der Header expandiert → `max` steigt → kollabiert …
+    // (60-fps-Oszillation). Deshalb Hysterese mit zwei Schwellen:
+    //   einschalten erst bei  max ≥ COLLAPSE + MARGIN  (expandiert reichlich Raum),
+    //   ausschalten erst bei   max < COLLAPSE.
+    // Weil MARGIN größer ist als die Header-Schrumpfung, kann das Kollabieren `max`
+    // nie unter die Ausschalt-Schwelle drücken — der Flip ist unmöglich.
+    let collapseEnabled = false;
     const onScroll = () => {
       cancelAnimationFrame(raf);
       raf = requestAnimationFrame(() => {
-        // Clamp to [0, maxScrollable] so iOS rubber-band bounce can't trigger
-        // the animation. Computed fresh each frame — no separate state needed,
-        // which avoids a ResizeObserver feedback loop with the collapsing header.
         const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
-        setScrollY(Math.min(Math.max(window.scrollY, 0), max));
+        if (collapseEnabled) {
+          if (max < COLLAPSE) collapseEnabled = false;
+        } else if (max >= COLLAPSE + COLLAPSE_ENABLE_MARGIN) {
+          collapseEnabled = true;
+        }
+        // Ist die Seite zu kurz für einen vollen Kollaps, bleibt der Header groß –
+        // kein Bounce kann ihn dann bewegen. Sonst auf [0, max] clampen, damit der
+        // Rubber-Band-Bounce am oberen/unteren Rand die Animation nicht auslöst.
+        setScrollY(collapseEnabled ? Math.min(Math.max(window.scrollY, 0), max) : 0);
       });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
     onScroll();
     return () => {
       window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
       cancelAnimationFrame(raf);
     };
   }, []);
