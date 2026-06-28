@@ -6,7 +6,7 @@
 **Ziel des MVP:** Lokale Webapp (Heilpädagogik), die (A) ICF-CY-Codes überprüfen/
 anpassen und (B) SMART-Förderziele (Oberziele + ausformulierte SMART-Unterziele)
 vorschlägt – privacy-first, KI über austauschbaren Provider (Default Gemini Flash).
-**Aktueller Stand:** M0–M6 umgesetzt; offen sind **M7–M8** (siehe §10).
+**Aktueller Stand:** M0–M7 umgesetzt; offen ist **M8** (siehe §10).
 
 Dieser Plan ist so geschnitten, dass er **Meilenstein für Meilenstein** abgearbeitet
 werden kann. Jeder Meilenstein hat ein klares Ergebnis und Akzeptanzkriterien.
@@ -419,6 +419,16 @@ vs. kompletter Plan). Button „In Zwischenablage kopieren" + „Als .txt herunt
     annehmbare Karten (Code, Titel, Begründung, ggf. Qualifier-Badge); „Übernehmen"
     fügt Code mit `quelle: "fachkraft"` und ggf. `empfohlenerQualifier` ein.
   - Wizard gibt `therapieformen` + `merkmale` an `StepCodes` weiter.
+- **M7 (umgesetzt 2026-06-28):**
+  - Route `src/app/api/next-step/route.ts`: validiert Request (zod), konvertiert
+    `codes: string[]` → `IcfSelection[]`, ruft `getProvider().nextStep()` auf.
+  - Client-Helfer `requestNextStep` in `src/lib/goals-client.ts`.
+  - UI in `GoalCard.tsx`: „○ Offen / ✓ Erreicht"-Toggle pro Unterziel; bei
+    `status === "erreicht"` Button „→ Nächste Stufe vorschlagen" (Ladespinner je
+    Unterziel). Neues Unterziel wird an dasselbe Oberziel angehängt und automatisch
+    für den Export vorausgewählt. Verfeinern-Panel blendet bei erreichtem Ziel aus.
+  - `StepZiele.tsx`: `handleToggleStatus` + `handleNextStep` + `nextStepKey`-State;
+    Status-Änderung wird über `onZieleChange` in localStorage persistiert.
 
 ---
 
@@ -460,7 +470,7 @@ korrekt in `auswahl`; ohne `GEMINI_API_KEY` klare Fehlermeldung; `lint`+`build` 
 
 ---
 
-### M7 – Folgestufen (`/api/next-step`)
+### M7 – Folgestufen (`/api/next-step`) ✅ ABGESCHLOSSEN
 
 **Ziel:** Ein als **erreicht** markiertes Unterziel erzeugt eine darauf
 aufbauende nächste Stufe (Progression).

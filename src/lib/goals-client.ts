@@ -77,6 +77,37 @@ export async function requestSuggestCodes(
   return data.vorschlaege ?? [];
 }
 
+export type NextStepClientInput = {
+  erreichtesUnterziel: SmartUnterziel;
+  oberziel: string;
+  codes: string[];
+  alterHalbjahre: number;
+};
+
+// Schlägt eine aufbauende nächste Stufe vor. Wirft Error mit nutzbarer Meldung.
+export async function requestNextStep(
+  input: NextStepClientInput,
+): Promise<SmartUnterziel> {
+  let res: Response;
+  try {
+    res = await fetch("/api/next-step", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+  } catch {
+    throw new Error(NETWORK_ERROR);
+  }
+  const data = (await res.json().catch(() => ({}))) as {
+    unterziel?: SmartUnterziel;
+    error?: string;
+  };
+  if (!res.ok || data.error || !data.unterziel) {
+    throw new Error(data.error ?? "Nächste Stufe konnte nicht geladen werden.");
+  }
+  return data.unterziel;
+}
+
 // Überarbeitet ein einzelnes Unterziel. Wirft Error mit nutzbarer Meldung.
 export async function requestRefine(
   input: RefineUnterzielClientInput,
