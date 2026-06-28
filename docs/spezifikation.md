@@ -18,8 +18,8 @@ ausformulierten SMART-Unterzielen) als Entwurf zu erhalten.
 > - **Disclaimer als Einstiegsseite**; **freie Beobachtung in Schritt 4**;
 >   Ergebnisse auf **eigener Seite** (§6).
 >
-> M6 (KI-Code-Vorschläge) ist umgesetzt (2026-06-28). Offen: Folgestufen (M7)
-> und Restfeinschliff (M8), siehe `docs/implementierungsplan.md` §10. Bei
+> M6 (KI-Code-Vorschläge) und M7 (Folgestufen) sind umgesetzt (2026-06-28).
+> Offen: Restfeinschliff (M8), siehe `docs/implementierungsplan.md` §10. Bei
 > fachlichen Änderungen bitte dieses Dokument mitführen.
 
 ## 0. Praxis-Kontext (warum die App so aussieht)
@@ -204,7 +204,7 @@ nur optional. **Vorgeschaltet:** ein **Disclaimer-Einstieg** mit Button
    SMART-Unterzielen (§7). Pro **Unterziel**:
    - **Verfeinern**: *einfacher · ambitionierter · anders formulieren · für
      Eltern* **plus Freitext** („eigene Änderung"). Wirkt nur auf das Unterziel.
-   - *(geplant, M7)* Unterziel als **erreicht** markieren → **nächste Stufe**.
+   - *(M7, umgesetzt)* Unterziel als **erreicht** markieren → **nächste Stufe**.
    - **Begründung** auf Klick einblendbar.
    Pro Oberziel: Mülleimer-Icon zum Verwerfen, „Ziele neu vorschlagen".
    **Export**: einzelne Unterziele per Checkbox auswählen; Umfang „ausgewählte
@@ -335,7 +335,7 @@ gezielt überarbeitet (statt „alles neu" oder ganzes Oberziel). Modi: *einfach
 ambitionierter, umformulieren, elterngerecht* sowie **`freitext`** (eigene
 Anweisung der Fachkraft). Rückgabe: **genau ein** überarbeitetes `SmartUnterziel`.
 
-**Folgestufe (`/api/next-step`, geplant M7):** Bei erreichtem Unterziel ein darauf
+**Folgestufe (`/api/next-step`, M7):** Bei erreichtem Unterziel ein darauf
 **aufbauendes** nächstes Unterziel vorschlagen (Progression).
 
 ---
@@ -355,7 +355,7 @@ Anweisung der Fachkraft). Rückgabe: **genau ein** überarbeitetes `SmartUnterzi
   Zielentwurf (Ober-/Unterziele) + Verfeinern pro Unterziel, Proxy mit
   Provider-Adapter (Gemini Flash), Kategorien-Maske + semantische Suche,
   kuratierter ICF-CY-Auszug (Kapitel b/d/e), Alter in Halbjahren, lokal +
-  Text-Export, KI-Code-Vorschläge (M6). **Umgesetzt** (außer M7 Folgestufen).
+  Text-Export, KI-Code-Vorschläge (M6), Folgestufen (M7). **Umgesetzt.**
 - **Phase 2:** Weitere Therapieformen (Logo/Physio/Ergo/Systemische
   Familientherapie als Daten/Masken), Ziel-Bibliothek/Vorlagen, Feedback
   verfeinern, ggf. Schweregrad nach Team-Klärung.

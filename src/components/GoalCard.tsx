@@ -22,6 +22,9 @@ interface Props {
     freitext?: string,
   ) => void;
   busyUnterziel: number | null;
+  onToggleStatus: (uzIndex: number) => void;
+  onNextStep: (uzIndex: number) => void;
+  busyNextStep: number | null;
   onRemove: () => void;
 }
 
@@ -32,6 +35,9 @@ export default function GoalCard({
   onToggleSelect,
   onRefineUnterziel,
   busyUnterziel,
+  onToggleStatus,
+  onNextStep,
+  busyNextStep,
   onRemove,
 }: Props) {
   return (
@@ -97,6 +103,9 @@ export default function GoalCard({
               onToggleSelect={() => onToggleSelect(key)}
               onRefine={(modus, freitext) => onRefineUnterziel(i, modus, freitext)}
               busy={busyUnterziel === i}
+              onToggleStatus={() => onToggleStatus(i)}
+              onNextStep={() => onNextStep(i)}
+              busyNextStep={busyNextStep === i}
             />
           );
         })}
@@ -111,17 +120,24 @@ function UnterzielRow({
   onToggleSelect,
   onRefine,
   busy,
+  onToggleStatus,
+  onNextStep,
+  busyNextStep,
 }: {
   unterziel: Foerderziel["unterziele"][number];
   selected: boolean;
   onToggleSelect: () => void;
   onRefine: (modus: RefineModus, freitext?: string) => void;
   busy: boolean;
+  onToggleStatus: () => void;
+  onNextStep: () => void;
+  busyNextStep: boolean;
 }) {
   const [showWhy, setShowWhy] = useState(false);
   const [showRefine, setShowRefine] = useState(false);
   const [freitext, setFreitext] = useState("");
   const erreicht = unterziel.status === "erreicht";
+  const anyBusy = busy || busyNextStep;
 
   const submitFreitext = () => {
     if (!freitext.trim()) return;
@@ -144,11 +160,13 @@ function UnterzielRow({
 
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <p className="text-sm text-gray-800">
-              {erreicht && <span className="mr-1 text-green-600">✓</span>}
+            <p className={`text-sm ${erreicht ? "text-gray-500 line-through-none" : "text-gray-800"}`}>
+              {erreicht && (
+                <span className="mr-1 font-semibold text-green-600">✓</span>
+              )}
               {unterziel.ziel}
             </p>
-            {busy && (
+            {(busy || busyNextStep) && (
               <span className="mt-0.5 inline-block h-4 w-4 flex-shrink-0 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
             )}
           </div>
@@ -164,14 +182,51 @@ function UnterzielRow({
                 {showWhy ? "Warum ▲" : "Warum ▼"}
               </button>
             )}
+
+            {/* Erreicht-Toggle */}
             <button
               type="button"
-              disabled={busy}
-              onClick={() => setShowRefine((r) => !r)}
-              className="text-xs text-blue-600 hover:text-blue-800 disabled:opacity-50"
+              disabled={anyBusy}
+              onClick={onToggleStatus}
+              className={`text-xs font-medium transition-colors disabled:opacity-50 ${
+                erreicht
+                  ? "text-green-700 hover:text-green-900"
+                  : "text-gray-400 hover:text-green-700"
+              }`}
+              title={erreicht ? "Als offen markieren" : "Als erreicht markieren"}
             >
-              {showRefine ? "Verfeinern ▲" : "Verfeinern ▼"}
+              {erreicht ? "✓ Erreicht" : "○ Offen"}
             </button>
+
+            {!erreicht && (
+              <button
+                type="button"
+                disabled={anyBusy}
+                onClick={() => setShowRefine((r) => !r)}
+                className="text-xs text-blue-600 hover:text-blue-800 disabled:opacity-50"
+              >
+                {showRefine ? "Verfeinern ▲" : "Verfeinern ▼"}
+              </button>
+            )}
+
+            {/* Nächste Stufe – nur bei erreichtem Ziel */}
+            {erreicht && (
+              <button
+                type="button"
+                disabled={anyBusy}
+                onClick={onNextStep}
+                className="inline-flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-800 disabled:opacity-50"
+              >
+                {busyNextStep ? (
+                  <>
+                    <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                    Nächste Stufe …
+                  </>
+                ) : (
+                  "→ Nächste Stufe vorschlagen"
+                )}
+              </button>
+            )}
           </div>
 
           {showWhy && unterziel.begruendung && (
@@ -180,14 +235,14 @@ function UnterzielRow({
             </p>
           )}
 
-          {showRefine && (
+          {showRefine && !erreicht && (
             <div className="mt-2 space-y-2 rounded-md bg-gray-50 px-3 py-2.5">
               <div className="flex flex-wrap gap-1.5">
                 {PRESET_BUTTONS.map((b) => (
                   <button
                     key={b.modus}
                     type="button"
-                    disabled={busy}
+                    disabled={anyBusy}
                     onClick={() => onRefine(b.modus)}
                     className="rounded-full border border-gray-300 bg-white px-3 py-1 text-xs text-gray-700 transition-colors hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                   >
@@ -203,14 +258,14 @@ function UnterzielRow({
                   onKeyDown={(e) => {
                     if (e.key === "Enter") submitFreitext();
                   }}
-                  disabled={busy}
+                  disabled={anyBusy}
                   placeholder="Eigene Änderung beschreiben …"
                   className="min-h-[40px] w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
                 />
                 <div className="flex justify-end">
                   <button
                     type="button"
-                    disabled={busy || !freitext.trim()}
+                    disabled={anyBusy || !freitext.trim()}
                     onClick={submitFreitext}
                     className="min-h-[40px] rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                   >
