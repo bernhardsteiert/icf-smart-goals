@@ -9,6 +9,7 @@ import {
   getAllMerkmale,
 } from "@/lib/icf";
 import CollapsingHeader from "./CollapsingHeader";
+import ConfirmDialog from "./ConfirmDialog";
 import DisclaimerIntro from "./DisclaimerIntro";
 import StepTherapieform from "./StepTherapieform";
 import StepAusgangslage from "./StepAusgangslage";
@@ -39,6 +40,7 @@ export default function Wizard() {
   // Disclaimer-Einstieg: bewusst NICHT persistiert – erscheint bei jedem Start
   // (frischer Seitenaufruf) und bei jedem neuen Fall erneut.
   const [accepted, setAccepted] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
 
   if (!hydrated) {
     return (
@@ -57,12 +59,13 @@ export default function Wizard() {
 
   const canAdvance = step === 1 ? state.therapieformen.length > 0 : step < TOTAL_STEPS;
 
-  const handleReset = () => {
-    if (window.confirm("Aktuellen Fall verwerfen und neu beginnen?")) {
-      resetFall();
-      setStep(1);
-      setAccepted(false); // Disclaimer beim neuen Fall erneut zeigen
-    }
+  const handleReset = () => setConfirmReset(true);
+
+  const handleConfirmReset = () => {
+    resetFall();
+    setStep(1);
+    setAccepted(false);
+    setConfirmReset(false);
   };
 
   // When entering step 3 for the first time, pre-populate auswahl from Vorgespräch-Codes
@@ -175,6 +178,16 @@ export default function Wizard() {
         </div>
       </main>
 
+      {confirmReset && (
+        <ConfirmDialog
+          title="Neuer Fall"
+          message="Aktuellen Fall verwerfen und neu beginnen?"
+          confirmLabel="Verwerfen"
+          onConfirm={handleConfirmReset}
+          onCancel={() => setConfirmReset(false)}
+        />
+      )}
+
       {/* Navigation – bleibt am unteren Rand klebend, respektiert die
           Safe-Area (Home-Indicator) am unteren iPhone-Rand. */}
       <footer
@@ -229,12 +242,16 @@ function StepIndicator({
         return (
           <div key={num} className="flex flex-1 flex-col items-center">
             <div className="flex w-full items-center">
-              {/* Left connector */}
-              {i > 0 && (
-                <div
-                  className={`h-px flex-1 ${done || active ? "bg-blue-400" : "bg-gray-200"}`}
-                />
-              )}
+              {/* Left connector – invisible on first item to keep circles centred */}
+              <div
+                className={`h-px flex-1 ${
+                  i === 0
+                    ? "invisible"
+                    : done || active
+                    ? "bg-blue-400"
+                    : "bg-gray-200"
+                }`}
+              />
               {/* Circle */}
               <div
                 className={[
@@ -248,12 +265,16 @@ function StepIndicator({
               >
                 {done ? "✓" : num}
               </div>
-              {/* Right connector */}
-              {i < labels.length - 1 && (
-                <div
-                  className={`h-px flex-1 ${done ? "bg-blue-400" : "bg-gray-200"}`}
-                />
-              )}
+              {/* Right connector – invisible on last item */}
+              <div
+                className={`h-px flex-1 ${
+                  i === labels.length - 1
+                    ? "invisible"
+                    : done
+                    ? "bg-blue-400"
+                    : "bg-gray-200"
+                }`}
+              />
             </div>
             {/* Label */}
             <span
