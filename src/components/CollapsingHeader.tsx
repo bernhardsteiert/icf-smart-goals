@@ -20,14 +20,20 @@ const COLLAPSE = 72;
  */
 export default function CollapsingHeader({ onReset }: Props) {
   const [scrollY, setScrollY] = useState(0);
+  const [maxScroll, setMaxScroll] = useState(0);
   const [subHeight, setSubHeight] = useState(20);
   const subRef = useRef<HTMLParagraphElement>(null);
 
+  // Clamp scrollY to [0, maxScrollable] so iOS rubber-band bounce can't trigger
+  // the collapse animation on short pages or at the bottom of a page.
   useEffect(() => {
     let raf = 0;
     const onScroll = () => {
       cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => setScrollY(window.scrollY));
+      raf = requestAnimationFrame(() => {
+        const max = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+        setScrollY(Math.min(Math.max(window.scrollY, 0), max));
+      });
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
@@ -35,6 +41,16 @@ export default function CollapsingHeader({ onReset }: Props) {
       window.removeEventListener("scroll", onScroll);
       cancelAnimationFrame(raf);
     };
+  }, []);
+
+  // Track available scroll distance; update when page content changes height.
+  useEffect(() => {
+    const update = () =>
+      setMaxScroll(Math.max(0, document.documentElement.scrollHeight - window.innerHeight));
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(document.body);
+    return () => ro.disconnect();
   }, []);
 
   // Natürliche Höhe des Untertitels messen (für sauberes Wegfahren).
@@ -47,7 +63,8 @@ export default function CollapsingHeader({ onReset }: Props) {
     return () => window.removeEventListener("resize", measure);
   }, []);
 
-  const p = clamp(scrollY / COLLAPSE); // 0 = groß, 1 = kompakt
+  // Only animate when the page can actually scroll far enough to justify collapsing.
+  const p = maxScroll >= COLLAPSE ? clamp(scrollY / COLLAPSE) : 0;
   const titleFontRem = 1.5 - 0.5 * p; // text-2xl (1.5rem) → text-base (1rem)
   const subOpacity = clamp(1 - p * 1.5);
   const textOpacity = clamp(1 - p * 1.9); // „Neuer Fall"-Text
