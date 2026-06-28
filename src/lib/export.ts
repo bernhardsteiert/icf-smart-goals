@@ -8,7 +8,6 @@ export function zieleToText(ziele: Foerderziel[]): string {
 
   const lines: string[] = [];
   lines.push("Förderziele (Heilpädagogik) – Entwurf");
-  lines.push("Planungshorizont: ca. 1 Jahr (~42 Therapieeinheiten)");
   lines.push("");
 
   ziele.forEach((ziel, idx) => {

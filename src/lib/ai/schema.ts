@@ -17,7 +17,6 @@ export const smartUnterzielSchema = z.object({
 export const foerderzielSchema = z.object({
   oberziel: z.string(),
   bereich: z.string(),
-  zeithorizont: z.string(),
   abgeleitetAus: z.array(z.string()),
   unterziele: z.array(smartUnterzielSchema),
 });
@@ -54,11 +53,10 @@ export const GEMINI_GOALS_SCHEMA = {
     properties: {
       oberziel: { type: "STRING" },
       bereich: { type: "STRING" },
-      zeithorizont: { type: "STRING" },
       abgeleitetAus: { type: "ARRAY", items: { type: "STRING" } },
       unterziele: { type: "ARRAY", items: UNTERZIEL_SCHEMA },
     },
-    required: ["oberziel", "bereich", "zeithorizont", "abgeleitetAus", "unterziele"],
+    required: ["oberziel", "bereich", "abgeleitetAus", "unterziele"],
   },
 };
 

@@ -1,5 +1,11 @@
 import type { CodeVorschlag, Foerderziel, SmartUnterziel } from "@/lib/types";
-import type { AiProvider, GenerateGoalsInput, SuggestCodesInput, NextStepInput } from "./provider";
+import type {
+  AiProvider,
+  GenerateGoalsInput,
+  SuggestCodesInput,
+  NextStepInput,
+  RefineUnterzielInput,
+} from "./provider";
 import {
   foerderzielArraySchema,
   codeVorschlagArraySchema,
@@ -14,6 +20,7 @@ import {
   buildGoalsUserPrompt,
   buildCodesUserPrompt,
   buildNextStepUserPrompt,
+  buildRefineUnterzielUserPrompt,
 } from "./prompts";
 
 const TIMEOUT_MS = 30_000;
@@ -159,6 +166,20 @@ export class GeminiProvider implements AiProvider {
     const raw = await callGemini({
       systemInstruction: { parts: [{ text: SYSTEM_PROMPT_GOALS }] },
       contents: [{ role: "user", parts: [{ text: buildNextStepUserPrompt(input) }] }],
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: GEMINI_NEXT_STEP_SCHEMA,
+      },
+    });
+    return parseAndValidate(raw, smartUnterzielSchema);
+  }
+
+  async refineUnterziel(input: RefineUnterzielInput): Promise<SmartUnterziel> {
+    const raw = await callGemini({
+      systemInstruction: { parts: [{ text: SYSTEM_PROMPT_GOALS }] },
+      contents: [
+        { role: "user", parts: [{ text: buildRefineUnterzielUserPrompt(input) }] },
+      ],
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: GEMINI_NEXT_STEP_SCHEMA,

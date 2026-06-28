@@ -83,7 +83,8 @@ export default function Wizard() {
       {/* Step content */}
       <main className="flex-1 px-4 py-6">
         <div className="mx-auto max-w-2xl space-y-5">
-          <DisclaimerBanner />
+          {/* Disclaimer bewusst nur einmal zu Beginn (Schritt 1). */}
+          {step === 1 && <DisclaimerBanner />}
 
           <div>
             <h2 className="mb-4 text-lg font-semibold text-gray-800">
@@ -122,8 +123,10 @@ export default function Wizard() {
                 alterHalbjahre={state.alterHalbjahre}
                 merkmale={state.merkmale}
                 alleMerkmale={ALL_MERKMALE}
+                beobachtung={state.beobachtung}
                 onAlterChange={(v) => update("alterHalbjahre", v)}
                 onMerkmaleChange={updateMerkmale}
+                onBeobachtungChange={(v) => update("beobachtung", v)}
               />
             )}
 

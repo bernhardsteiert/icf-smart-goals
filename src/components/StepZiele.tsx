@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import type { Foerderziel, IcfSelection } from "@/lib/types";
+import type { RefineModus } from "@/lib/ai/provider";
 import { halbjahreToText, QUALIFIER_LABELS } from "@/lib/format";
 import { zieleToText } from "@/lib/export";
 import {
@@ -9,7 +10,29 @@ import {
   getAllTherapieformen,
   getAllMerkmale,
 } from "@/lib/icf";
-import GoalCard, { type RefineModus } from "./GoalCard";
+import GoalCard from "./GoalCard";
+
+// Alle Export-Auswahl-Schlüssel (Karten-Index : Unterziel-Index).
+function allSelectionKeys(ziele: Foerderziel[]): Set<string> {
+  const keys = new Set<string>();
+  ziele.forEach((z, zi) =>
+    z.unterziele.forEach((_, ui) => keys.add(`${zi}:${ui}`)),
+  );
+  return keys;
+}
+
+// Reduziert die Ziele auf die ausgewählten Unterziele (für den Export).
+function filterSelected(
+  ziele: Foerderziel[],
+  selected: Set<string>,
+): Foerderziel[] {
+  return ziele
+    .map((z, zi) => ({
+      ...z,
+      unterziele: z.unterziele.filter((_, ui) => selected.has(`${zi}:${ui}`)),
+    }))
+    .filter((z) => z.unterziele.length > 0);
+}
 
 // Statische Stammdaten (JSON, beim Build gebündelt) – einmalig auf Modulebene.
 const THERAPIEFORMEN = getAllTherapieformen();
@@ -41,8 +64,14 @@ export default function StepZiele({
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [refiningIndex, setRefiningIndex] = useState<number | null>(null);
+  // Aktuell verfeinertes Unterziel als "zi:ui" (oder null).
+  const [refiningKey, setRefiningKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  // Export: Auswahl der Unterziele + Umfang.
+  const [selected, setSelected] = useState<Set<string>>(() =>
+    allSelectionKeys(ziele),
+  );
+  const [exportScope, setExportScope] = useState<"auswahl" | "komplett">("auswahl");
 
   const canGenerate = auswahl.length > 0 && therapieformen.length > 0;
 
@@ -68,7 +97,9 @@ export default function StepZiele({
         setError(data.error ?? "Unbekannter Fehler beim Abrufen der Ziele.");
         return;
       }
-      onZieleChange(data.ziele ?? []);
+      const neueZiele = data.ziele ?? [];
+      onZieleChange(neueZiele);
+      setSelected(allSelectionKeys(neueZiele));
     } catch {
       setError("Netzwerkfehler. Bitte Verbindung prüfen und erneut versuchen.");
     } finally {
@@ -76,42 +107,80 @@ export default function StepZiele({
     }
   }
 
-  async function handleRefine(index: number, modus: RefineModus) {
-    setRefiningIndex(index);
+  async function handleRefineUnterziel(
+    zi: number,
+    ui: number,
+    modus: RefineModus,
+    freitext?: string,
+  ) {
+    setRefiningKey(`${zi}:${ui}`);
     setError(null);
     try {
-      const res = await fetch("/api/generate-goals", {
+      const res = await fetch("/api/refine-goal", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...basePayload,
+          oberziel: ziele[zi].oberziel,
+          bisherigesZiel: ziele[zi].unterziele[ui].ziel,
           modus,
-          bezugsziel: { oberziel: ziele[index].oberziel },
+          freitext,
+          alterHalbjahre,
+          merkmale,
+          beobachtung: beobachtung || undefined,
+          codes: auswahl.map((a) => a.code),
         }),
       });
-      const data = (await res.json()) as { ziele?: Foerderziel[]; error?: string };
-      if (!res.ok || data.error) {
+      const data = (await res.json()) as {
+        unterziel?: Foerderziel["unterziele"][number];
+        error?: string;
+      };
+      if (!res.ok || data.error || !data.unterziel) {
         setError(data.error ?? "Verfeinern fehlgeschlagen.");
         return;
       }
-      const neu = data.ziele?.[0];
-      if (neu) {
-        onZieleChange(ziele.map((z, i) => (i === index ? neu : z)));
-      }
+      const neu = data.unterziel;
+      onZieleChange(
+        ziele.map((z, i) =>
+          i === zi
+            ? { ...z, unterziele: z.unterziele.map((u, j) => (j === ui ? neu : u)) }
+            : z,
+        ),
+      );
     } catch {
       setError("Netzwerkfehler. Bitte Verbindung prüfen und erneut versuchen.");
     } finally {
-      setRefiningIndex(null);
+      setRefiningKey(null);
     }
   }
 
   function handleRemove(index: number) {
-    onZieleChange(ziele.filter((_, i) => i !== index));
+    const neueZiele = ziele.filter((_, i) => i !== index);
+    onZieleChange(neueZiele);
+    setSelected(allSelectionKeys(neueZiele));
+  }
+
+  function toggleSelect(key: string) {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
+  function exportText(): string {
+    const list = exportScope === "komplett" ? ziele : filterSelected(ziele, selected);
+    return zieleToText(list);
   }
 
   async function handleCopy() {
+    const text = exportText();
+    if (!text) {
+      setError("Bitte mindestens ein Ziel für den Export auswählen.");
+      return;
+    }
     try {
-      await navigator.clipboard.writeText(zieleToText(ziele));
+      await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -120,7 +189,12 @@ export default function StepZiele({
   }
 
   function handleDownload() {
-    const blob = new Blob([zieleToText(ziele)], { type: "text/plain;charset=utf-8" });
+    const text = exportText();
+    if (!text) {
+      setError("Bitte mindestens ein Ziel für den Export auswählen.");
+      return;
+    }
+    const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -128,6 +202,8 @@ export default function StepZiele({
     a.click();
     URL.revokeObjectURL(url);
   }
+
+  const selectedCount = selected.size;
 
   return (
     <div className="space-y-5">
@@ -185,32 +261,65 @@ export default function StepZiele({
             <GoalCard
               key={i}
               ziel={z}
-              busy={refiningIndex === i}
-              onRefine={(modus) => handleRefine(i, modus)}
+              zielIndex={i}
+              selected={selected}
+              onToggleSelect={toggleSelect}
+              onRefineUnterziel={(ui, modus, freitext) =>
+                handleRefineUnterziel(i, ui, modus, freitext)
+              }
+              busyUnterziel={
+                refiningKey?.startsWith(`${i}:`)
+                  ? Number(refiningKey.split(":")[1])
+                  : null
+              }
               onRemove={() => handleRemove(i)}
             />
           ))}
 
           {/* Export */}
-          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-            <span className="text-sm font-medium text-gray-700">Export:</span>
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-100"
-            >
-              {copied ? "✓ Kopiert" : "In Zwischenablage kopieren"}
-            </button>
-            <button
-              type="button"
-              onClick={handleDownload}
-              className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-100"
-            >
-              Als .txt herunterladen
-            </button>
-            <span className="text-xs text-gray-400">
-              (Text – PDF entsteht extern im größeren Dokument)
-            </span>
+          <div className="space-y-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+              <span className="font-medium text-gray-700">Export-Umfang:</span>
+              <label className="flex cursor-pointer items-center gap-1.5 text-gray-700">
+                <input
+                  type="radio"
+                  name="exportScope"
+                  checked={exportScope === "auswahl"}
+                  onChange={() => setExportScope("auswahl")}
+                  className="h-4 w-4"
+                />
+                Ausgewählte Ziele ({selectedCount})
+              </label>
+              <label className="flex cursor-pointer items-center gap-1.5 text-gray-700">
+                <input
+                  type="radio"
+                  name="exportScope"
+                  checked={exportScope === "komplett"}
+                  onChange={() => setExportScope("komplett")}
+                  className="h-4 w-4"
+                />
+                Kompletter Förderplan
+              </label>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={handleCopy}
+                className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-100"
+              >
+                {copied ? "✓ Kopiert" : "In Zwischenablage kopieren"}
+              </button>
+              <button
+                type="button"
+                onClick={handleDownload}
+                className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 transition-colors hover:bg-gray-100"
+              >
+                Als .txt herunterladen
+              </button>
+              <span className="text-xs text-gray-400">
+                (Text – PDF entsteht extern im größeren Dokument)
+              </span>
+            </div>
           </div>
         </div>
       )}

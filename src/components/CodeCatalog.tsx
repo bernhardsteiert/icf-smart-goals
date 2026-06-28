@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import type { IcfCode, Hauptbereich } from "@/lib/types";
 import { QUALIFIER_LABELS } from "@/lib/format";
+import { getConceptCodesForQuery } from "@/lib/icf";
 
 // Überschriften der ICF-Kapitel-Abschnitte.
 const CHAPTER_LABELS: Record<string, string> = {
@@ -56,8 +57,15 @@ export default function CodeCatalog({
   const q = search.toLowerCase().trim();
   const searchActive = q.length > 0;
 
+  // Verwandte Codes aus dem Konzept-Thesaurus (semantischere Suche).
+  const conceptCodes = useMemo(
+    () => (searchActive ? getConceptCodesForQuery(q) : new Set<string>()),
+    [q, searchActive],
+  );
+
   const matches = (code: IcfCode) =>
     !searchActive ||
+    conceptCodes.has(code.code) ||
     code.code.toLowerCase().includes(q) ||
     code.title.toLowerCase().includes(q) ||
     code.description.toLowerCase().includes(q) ||

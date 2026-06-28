@@ -53,7 +53,6 @@ export type SmartUnterziel = {
 export type Foerderziel = {
   oberziel: string;
   bereich: string;
-  zeithorizont: string;
   abgeleitetAus: string[];
   unterziele: SmartUnterziel[];
 };

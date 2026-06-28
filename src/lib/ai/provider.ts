@@ -30,12 +30,32 @@ export type NextStepInput = {
   alterHalbjahre: number;
 };
 
+export type RefineModus =
+  | "einfacher"
+  | "ambitionierter"
+  | "umformulieren"
+  | "elterngerecht"
+  | "freitext";
+
+export type RefineUnterzielInput = {
+  oberziel: string;
+  bisherigesZiel: string; // aktueller Zielsatz, der überarbeitet werden soll
+  modus: RefineModus;
+  freitext?: string; // bei modus "freitext": gewünschte Änderung in Worten
+  alterHalbjahre: number;
+  merkmale: Record<string, unknown>;
+  beobachtung?: string;
+  // Angereichert vom Route-Handler:
+  codeDetails: { code: string; title: string; description: string }[];
+};
+
 // ── Provider-Interface ────────────────────────────────────────────────────────
 
 export interface AiProvider {
   suggestCodes(input: SuggestCodesInput): Promise<CodeVorschlag[]>;
   generateGoals(input: GenerateGoalsInput): Promise<Foerderziel[]>;
   nextStep(input: NextStepInput): Promise<SmartUnterziel>;
+  refineUnterziel(input: RefineUnterzielInput): Promise<SmartUnterziel>;
 }
 
 // ── Factory ───────────────────────────────────────────────────────────────────

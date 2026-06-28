@@ -6,8 +6,10 @@ interface Props {
   alterHalbjahre: number;
   merkmale: Record<string, unknown>;
   alleMerkmale: Merkmal[];
+  beobachtung: string;
   onAlterChange: (value: number) => void;
   onMerkmaleChange: (key: string, value: unknown) => void;
+  onBeobachtungChange: (value: string) => void;
 }
 
 function alterLabel(halbjahre: number): string {
@@ -23,8 +25,10 @@ export default function StepMerkmale({
   alterHalbjahre,
   merkmale,
   alleMerkmale,
+  beobachtung,
   onAlterChange,
   onMerkmaleChange,
+  onBeobachtungChange,
 }: Props) {
   // "alter" is handled by the dedicated dropdown; skip it in the loop
   const otherMerkmale = alleMerkmale.filter((m) => m.id !== "alter");
@@ -65,6 +69,25 @@ export default function StepMerkmale({
             onChange={(v) => onMerkmaleChange(m.id, v)}
           />
         ))}
+      </div>
+
+      {/* Freie Beobachtungen (anonym) */}
+      <div>
+        <label className="mb-1 block text-sm font-medium text-gray-700">
+          Weitere Beobachtungen{" "}
+          <span className="font-normal text-gray-400">(anonym, optional)</span>
+        </label>
+        <textarea
+          value={beobachtung}
+          onChange={(e) => onBeobachtungChange(e.target.value)}
+          rows={3}
+          placeholder="Stichworte zum Kind, die für die Ziele hilfreich sind (z.B. 'spielt gern draußen, wird bei Wechseln schnell unruhig') …"
+          className="w-full resize-y rounded-lg border border-gray-300 px-3 py-2.5 text-base focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+        />
+        <p className="mt-1 text-xs text-gray-500">
+          Bitte keine echten Namen, Geburtsdaten oder Einrichtungen – nur
+          &bdquo;das Kind&ldquo;. Fließt anonym in die Zielerstellung ein.
+        </p>
       </div>
     </div>
   );

@@ -1,4 +1,9 @@
-import type { GenerateGoalsInput, SuggestCodesInput, NextStepInput } from "./provider";
+import type {
+  GenerateGoalsInput,
+  SuggestCodesInput,
+  NextStepInput,
+  RefineUnterzielInput,
+} from "./provider";
 import { halbjahreToText } from "@/lib/format";
 
 // ── Qualifier-Bedeutungen (fließen in den User-Prompt) ────────────────────────
@@ -32,9 +37,12 @@ Regeln:
 - Jedes Unterziel ist GENAU EIN Ziel, formuliert als EIN zusammenhängender, \
 ausformulierter Satz im Feld "ziel", der ALLE SMART-Kriterien zugleich erfüllt: \
 spezifisch, messbar (konkreter, beobachtbarer Indikator), erreichbar, relevant und \
-terminiert (Zeithorizont). Schlüssele die Kriterien NICHT in Einzelfelder auf – \
-sie müssen sich aus dem einen Satz ergeben.
-- Plane realistisch für ca. ein Jahr Förderung (Richtwert 42 Therapieeinheiten).
+terminiert. Schlüssele die Kriterien NICHT in Einzelfelder auf – sie müssen sich \
+aus dem einen Satz ergeben.
+- Planungshintergrund (NICHT im Text erwähnen): ein Förderzeitraum von ca. einem \
+Jahr bzw. rund 42 Therapieeinheiten. Nutze das nur, um den Anspruch realistisch zu \
+wählen. Nenne KEINE konkreten Monats- oder Einheitenzahlen in den Zielen; formuliere \
+den Zeitbezug allgemein, z.B. "bis zum Ende des Förderzeitraums".
 - Leite Ziele ausschließlich aus den übergebenen ICF-CY-Codes, dem Alter und den \
 Merkmalen ab. Erfinde keine Testnormen, Diagnosen oder Fakten.
 - Schreibe auf Deutsch, wertschätzend und ressourcenorientiert.
@@ -136,4 +144,42 @@ export function buildNextStepUserPrompt(input: NextStepInput): string {
     `Aufgabe: Schlage ein darauf aufbauendes, schwierigeres nächstes Unterziel vor (Progression). \
 Das neue Unterziel soll auf dem Erreichten aufbauen und eine realistische nächste Entwicklungsstufe beschreiben.`,
   ].join("\n\n");
+}
+
+const REFINE_MODUS_TEXT: Record<RefineUnterzielInput["modus"], string> = {
+  einfacher: "Mache das Ziel EINFACHER / weniger anspruchsvoll.",
+  ambitionierter: "Mache das Ziel AMBITIONIERTER / anspruchsvoller.",
+  umformulieren: "Formuliere dasselbe Ziel ANDERS (gleicher Anspruch, neue Formulierung).",
+  elterngerecht: "Formuliere das Ziel ELTERNGERECHT in alltagsnaher, positiver Sprache.",
+  freitext: "Überarbeite das Ziel gemäß der gewünschten Änderung der Fachkraft.",
+};
+
+export function buildRefineUnterzielUserPrompt(input: RefineUnterzielInput): string {
+  const parts: string[] = [];
+  parts.push(`Oberziel (Richtung, bleibt gleich): "${input.oberziel}"`);
+  parts.push(`Zu überarbeitendes Unterziel: "${input.bisherigesZiel}"`);
+
+  const codeLines = input.codeDetails
+    .map((d) => `- ${d.code} ${d.title}: ${d.description}`)
+    .join("\n");
+  if (codeLines) parts.push(`Bezug ICF-CY-Codes:\n${codeLines}`);
+
+  parts.push(`Alter: ${halbjahreToText(input.alterHalbjahre)}`);
+  parts.push(`Merkmale: ${merkmaleToText(input.merkmale)}`);
+  if (input.beobachtung?.trim()) {
+    parts.push(`Beobachtung (anonym): ${input.beobachtung.trim()}`);
+  }
+
+  parts.push(`Änderungswunsch: ${REFINE_MODUS_TEXT[input.modus]}`);
+  if (input.modus === "freitext" && input.freitext?.trim()) {
+    parts.push(`Konkrete Vorgabe der Fachkraft: ${input.freitext.trim()}`);
+  }
+
+  parts.push(
+    `Gib GENAU EIN überarbeitetes Unterziel als JSON zurück (Feld "ziel" als ein \
+ausformulierter SMART-Satz, der alle SMART-Kriterien zugleich erfüllt). Behalte \
+den Status "offen", außer es ist anders sinnvoll.`,
+  );
+
+  return parts.join("\n\n");
 }

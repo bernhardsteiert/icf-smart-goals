@@ -1,0 +1,133 @@
+{
+  "_hinweis": "Konzept-Thesaurus für die Stichwortsuche: Ein eingegebener Alltagsbegriff (begriffe) zeigt alle fachlich verwandten ICF-Codes (codes), auch wenn der Begriff nicht im Code-Namen steht. Frei erweiterbar.",
+  "konzepte": [
+    {
+      "begriffe": ["selbstbewusstsein", "selbstvertrauen", "selbstwert", "selbstsicherheit", "selbstsicher"],
+      "codes": ["b122", "b125", "b126", "d250", "d710", "d720"]
+    },
+    {
+      "begriffe": ["entspannung", "ruhe", "beruhigen", "anspannung", "ausgeglichenheit"],
+      "codes": ["b134", "b147", "b152", "d240", "d250"]
+    },
+    {
+      "begriffe": ["stress", "überforderung", "belastung", "reizüberflutung"],
+      "codes": ["b152", "b147", "d240", "d250"]
+    },
+    {
+      "begriffe": ["wut", "aggression", "aggressiv", "schlagen", "beißen", "impulsiv", "impulskontrolle", "ausraster"],
+      "codes": ["b152", "b147", "d250", "d720"]
+    },
+    {
+      "begriffe": ["angst", "ängstlich", "unsicher", "schüchtern", "zurückhaltend", "trennungsangst"],
+      "codes": ["b152", "b126", "d710", "d720", "d240"]
+    },
+    {
+      "begriffe": ["trotz", "frustration", "frust", "grenzen", "regeln", "nein"],
+      "codes": ["d250", "b152", "d240", "d720"]
+    },
+    {
+      "begriffe": ["gefühle", "emotionen", "emotional", "stimmung", "gefühlsregulation"],
+      "codes": ["b152", "d250", "b126"]
+    },
+    {
+      "begriffe": ["selbstregulation", "regulation", "steuern", "selbststeuerung", "impuls"],
+      "codes": ["d250", "b152", "b164", "b147"]
+    },
+    {
+      "begriffe": ["konzentration", "aufmerksamkeit", "fokus", "ablenkbar", "unaufmerksam", "ausdauer"],
+      "codes": ["b140", "d160", "d161", "b147", "d210"]
+    },
+    {
+      "begriffe": ["motivation", "antrieb", "neugier", "durchhalten", "dranbleiben"],
+      "codes": ["b130", "b125", "d161", "d210"]
+    },
+    {
+      "begriffe": ["lernen", "merken", "gedächtnis", "konzepte", "begreifen", "verstehen"],
+      "codes": ["b117", "b144", "d130", "d131", "d132", "d137", "d163"]
+    },
+    {
+      "begriffe": ["problemlösen", "planen", "denken", "vorausschauen", "exekutiv"],
+      "codes": ["b164", "b160", "d163", "d137"]
+    },
+    {
+      "begriffe": ["sprache", "sprechen", "wortschatz", "reden", "kommunikation", "verständigung", "kommunizieren"],
+      "codes": ["b167", "b310", "b320", "d310", "d315", "d330", "d331", "d335", "d350"]
+    },
+    {
+      "begriffe": ["aussprache", "artikulation", "stottern", "lautbildung", "deutlich"],
+      "codes": ["b320", "b310", "d330"]
+    },
+    {
+      "begriffe": ["mehrsprachigkeit", "zweisprachig", "sprachbarriere", "deutsch lernen"],
+      "codes": ["b167", "d310", "d330", "d350"]
+    },
+    {
+      "begriffe": ["zuhören", "hören", "lauschen"],
+      "codes": ["d115", "d310"]
+    },
+    {
+      "begriffe": ["blickkontakt", "zuschauen", "schauen", "anschauen"],
+      "codes": ["d110", "d335"]
+    },
+    {
+      "begriffe": ["nachahmen", "imitieren", "nachmachen"],
+      "codes": ["d130"]
+    },
+    {
+      "begriffe": ["motorik", "bewegung", "grobmotorik", "körperbeherrschung", "geschicklichkeit"],
+      "codes": ["b760", "b730", "b735", "d410", "d415", "d450", "d445"]
+    },
+    {
+      "begriffe": ["feinmotorik", "greifen", "malen", "stift", "basteln", "schneiden", "grafomotorik"],
+      "codes": ["d440", "d445", "d145", "b760"]
+    },
+    {
+      "begriffe": ["gleichgewicht", "balance", "koordination", "geschick"],
+      "codes": ["b235", "b260", "b760"]
+    },
+    {
+      "begriffe": ["wahrnehmung", "sinne", "sensorik", "reizverarbeitung", "taktil", "tastsinn", "empfindlich"],
+      "codes": ["b156", "b235", "b260", "b265", "b270"]
+    },
+    {
+      "begriffe": ["schlaf", "einschlafen", "durchschlafen", "müde", "schlafrhythmus"],
+      "codes": ["b134", "b130"]
+    },
+    {
+      "begriffe": ["selbstständigkeit", "selbständigkeit", "alltag", "alltagshandeln", "selber machen"],
+      "codes": ["d510", "d520", "d530", "d540", "d550", "d560", "d230"]
+    },
+    {
+      "begriffe": ["anziehen", "ausziehen", "kleiden", "schuhe", "knöpfe"],
+      "codes": ["d540"]
+    },
+    {
+      "begriffe": ["essen", "trinken", "besteck", "kauen", "füttern"],
+      "codes": ["d550", "d560"]
+    },
+    {
+      "begriffe": ["sauberkeit", "toilette", "windel", "trocken", "sauber werden"],
+      "codes": ["d530", "d510"]
+    },
+    {
+      "begriffe": ["spielen", "spiel", "rollenspiel", "fantasie", "spielverhalten"],
+      "codes": ["d880", "d131", "d137"]
+    },
+    {
+      "begriffe": ["sozial", "sozialverhalten", "kontakt", "freunde", "gruppe", "teilen", "miteinander", "kontaktaufnahme"],
+      "codes": ["d710", "d720", "d750", "d760", "b122", "e320", "e325"]
+    },
+    {
+      "begriffe": ["familie", "eltern", "bindung", "geschwister", "zuhause"],
+      "codes": ["d760", "e310", "e315", "e410"]
+    },
+    {
+      "begriffe": ["routine", "struktur", "tagesablauf", "übergänge", "wechsel"],
+      "codes": ["d230", "d220", "d240"]
+    },
+    {
+      "begriffe": ["schule", "vorschule", "schulreife", "lesen", "schreiben", "rechnen"],
+      "codes": ["d166", "d170", "d172", "d145", "b117"]
+    }
+  ]
+}

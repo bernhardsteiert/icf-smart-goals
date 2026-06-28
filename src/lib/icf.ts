@@ -2,6 +2,7 @@ import rawIcf from "@/data/icf-cy.json";
 import rawMasken from "@/data/masken.json";
 import rawTherapieformen from "@/data/therapieformen.json";
 import rawMerkmale from "@/data/merkmale.json";
+import rawSynonyme from "@/data/synonyme.json";
 import type { IcfCode, Maske, Therapieform, Merkmal, Hauptbereich } from "./types";
 
 // ── Codes ─────────────────────────────────────────────────────────────────────
@@ -55,4 +56,27 @@ const ALL_MERKMALE: Merkmal[] = rawMerkmale as Merkmal[];
 
 export function getAllMerkmale(): Merkmal[] {
   return ALL_MERKMALE;
+}
+
+// ── Konzept-Suche (Synonym-Thesaurus) ─────────────────────────────────────────
+
+type Konzept = { begriffe: string[]; codes: string[] };
+const ALL_KONZEPTE: Konzept[] = (rawSynonyme as { konzepte: Konzept[] }).konzepte;
+
+/**
+ * Liefert zu einem Suchbegriff fachlich verwandte Codes über den Thesaurus –
+ * z.B. "Selbstbewusstsein" → b122, b125, d250 …, auch wenn der Begriff nicht
+ * im Code-Namen vorkommt. Trefferlogik bewusst tolerant (Teil-/Wortstamm).
+ */
+export function getConceptCodesForQuery(query: string): Set<string> {
+  const q = query.toLowerCase().trim();
+  const result = new Set<string>();
+  if (q.length < 3) return result;
+  for (const konzept of ALL_KONZEPTE) {
+    const hit = konzept.begriffe.some(
+      (b) => b.includes(q) || q.includes(b),
+    );
+    if (hit) konzept.codes.forEach((c) => result.add(c));
+  }
+  return result;
 }
