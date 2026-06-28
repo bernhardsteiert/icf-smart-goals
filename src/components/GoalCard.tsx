@@ -38,8 +38,34 @@ export default function GoalCard({
     <div className="rounded-lg border border-gray-200 bg-white shadow-sm">
       {/* Header */}
       <div className="border-b border-gray-100 px-5 py-4">
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <h3 className="text-base font-semibold text-gray-900">{ziel.oberziel}</h3>
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="flex-1 text-base font-semibold text-gray-900">
+            {ziel.oberziel}
+          </h3>
+          <button
+            type="button"
+            onClick={onRemove}
+            aria-label="Ganzes Oberziel verwerfen"
+            title="Ganzes Oberziel verwerfen"
+            className="-mr-1 -mt-1 flex-shrink-0 rounded-full p-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M3 6h18" />
+              <path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" />
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+              <path d="M10 11v6M14 11v6" />
+            </svg>
+          </button>
+        </div>
+        <div className="mt-1.5">
           <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs text-blue-700">
             {ziel.bereich}
           </span>
@@ -74,17 +100,6 @@ export default function GoalCard({
             />
           );
         })}
-      </div>
-
-      {/* Karte verwerfen */}
-      <div className="flex justify-end border-t border-gray-100 px-5 py-2">
-        <button
-          type="button"
-          onClick={onRemove}
-          className="rounded-full px-3 py-1 text-xs text-red-600 transition-colors hover:bg-red-50"
-        >
-          Ganzes Oberziel verwerfen
-        </button>
       </div>
     </div>
   );

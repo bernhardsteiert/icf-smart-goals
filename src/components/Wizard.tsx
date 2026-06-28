@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useFallState } from "@/lib/store";
 import {
   getAllTherapieformen,
@@ -30,35 +30,15 @@ const THERAPIEFORMEN = getAllTherapieformen();
 const ALL_CODES = getAllCodes();
 const ALL_MERKMALE = getAllMerkmale();
 
-const DISCLAIMER_KEY = "icf-disclaimer-accepted";
-
 export default function Wizard() {
   const { state, update, updateMerkmale, resetFall, hydrated } = useFallState();
   const [step, setStep] = useState(1);
 
-  // Disclaimer-Einstieg: einmalige Bestätigung, in localStorage gemerkt.
+  // Disclaimer-Einstieg: bewusst NICHT persistiert – erscheint bei jedem Start
+  // (frischer Seitenaufruf) und bei jedem neuen Fall erneut.
   const [accepted, setAccepted] = useState(false);
-  const [acceptHydrated, setAcceptHydrated] = useState(false);
 
-  useEffect(() => {
-    // Einmalige Hydration aus localStorage (Wert steht erst clientseitig fest).
-    try {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setAccepted(localStorage.getItem(DISCLAIMER_KEY) === "1");
-    } catch {
-      // localStorage nicht verfügbar
-    }
-    setAcceptHydrated(true);
-  }, []);
-
-  const acceptDisclaimer = () => {
-    setAccepted(true);
-    try {
-      localStorage.setItem(DISCLAIMER_KEY, "1");
-    } catch {}
-  };
-
-  if (!hydrated || !acceptHydrated) {
+  if (!hydrated) {
     return (
       <div className="flex flex-1 items-center justify-center text-gray-400">
         Laden …
@@ -67,7 +47,7 @@ export default function Wizard() {
   }
 
   if (!accepted) {
-    return <DisclaimerIntro onAccept={acceptDisclaimer} />;
+    return <DisclaimerIntro onAccept={() => setAccepted(true)} />;
   }
 
   const activeTherapieformId = state.therapieformen[0] ?? "heilpaedagogik";
@@ -79,6 +59,7 @@ export default function Wizard() {
     if (window.confirm("Aktuellen Fall verwerfen und neu beginnen?")) {
       resetFall();
       setStep(1);
+      setAccepted(false); // Disclaimer beim neuen Fall erneut zeigen
     }
   };
 
