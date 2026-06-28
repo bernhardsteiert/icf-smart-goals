@@ -1,4 +1,4 @@
-import type { Foerderziel, IcfSelection, SmartUnterziel } from "./types";
+import type { CodeVorschlag, Foerderziel, IcfSelection, SmartUnterziel } from "./types";
 import type { RefineModus } from "./ai/provider";
 
 const NETWORK_ERROR = "Netzwerkfehler. Bitte Verbindung prüfen und erneut versuchen.";
@@ -45,6 +45,37 @@ export type RefineUnterzielClientInput = {
   beobachtung?: string;
   codes: string[];
 };
+
+export type SuggestCodesClientInput = {
+  therapieformen: string[];
+  vorgespraechCodes: string[];
+  merkmale: Record<string, unknown>;
+  beobachtung?: string;
+};
+
+// Schlägt passende ICF-CY-Codes vor. Wirft Error mit nutzbarer Meldung.
+export async function requestSuggestCodes(
+  input: SuggestCodesClientInput,
+): Promise<CodeVorschlag[]> {
+  let res: Response;
+  try {
+    res = await fetch("/api/suggest-codes", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+  } catch {
+    throw new Error(NETWORK_ERROR);
+  }
+  const data = (await res.json().catch(() => ({}))) as {
+    vorschlaege?: CodeVorschlag[];
+    error?: string;
+  };
+  if (!res.ok || data.error) {
+    throw new Error(data.error ?? "Code-Vorschläge konnten nicht geladen werden.");
+  }
+  return data.vorschlaege ?? [];
+}
 
 // Überarbeitet ein einzelnes Unterziel. Wirft Error mit nutzbarer Meldung.
 export async function requestRefine(

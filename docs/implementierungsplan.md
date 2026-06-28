@@ -6,8 +6,7 @@
 **Ziel des MVP:** Lokale Webapp (Heilpädagogik), die (A) ICF-CY-Codes überprüfen/
 anpassen und (B) SMART-Förderziele (Oberziele + ausformulierte SMART-Unterziele)
 vorschlägt – privacy-first, KI über austauschbaren Provider (Default Gemini Flash).
-**Aktueller Stand:** M0–M5 + Feedback-Iterationen umgesetzt; offen sind **M6–M8**
-(siehe §10).
+**Aktueller Stand:** M0–M6 umgesetzt; offen sind **M7–M8** (siehe §10).
 
 Dieser Plan ist so geschnitten, dass er **Meilenstein für Meilenstein** abgearbeitet
 werden kann. Jeder Meilenstein hat ein klares Ergebnis und Akzeptanzkriterien.
@@ -395,7 +394,7 @@ vs. kompletter Plan). Button „In Zwischenablage kopieren" + „Als .txt herunt
 > Routen und `CodeCatalog.tsx` / `GoalCard.tsx` als UI-Vorlagen. Nach jeder
 > Änderung: `npm run lint` und `npm run build` müssen fehlerfrei sein.
 
-### Abgeschlossen (M0–M5 + Feedback-Iterationen)
+### Abgeschlossen (M0–M6)
 
 - **M0–M5:** Projektgerüst, Stammdaten/Typen, Wizard + `localStorage`,
   Code-Maske, AI-Layer + `/api/generate-goals`, Zielanzeige/Verfeinern/Export.
@@ -411,10 +410,19 @@ vs. kompletter Plan). Button „In Zwischenablage kopieren" + „Als .txt herunt
   - **Freie Beobachtung** in Schritt 4; **Disclaimer-Einstiegsseite** (bei jedem
     Start/neuen Fall); **Ergebnisse auf eigener Seite** (Schritt 6).
   - KI-Robustheit (`thinkingBudget: 0`, `maxOutputTokens`, spezifische Fehler).
+- **M6 (umgesetzt 2026-06-28):**
+  - Route `src/app/api/suggest-codes/route.ts`: validiert Request (zod), baut
+    `catalogCodes` aus `getAllCodes()`, filtert KI-Antwort auf bekannte Codes.
+  - Client-Helfer `requestSuggestCodes` in `src/lib/goals-client.ts`.
+  - UI in `StepCodes.tsx`: optionales Stichwortfeld + Button „Passende Codes
+    vorschlagen" (Ladezustand, Fehleranzeige, Klarnamen-Hinweis); Vorschläge als
+    annehmbare Karten (Code, Titel, Begründung, ggf. Qualifier-Badge); „Übernehmen"
+    fügt Code mit `quelle: "fachkraft"` und ggf. `empfohlenerQualifier` ein.
+  - Wizard gibt `therapieformen` + `merkmale` an `StepCodes` weiter.
 
 ---
 
-### M6 – KI-Code-Vorschläge (`/api/suggest-codes`)
+### M6 – KI-Code-Vorschläge (`/api/suggest-codes`) ✅ ABGESCHLOSSEN
 
 **Ziel:** In Schritt 3 schlägt die KI passende Katalog-Codes vor (Aufgabe A).
 

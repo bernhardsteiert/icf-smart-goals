@@ -18,9 +18,9 @@ ausformulierten SMART-Unterzielen) als Entwurf zu erhalten.
 > - **Disclaimer als Einstiegsseite**; **freie Beobachtung in Schritt 4**;
 >   Ergebnisse auf **eigener Seite** (§6).
 >
-> Offen: KI-Code-Vorschläge (M6) und Folgestufen (M7), siehe §12 und
-> `docs/implementierungsplan.md` §10. Bei fachlichen Änderungen bitte dieses
-> Dokument mitführen.
+> M6 (KI-Code-Vorschläge) ist umgesetzt (2026-06-28). Offen: Folgestufen (M7)
+> und Restfeinschliff (M8), siehe `docs/implementierungsplan.md` §10. Bei
+> fachlichen Änderungen bitte dieses Dokument mitführen.
 
 ## 0. Praxis-Kontext (warum die App so aussieht)
 
@@ -193,7 +193,7 @@ nur optional. **Vorgeschaltet:** ein **Disclaimer-Einstieg** mit Button
      **auf Klick** auf den Code (sonst nur Code + Name).
    - **Suche** (semantisch, §6a) über alle Codes.
    - *(optional)* **Schweregrad 0–4** pro Code per Schieber.
-   - *(geplant, M6)* **„Passende Codes vorschlagen"** → KI ergänzt/bestätigt.
+   - *(M6, umgesetzt)* **„Passende Codes vorschlagen"** → KI ergänzt/bestätigt.
 4. **Alter & Merkmale** – Alter in **Halbjahrschritten**; wenige
    nicht-identifizierende Merkmale (§6b); **freies Beobachtungsfeld** (anonym,
    Stichworte) mit Klarnamen-Hinweis.
@@ -355,7 +355,7 @@ Anweisung der Fachkraft). Rückgabe: **genau ein** überarbeitetes `SmartUnterzi
   Zielentwurf (Ober-/Unterziele) + Verfeinern pro Unterziel, Proxy mit
   Provider-Adapter (Gemini Flash), Kategorien-Maske + semantische Suche,
   kuratierter ICF-CY-Auszug (Kapitel b/d/e), Alter in Halbjahren, lokal +
-  Text-Export. **Umgesetzt** (außer M6 Code-Vorschläge, M7 Folgestufen).
+  Text-Export, KI-Code-Vorschläge (M6). **Umgesetzt** (außer M7 Folgestufen).
 - **Phase 2:** Weitere Therapieformen (Logo/Physio/Ergo/Systemische
   Familientherapie als Daten/Masken), Ziel-Bibliothek/Vorlagen, Feedback
   verfeinern, ggf. Schweregrad nach Team-Klärung.

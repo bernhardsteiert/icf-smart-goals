@@ -122,6 +122,8 @@ export default function Wizard() {
                 allCodes={ALL_CODES}
                 auswahl={state.auswahl}
                 vorgespraechCodes={state.vorgespraechCodes}
+                therapieformen={state.therapieformen}
+                merkmale={state.merkmale}
                 onChange={(auswahl) => update("auswahl", auswahl)}
               />
             )}
