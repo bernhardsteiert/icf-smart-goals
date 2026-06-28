@@ -18,8 +18,14 @@ ausformulierten SMART-Unterzielen) als Entwurf zu erhalten.
 > - **Disclaimer als Einstiegsseite**; **freie Beobachtung in Schritt 4**;
 >   Ergebnisse auf **eigener Seite** (§6).
 >
-> **MVP vollständig umgesetzt** (M0–M8, Stand 2026-06-28). Alle Meilensteine
-> abgeschlossen. Bei fachlichen Änderungen bitte dieses Dokument mitführen.
+> **MVP vollständig umgesetzt** (M0–M8, Stand 2026-06-28). Post-M8 UX-Korrekturen
+> abgeschlossen (gleichmäßige Schrittanzeige, eigener Bestätigungs-Dialog, Bounce-Fix
+> im CollapsingHeader teilweise). Ein bekanntes UI-Problem offen: iOS-Scroll-Jitter
+> → Implementierungsplan §14.
+>
+> **Wichtig M7:** `offen/erreicht`-Toggle und „Nächste Stufe vorschlagen" wurden aus
+> der UI entfernt, da sie erst mit Datenbankpersistenz (Phase 3) sinnvoll sind.
+> Server-Route `/api/next-step` und Client-Helfer `requestNextStep` bleiben erhalten.
 
 ## 0. Praxis-Kontext (warum die App so aussieht)
 
@@ -203,7 +209,7 @@ nur optional. **Vorgeschaltet:** ein **Disclaimer-Einstieg** mit Button
    SMART-Unterzielen (§7). Pro **Unterziel**:
    - **Verfeinern**: *einfacher · ambitionierter · anders formulieren · für
      Eltern* **plus Freitext** („eigene Änderung"). Wirkt nur auf das Unterziel.
-   - *(M7, umgesetzt)* Unterziel als **erreicht** markieren → **nächste Stufe**.
+   - *(M7, Server vorhanden; UI erst mit Phase 3 / DB sinnvoll)* Unterziel als **erreicht** markieren → **nächste Stufe**.
    - **Begründung** auf Klick einblendbar.
    Pro Oberziel: Mülleimer-Icon zum Verwerfen, „Ziele neu vorschlagen".
    **Export**: einzelne Unterziele per Checkbox auswählen; Umfang „ausgewählte
@@ -354,7 +360,8 @@ Anweisung der Fachkraft). Rückgabe: **genau ein** überarbeitetes `SmartUnterzi
   Zielentwurf (Ober-/Unterziele) + Verfeinern pro Unterziel, Proxy mit
   Provider-Adapter (Gemini Flash), Kategorien-Maske + semantische Suche,
   kuratierter ICF-CY-Auszug (Kapitel b/d/e), Alter in Halbjahren, lokal +
-  Text-Export, KI-Code-Vorschläge (M6), Folgestufen (M7). **Umgesetzt.**
+  Text-Export, KI-Code-Vorschläge (M6). Server-Route für Folgestufen (M7)
+  vorhanden, UI deaktiviert bis Phase 3. **Umgesetzt.**
 - **Phase 2:** Weitere Therapieformen (Logo/Physio/Ergo/Systemische
   Familientherapie als Daten/Masken), Ziel-Bibliothek/Vorlagen, Feedback
   verfeinern, ggf. Schweregrad nach Team-Klärung.
@@ -373,7 +380,7 @@ interface AiProvider {
   suggestCodes(input: CodeInput): Promise<CodeVorschlag[]>;      // geplant (M6)
   generateGoals(input: GoalInput): Promise<Foerderziel[]>;       // umgesetzt
   refineUnterziel(input: RefineInput): Promise<SmartUnterziel>;  // umgesetzt
-  nextStep(input: NextStepInput): Promise<SmartUnterziel>;       // Gerüst, UI geplant (M7)
+  nextStep(input: NextStepInput): Promise<SmartUnterziel>;       // Route vorhanden (M7); UI erst mit Phase 3
 }
 
 // Auswahl per Env, z.B. AI_PROVIDER=gemini | openai

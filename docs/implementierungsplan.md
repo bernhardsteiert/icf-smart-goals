@@ -6,7 +6,7 @@
 **Ziel des MVP:** Lokale Webapp (Heilpädagogik), die (A) ICF-CY-Codes überprüfen/
 anpassen und (B) SMART-Förderziele (Oberziele + ausformulierte SMART-Unterziele)
 vorschlägt – privacy-first, KI über austauschbaren Provider (Default Gemini Flash).
-**Aktueller Stand:** M0–M8 vollständig umgesetzt – MVP abgeschlossen.
+**Aktueller Stand:** M0–M8 vollständig umgesetzt. Post-M8 UX-Korrekturen abgeschlossen (Stand 2026-06-28). Ein bekanntes UI-Problem ist noch offen: iOS-Scroll-Jitter im CollapsingHeader (→ §14).
 
 Dieser Plan ist so geschnitten, dass er **Meilenstein für Meilenstein** abgearbeitet
 werden kann. Jeder Meilenstein hat ein klares Ergebnis und Akzeptanzkriterien.
@@ -83,6 +83,7 @@ src/
     StepZiele.tsx             # Schritt 6: Ergebnisse, Verfeinern, Export
     CodeCatalog.tsx           # Suche + ausklappbare Kategorien + Desc-auf-Klick + Schweregrad-Slider
     SelectionSummary.tsx      # Zusammenfassung der Auswahl (in Schritt 5)
+    ConfirmDialog.tsx         # Eigener Bestätigungs-Dialog (ersetzt window.confirm)
     GoalCard.tsx              # Oberziel-Karte; Verfeinern + Export-Checkbox je Unterziel
   lib/
     types.ts                  # zentrale Typen (siehe §3)
@@ -419,16 +420,15 @@ vs. kompletter Plan). Button „In Zwischenablage kopieren" + „Als .txt herunt
     annehmbare Karten (Code, Titel, Begründung, ggf. Qualifier-Badge); „Übernehmen"
     fügt Code mit `quelle: "fachkraft"` und ggf. `empfohlenerQualifier` ein.
   - Wizard gibt `therapieformen` + `merkmale` an `StepCodes` weiter.
-- **M7 (umgesetzt 2026-06-28):**
-  - Route `src/app/api/next-step/route.ts`: validiert Request (zod), konvertiert
-    `codes: string[]` → `IcfSelection[]`, ruft `getProvider().nextStep()` auf.
-  - Client-Helfer `requestNextStep` in `src/lib/goals-client.ts`.
-  - UI in `GoalCard.tsx`: „○ Offen / ✓ Erreicht"-Toggle pro Unterziel; bei
-    `status === "erreicht"` Button „→ Nächste Stufe vorschlagen" (Ladespinner je
-    Unterziel). Neues Unterziel wird an dasselbe Oberziel angehängt und automatisch
-    für den Export vorausgewählt. Verfeinern-Panel blendet bei erreichtem Ziel aus.
-  - `StepZiele.tsx`: `handleToggleStatus` + `handleNextStep` + `nextStepKey`-State;
-    Status-Änderung wird über `onZieleChange` in localStorage persistiert.
+- **M7 (umgesetzt 2026-06-28, UI danach entfernt):**
+  - Route `src/app/api/next-step/route.ts` und Client-Helfer `requestNextStep`
+    bleiben erhalten (serverseitiger Code vollständig).
+  - **UI wurde nach M8 wieder entfernt** (Toggle + „Nächste Stufe"-Button), weil
+    offen/erreicht-Status und Folgestufen erst Sinn ergeben, wenn alte Fälle aus
+    einer Datenbank wieder einlesbar sind. Sobald Phase 3 (zentrale Speicherung,
+    §10 Spec) umgesetzt ist, kann die UI direkt an die bestehende Route angebunden
+    werden. (Ticket: GoalCard + StepZiele erneut um onToggleStatus / onNextStep
+    erweitern.)
 - **M8 (umgesetzt 2026-06-28):**
   - `src/lib/privacy.ts`: `detectsKlarname(text)` – heuristische Pattern-Erkennung
     (Klarname + Schlüsselwort, Datumsformat, Geburtsjahresbereich 2015–2026).
@@ -439,6 +439,20 @@ vs. kompletter Plan). Button „In Zwischenablage kopieren" + „Als .txt herunt
     persistiert via `onEditZiel`); `aria-expanded`/`aria-pressed`/`aria-label`/
     `aria-hidden` an allen relevanten Buttons; Spinner mit `aria-label`.
   - `StepZiele.tsx`: `handleEditZiel` + prop `onEditZiel` an GoalCard.
+- **Post-M8 UX-Korrekturen (2026-06-28):**
+  - Blaue Zusammenfassungsboxen in Schritt 2 (Chip-Leiste „Stand Vorgespräch") und
+    Schritt 3 (Zähler „X Codes ausgewählt") entfernt – der CodeCatalog darunter
+    zeigt den Auswahlstand bereits vollständig.
+  - `StepIndicator` (`Wizard.tsx`): Connectors werden jetzt auf allen Items gerendert,
+    beim ersten und letzten Item jedoch `invisible` – dadurch sitzen alle Kreise
+    zentriert in ihren Zellen und die Abstände sind gleichmäßig.
+  - `window.confirm()` ersetzt durch eigene `ConfirmDialog`-Komponente
+    (`src/components/ConfirmDialog.tsx`): Eigenes Modal mit Backdrop, passend zum
+    App-Design (iOS-systemdialog sieht veraltet aus und kann nicht gestylt werden).
+  - `CollapsingHeader.tsx`: `scrollY` wird im Scroll-Handler auf `[0, maxScrollable]`
+    geclampt (inline berechnet via `scrollHeight - innerHeight`). Verhindert, dass
+    iOS-Rubber-Band-Bounce die Animation auslöst. **Hinweis:** Auf kurzen Seiten
+    besteht weiterhin leichtes Jitter bei Bounce am unteren Rand – siehe §14.
 
 ---
 
@@ -570,8 +584,81 @@ GEMINI_MODEL=gemini-2.5-flash
 
 - Kompletter Flow Schritt 1 → Ziele → Export lauffähig (Heilpädagogik).
 - Code-Überprüfung (manuell + optional KI-Vorschlag), Ziele mit Ober-/Unterzielen,
-  Verfeinern, Folgestufen, Plaintext-Export.
+  Verfeinern, Plaintext-Export.
 - Kein API-Key im Client; keine personenbezogenen Daten an die KI.
 - Daten aus `data/*.json`, KI hinter `AiProvider`.
 - README mit Setup, Env, Datenschutz-Hinweis und „Entwurfshilfe"-Disclaimer.
 - Deploybar auf Vercel (EU-Region).
+
+---
+
+## 14. Bekannte Probleme / Nächste Schritte
+
+### iOS-Scroll-Jitter im CollapsingHeader ← NÄCHSTER SCHRITT
+
+**Problem:**
+
+`CollapsingHeader.tsx` (Zeile 29–44) hört auf `window.scrollY` und animiert den
+Header von groß (Titel groß + Untertitel) auf kompakt (Titel klein, kein Untertitel).
+Die Animation läuft über `COLLAPSE = 72` Scroll-Pixel (`p = scrollY / 72`).
+
+Auf kurzen Seiten (z.B. Schritt 1 „Therapieform") kann das Seiten-Layout
+nahezu in den Viewport passen — `maxScrollable = scrollHeight - innerHeight` ist
+dann sehr klein (< 72 px) oder sogar 0. iOS-Safari erzeugt trotzdem einen
+**Rubber-Band-Bounce-Effekt** wenn der Nutzer am unteren oder oberen Rand
+weiter „drückt": `window.scrollY` springt kurz auf einen positiven Wert (z.B. 20)
+und schnellt dann zurück auf 0.
+
+Das führt zu sichtbarem **Zucken**: der Header beginnt kurz zu schrumpfen, schnellt
+sofort wieder zurück.
+
+**Was bisher versucht wurde (und warum es noch nicht reicht):**
+
+- **Versuch 1 (PR #21, rückgängig in PR #22):** `ResizeObserver` auf `document.body`,
+  `maxScroll` als React-State → erzeugte eine **Rückkopplungsschleife**: Header
+  kollabiert → Untertitel-Höhe ändert sich → `document.body` resized → Observer feuert →
+  `setMaxScroll` → Re-render → Header berechnet sich neu → Höhe ändert sich …
+  Machte das Zucken deutlich schlimmer.
+
+- **Versuch 2 (PR #22, aktuell):** Kein Observer, `max` inline im Scroll-Handler
+  berechnet via `document.documentElement.scrollHeight - window.innerHeight`, dann
+  `setScrollY(Math.min(Math.max(scrollY, 0), max))`. Verhindert Bounce am BODEN
+  (scrollY > max wird geclampt). **Aber:** Wenn `max` klein ist (z.B. 30), kann der
+  Nutzer durch normales Scrollen bis `scrollY = 30` kommen. Beim iOS-Bounce-Snap-back
+  fällt scrollY von 30 auf 0 — das löst `p` von 0,42 auf 0 aus: Header expandiert
+  sichtbar. Problem bleibt.
+
+**Empfohlene Lösung für den nächsten Agenten:**
+
+Änderung in `src/components/CollapsingHeader.tsx`, nur im `requestAnimationFrame`-
+Callback des Scroll-Handlers (ca. Zeile 34–38):
+
+```typescript
+raf = requestAnimationFrame(() => {
+  const max = Math.max(
+    0,
+    document.documentElement.scrollHeight - window.innerHeight,
+  );
+  // Wenn die Seite zu kurz ist, um den Header vollständig einzuklappen,
+  // Animation komplett deaktivieren — jeder Bounce würde sonst sichtbar zucken.
+  if (max < COLLAPSE) {
+    setScrollY(0);
+  } else {
+    setScrollY(Math.min(Math.max(window.scrollY, 0), max));
+  }
+});
+```
+
+**Warum das funktioniert:**
+- `max < COLLAPSE`: Header bleibt immer groß, kein Bounce kann ihn bewegen. ✓
+- `max >= COLLAPSE`: Seite ist lang genug für volle Kollaps-Animation. Scroll-Ende
+  liegt bei `max`, der weit genug vom Start entfernt ist, dass der Header-Zustand
+  beim Bounce-Snap-back nicht springt (der Header ist zu diesem Zeitpunkt schon
+  kollabiert). ✓
+- Kein State für `maxScroll`, kein Observer → keine Rückkopplungsschleife. ✓
+- `max` wird frisch pro Frame berechnet, passt sich automatisch an, wenn der Nutzer
+  zwischen Schritten mit unterschiedlicher Seitenhöhe wechselt. ✓
+
+**Datei:** `src/components/CollapsingHeader.tsx`, nur der `requestAnimationFrame`-
+Callback. Sonst keine Änderungen. Lint + Build + manuelle Prüfung auf Schritt 1
+(kurz) und Schritt 6 mit Zielen (lang) genügen.
