@@ -113,6 +113,21 @@ export default function StepZiele({
     }
   }
 
+  function handleEditZiel(zi: number, ui: number, newZiel: string) {
+    onZieleChange(
+      ziele.map((z, i) =>
+        i !== zi
+          ? z
+          : {
+              ...z,
+              unterziele: z.unterziele.map((u, j) =>
+                j !== ui ? u : { ...u, ziel: newZiel },
+              ),
+            },
+      ),
+    );
+  }
+
   function handleToggleStatus(zi: number, ui: number) {
     onZieleChange(
       ziele.map((z, i) =>
@@ -287,6 +302,7 @@ export default function StepZiele({
               ? Number(refiningKey.split(":")[1])
               : null
           }
+          onEditZiel={(ui, newZiel) => handleEditZiel(i, ui, newZiel)}
           onToggleStatus={(ui) => handleToggleStatus(i, ui)}
           onNextStep={(ui) => handleNextStep(i, ui)}
           busyNextStep={

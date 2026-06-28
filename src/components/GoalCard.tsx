@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Foerderziel } from "@/lib/types";
 import type { RefineModus } from "@/lib/ai/provider";
+import { detectsKlarname } from "@/lib/privacy";
 
 const PRESET_BUTTONS: { modus: RefineModus; label: string }[] = [
   { modus: "einfacher", label: "Einfacher" },
@@ -25,6 +26,7 @@ interface Props {
   onToggleStatus: (uzIndex: number) => void;
   onNextStep: (uzIndex: number) => void;
   busyNextStep: number | null;
+  onEditZiel: (uzIndex: number, newZiel: string) => void;
   onRemove: () => void;
 }
 
@@ -38,6 +40,7 @@ export default function GoalCard({
   onToggleStatus,
   onNextStep,
   busyNextStep,
+  onEditZiel,
   onRemove,
 }: Props) {
   return (
@@ -58,6 +61,7 @@ export default function GoalCard({
             <svg
               viewBox="0 0 24 24"
               className="h-5 w-5"
+              aria-hidden="true"
               fill="none"
               stroke="currentColor"
               strokeWidth={2}
@@ -106,6 +110,7 @@ export default function GoalCard({
               onToggleStatus={() => onToggleStatus(i)}
               onNextStep={() => onNextStep(i)}
               busyNextStep={busyNextStep === i}
+              onEdit={(newZiel) => onEditZiel(i, newZiel)}
             />
           );
         })}
@@ -123,6 +128,7 @@ function UnterzielRow({
   onToggleStatus,
   onNextStep,
   busyNextStep,
+  onEdit,
 }: {
   unterziel: Foerderziel["unterziele"][number];
   selected: boolean;
@@ -132,17 +138,40 @@ function UnterzielRow({
   onToggleStatus: () => void;
   onNextStep: () => void;
   busyNextStep: boolean;
+  onEdit: (newZiel: string) => void;
 }) {
   const [showWhy, setShowWhy] = useState(false);
   const [showRefine, setShowRefine] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [editText, setEditText] = useState(unterziel.ziel);
   const [freitext, setFreitext] = useState("");
+  const [freitextDirty, setFreitextDirty] = useState(false);
   const erreicht = unterziel.status === "erreicht";
   const anyBusy = busy || busyNextStep;
+
+  const showKlarnamenWarnung = freitextDirty && detectsKlarname(freitext);
 
   const submitFreitext = () => {
     if (!freitext.trim()) return;
     onRefine("freitext", freitext.trim());
     setFreitext("");
+    setFreitextDirty(false);
+    setShowRefine(false);
+  };
+
+  const submitEdit = () => {
+    const trimmed = editText.trim();
+    if (!trimmed || trimmed === unterziel.ziel) {
+      setShowEdit(false);
+      return;
+    }
+    onEdit(trimmed);
+    setShowEdit(false);
+  };
+
+  const openEdit = () => {
+    setEditText(unterziel.ziel);
+    setShowEdit(true);
     setShowRefine(false);
   };
 
@@ -160,14 +189,17 @@ function UnterzielRow({
 
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <p className={`text-sm ${erreicht ? "text-gray-500 line-through-none" : "text-gray-800"}`}>
+            <p className={`text-sm ${erreicht ? "text-gray-500" : "text-gray-800"}`}>
               {erreicht && (
-                <span className="mr-1 font-semibold text-green-600">✓</span>
+                <span className="mr-1 font-semibold text-green-600" aria-hidden="true">✓</span>
               )}
               {unterziel.ziel}
             </p>
             {(busy || busyNextStep) && (
-              <span className="mt-0.5 inline-block h-4 w-4 flex-shrink-0 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+              <span
+                className="mt-0.5 inline-block h-4 w-4 flex-shrink-0 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"
+                aria-label="Wird bearbeitet …"
+              />
             )}
           </div>
 
@@ -177,6 +209,7 @@ function UnterzielRow({
               <button
                 type="button"
                 onClick={() => setShowWhy((w) => !w)}
+                aria-expanded={showWhy}
                 className="text-xs text-gray-500 hover:text-gray-700"
               >
                 {showWhy ? "Warum ▲" : "Warum ▼"}
@@ -188,6 +221,7 @@ function UnterzielRow({
               type="button"
               disabled={anyBusy}
               onClick={onToggleStatus}
+              aria-pressed={erreicht}
               className={`text-xs font-medium transition-colors disabled:opacity-50 ${
                 erreicht
                   ? "text-green-700 hover:text-green-900"
@@ -199,14 +233,27 @@ function UnterzielRow({
             </button>
 
             {!erreicht && (
-              <button
-                type="button"
-                disabled={anyBusy}
-                onClick={() => setShowRefine((r) => !r)}
-                className="text-xs text-blue-600 hover:text-blue-800 disabled:opacity-50"
-              >
-                {showRefine ? "Verfeinern ▲" : "Verfeinern ▼"}
-              </button>
+              <>
+                <button
+                  type="button"
+                  disabled={anyBusy}
+                  onClick={() => { setShowRefine((r) => !r); setShowEdit(false); }}
+                  aria-expanded={showRefine}
+                  className="text-xs text-blue-600 hover:text-blue-800 disabled:opacity-50"
+                >
+                  {showRefine ? "Verfeinern ▲" : "Verfeinern ▼"}
+                </button>
+
+                <button
+                  type="button"
+                  disabled={anyBusy}
+                  onClick={() => { openEdit(); setShowRefine(false); }}
+                  aria-expanded={showEdit}
+                  className="text-xs text-gray-500 hover:text-gray-700 disabled:opacity-50"
+                >
+                  {showEdit ? "Bearbeiten ▲" : "Bearbeiten ▼"}
+                </button>
+              </>
             )}
 
             {/* Nächste Stufe – nur bei erreichtem Ziel */}
@@ -219,7 +266,10 @@ function UnterzielRow({
               >
                 {busyNextStep ? (
                   <>
-                    <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+                    <span
+                      className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"
+                      aria-hidden="true"
+                    />
                     Nächste Stufe …
                   </>
                 ) : (
@@ -235,6 +285,40 @@ function UnterzielRow({
             </p>
           )}
 
+          {/* Manuelles Editieren */}
+          {showEdit && !erreicht && (
+            <div className="mt-2 space-y-2 rounded-md bg-gray-50 px-3 py-2.5">
+              <label className="block text-xs font-medium text-gray-600">
+                Zielsatz direkt bearbeiten
+              </label>
+              <textarea
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                rows={3}
+                disabled={anyBusy}
+                className="w-full resize-y rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+              />
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setShowEdit(false)}
+                  className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-50"
+                >
+                  Abbrechen
+                </button>
+                <button
+                  type="button"
+                  disabled={anyBusy || !editText.trim()}
+                  onClick={submitEdit}
+                  className="rounded-lg bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Speichern
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* KI-Verfeinern */}
           {showRefine && !erreicht && (
             <div className="mt-2 space-y-2 rounded-md bg-gray-50 px-3 py-2.5">
               <div className="flex flex-wrap gap-1.5">
@@ -254,14 +338,32 @@ function UnterzielRow({
                 <input
                   type="text"
                   value={freitext}
-                  onChange={(e) => setFreitext(e.target.value)}
+                  onChange={(e) => {
+                    setFreitextDirty(true);
+                    setFreitext(e.target.value);
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter") submitFreitext();
                   }}
                   disabled={anyBusy}
                   placeholder="Eigene Änderung beschreiben …"
-                  className="min-h-[40px] w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  aria-describedby={showKlarnamenWarnung ? "freitext-warn" : undefined}
+                  className={`min-h-[40px] w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 ${
+                    showKlarnamenWarnung
+                      ? "border-amber-400 focus:border-amber-400 focus:ring-amber-100"
+                      : "border-gray-300 focus:border-blue-400 focus:ring-blue-100"
+                  }`}
                 />
+                {showKlarnamenWarnung && (
+                  <p
+                    id="freitext-warn"
+                    role="alert"
+                    className="rounded-md bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800"
+                  >
+                    Hinweis: Möglicher Klarname oder Geburtsdatum erkannt – bitte
+                    nur anonyme Beschreibungen verwenden.
+                  </p>
+                )}
                 <div className="flex justify-end">
                   <button
                     type="button"
