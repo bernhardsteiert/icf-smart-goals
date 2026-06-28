@@ -180,7 +180,7 @@ function UnterzielRow({
                   </button>
                 ))}
               </div>
-              <div className="flex items-end gap-2">
+              <div className="space-y-2">
                 <input
                   type="text"
                   value={freitext}
@@ -189,17 +189,19 @@ function UnterzielRow({
                     if (e.key === "Enter") submitFreitext();
                   }}
                   disabled={busy}
-                  placeholder="Eigene Änderung (z.B. 'mehr auf den Kindergarten beziehen') …"
-                  className="min-h-[40px] flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                  placeholder="Eigene Änderung beschreiben …"
+                  className="min-h-[40px] w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
                 />
-                <button
-                  type="button"
-                  disabled={busy || !freitext.trim()}
-                  onClick={submitFreitext}
-                  className="min-h-[40px] flex-shrink-0 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  Anwenden
-                </button>
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    disabled={busy || !freitext.trim()}
+                    onClick={submitFreitext}
+                    className="min-h-[40px] rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    Anwenden
+                  </button>
+                </div>
               </div>
             </div>
           )}

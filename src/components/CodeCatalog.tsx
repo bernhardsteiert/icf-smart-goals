@@ -226,45 +226,49 @@ export default function CodeCatalog({
 
                             {/* Schweregrad (nur qualifier-Variante, nur bei Auswahl) */}
                             {variant === "qualifier" && isSelected && (
-                              <div className="flex flex-wrap items-center gap-1.5 px-4 pb-3 pl-11">
-                                <span className="text-xs text-gray-500">
-                                  Schweregrad:
-                                </span>
-                                {([0, 1, 2, 3, 4] as const).map((qv) => {
-                                  const active = qualifier === qv;
-                                  return (
-                                    <button
-                                      key={qv}
-                                      type="button"
-                                      onClick={() =>
-                                        onQualifier?.(
-                                          code.code,
-                                          active ? undefined : qv,
-                                        )
-                                      }
-                                      className={[
-                                        "rounded border px-2 py-0.5 text-xs transition-colors",
-                                        active
-                                          ? "border-blue-600 bg-blue-600 text-white"
-                                          : "border-gray-300 bg-white text-gray-600 hover:border-blue-400 hover:text-blue-600",
-                                      ].join(" ")}
-                                      title={`${qv} – ${QUALIFIER_LABELS[qv]}`}
-                                    >
-                                      {qv} {QUALIFIER_LABELS[qv]}
-                                    </button>
-                                  );
-                                })}
-                                {qualifier !== undefined && (
+                              <div className="px-4 pb-3 pl-11">
+                                {qualifier === undefined ? (
                                   <button
                                     type="button"
-                                    onClick={() =>
-                                      onQualifier?.(code.code, undefined)
-                                    }
-                                    className="text-xs text-gray-400 hover:text-gray-600"
-                                    title="Schweregrad entfernen"
+                                    onClick={() => onQualifier?.(code.code, 0)}
+                                    className="text-xs text-blue-600 hover:text-blue-800"
                                   >
-                                    ×
+                                    + Schweregrad angeben
                                   </button>
+                                ) : (
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-xs text-gray-500">
+                                      Schweregrad:
+                                    </span>
+                                    <input
+                                      type="range"
+                                      min={0}
+                                      max={4}
+                                      step={1}
+                                      value={qualifier}
+                                      onChange={(e) =>
+                                        onQualifier?.(
+                                          code.code,
+                                          Number(e.target.value) as 0 | 1 | 2 | 3 | 4,
+                                        )
+                                      }
+                                      aria-label="Schweregrad"
+                                      className="h-5 max-w-[160px] flex-1 accent-blue-600"
+                                    />
+                                    <span className="w-28 flex-shrink-0 text-xs font-medium text-gray-700">
+                                      {qualifier} – {QUALIFIER_LABELS[qualifier]}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        onQualifier?.(code.code, undefined)
+                                      }
+                                      className="text-xs text-gray-400 hover:text-gray-600"
+                                      title="Schweregrad entfernen"
+                                    >
+                                      entfernen
+                                    </button>
+                                  </div>
                                 )}
                               </div>
                             )}

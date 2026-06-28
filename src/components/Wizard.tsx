@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useFallState } from "@/lib/store";
 import {
   getAllTherapieformen,
@@ -9,7 +9,7 @@ import {
   getAllMerkmale,
 } from "@/lib/icf";
 import CollapsingHeader from "./CollapsingHeader";
-import DisclaimerBanner from "./DisclaimerBanner";
+import DisclaimerIntro from "./DisclaimerIntro";
 import StepTherapieform from "./StepTherapieform";
 import StepAusgangslage from "./StepAusgangslage";
 import StepCodes from "./StepCodes";
@@ -30,16 +30,44 @@ const THERAPIEFORMEN = getAllTherapieformen();
 const ALL_CODES = getAllCodes();
 const ALL_MERKMALE = getAllMerkmale();
 
+const DISCLAIMER_KEY = "icf-disclaimer-accepted";
+
 export default function Wizard() {
   const { state, update, updateMerkmale, resetFall, hydrated } = useFallState();
   const [step, setStep] = useState(1);
 
-  if (!hydrated) {
+  // Disclaimer-Einstieg: einmalige Bestätigung, in localStorage gemerkt.
+  const [accepted, setAccepted] = useState(false);
+  const [acceptHydrated, setAcceptHydrated] = useState(false);
+
+  useEffect(() => {
+    // Einmalige Hydration aus localStorage (Wert steht erst clientseitig fest).
+    try {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setAccepted(localStorage.getItem(DISCLAIMER_KEY) === "1");
+    } catch {
+      // localStorage nicht verfügbar
+    }
+    setAcceptHydrated(true);
+  }, []);
+
+  const acceptDisclaimer = () => {
+    setAccepted(true);
+    try {
+      localStorage.setItem(DISCLAIMER_KEY, "1");
+    } catch {}
+  };
+
+  if (!hydrated || !acceptHydrated) {
     return (
       <div className="flex flex-1 items-center justify-center text-gray-400">
         Laden …
       </div>
     );
+  }
+
+  if (!accepted) {
+    return <DisclaimerIntro onAccept={acceptDisclaimer} />;
   }
 
   const activeTherapieformId = state.therapieformen[0] ?? "heilpaedagogik";
@@ -83,9 +111,6 @@ export default function Wizard() {
       {/* Step content */}
       <main className="flex-1 px-4 py-6">
         <div className="mx-auto max-w-2xl space-y-5">
-          {/* Disclaimer bewusst nur einmal zu Beginn (Schritt 1). */}
-          {step === 1 && <DisclaimerBanner />}
-
           <div>
             <h2 className="mb-4 text-lg font-semibold text-gray-800">
               Schritt {step}: {STEP_LABELS[step - 1]}
