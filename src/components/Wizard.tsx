@@ -8,8 +8,10 @@ import {
   getHauptbereicheForTherapieform,
   getAllMerkmale,
 } from "@/lib/icf";
+import { requestGoals } from "@/lib/goals-client";
 import CollapsingHeader from "./CollapsingHeader";
 import ConfirmDialog from "./ConfirmDialog";
+import LoadingOverlay from "./LoadingOverlay";
 import DisclaimerIntro from "./DisclaimerIntro";
 import StepTherapieform from "./StepTherapieform";
 import StepAusgangslage from "./StepAusgangslage";
@@ -42,6 +44,11 @@ export default function Wizard() {
   const [accepted, setAccepted] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
 
+  // Zielerstellung (Schritt 5) – läuft jetzt über die Wizard-Navigation, damit
+  // der „Weiter →"-Button konsistent zu den anderen Schritten bleibt.
+  const [generating, setGenerating] = useState(false);
+  const [generateError, setGenerateError] = useState<string | null>(null);
+
   if (!hydrated) {
     return (
       <div className="flex flex-1 items-center justify-center text-gray-400">
@@ -58,6 +65,42 @@ export default function Wizard() {
   const gruppen = getHauptbereicheForTherapieform(activeTherapieformId);
 
   const canAdvance = step === 1 ? state.therapieformen.length > 0 : step < TOTAL_STEPS;
+
+  // Schritt 5: Ziele lassen sich nur erstellen, wenn Codes und Therapieform da sind.
+  const canGenerateGoals =
+    state.auswahl.length > 0 && state.therapieformen.length > 0;
+
+  const goToZiele = () => {
+    setStep(6);
+    window.scrollTo({ top: 0 });
+  };
+
+  async function handleGenerateGoals() {
+    setGenerating(true);
+    setGenerateError(null);
+    try {
+      const ziele = await requestGoals({
+        therapieformen: state.therapieformen,
+        codes: state.auswahl,
+        alterHalbjahre: state.alterHalbjahre,
+        merkmale: state.merkmale,
+        beobachtung: state.beobachtung || undefined,
+      });
+      update("ziele", ziele);
+      goToZiele();
+    } catch (e) {
+      setGenerateError(e instanceof Error ? e.message : "Unbekannter Fehler.");
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  // „Weiter" auf Schritt 5: bestehen schon Ziele, direkt dorthin; sonst erst
+  // generieren (Overlay) und dann wechseln.
+  const handleAdvanceFromUebersicht = () => {
+    if (state.ziele.length > 0) goToZiele();
+    else handleGenerateGoals();
+  };
 
   const handleReset = () => setConfirmReset(true);
 
@@ -151,15 +194,8 @@ export default function Wizard() {
                 merkmale={state.merkmale}
                 beobachtung={state.beobachtung}
                 hasZiele={state.ziele.length > 0}
-                onGenerated={(ziele) => {
-                  update("ziele", ziele);
-                  setStep(6);
-                  window.scrollTo({ top: 0 });
-                }}
-                onGoToZiele={() => {
-                  setStep(6);
-                  window.scrollTo({ top: 0 });
-                }}
+                canGenerate={canGenerateGoals}
+                error={generateError}
               />
             )}
 
@@ -188,6 +224,13 @@ export default function Wizard() {
         />
       )}
 
+      {generating && (
+        <LoadingOverlay
+          message="Förderziele werden erstellt …"
+          hint="Die KI formuliert SMART-Entwürfe aus deiner Auswahl. Das kann einen Moment dauern."
+        />
+      )}
+
       {/* Navigation – bleibt am unteren Rand klebend, respektiert die
           Safe-Area (Home-Indicator) am unteren iPhone-Rand. */}
       <footer
@@ -208,13 +251,14 @@ export default function Wizard() {
           >
             ← Zurück
           </button>
-          {/* Auf Schritt 5 (Übersicht) erfolgt der Vorwärtsschritt über den
-              Inhalts-Button „Ziele vorschlagen"; Schritt 6 ist der Abschluss. */}
-          {step !== 5 && step !== TOTAL_STEPS && (
+          {/* „Weiter →" auf allen Schritten außer dem letzten. Auf Schritt 5
+              löst er die Zielerstellung aus (Overlay) bzw. wechselt zu schon
+              bestehenden Zielen. */}
+          {step !== TOTAL_STEPS && (
             <button
               type="button"
-              onClick={goNext}
-              disabled={!canAdvance}
+              onClick={step === 5 ? handleAdvanceFromUebersicht : goNext}
+              disabled={step === 5 ? !canGenerateGoals || generating : !canAdvance}
               className="min-h-[44px] rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 active:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-40"
             >
               Weiter →

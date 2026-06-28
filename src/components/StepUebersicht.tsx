@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import type { Foerderziel, IcfSelection } from "@/lib/types";
-import { requestGoals } from "@/lib/goals-client";
+import type { IcfSelection } from "@/lib/types";
 import SelectionSummary from "./SelectionSummary";
 
 interface Props {
@@ -12,10 +10,16 @@ interface Props {
   merkmale: Record<string, unknown>;
   beobachtung: string;
   hasZiele: boolean;
-  onGenerated: (ziele: Foerderziel[]) => void;
-  onGoToZiele: () => void;
+  canGenerate: boolean;
+  error: string | null;
 }
 
+/**
+ * Schritt 5: reine Zusammenfassung der Auswahl. Der Vorwärtsschritt (Ziele
+ * erstellen bzw. zu vorhandenen Zielen wechseln) läuft jetzt über den normalen
+ * „Weiter →"-Button in der Wizard-Navigation; während der Generierung blendet
+ * der Wizard ein Lade-Overlay ein.
+ */
 export default function StepUebersicht({
   therapieformen,
   auswahl,
@@ -23,33 +27,9 @@ export default function StepUebersicht({
   merkmale,
   beobachtung,
   hasZiele,
-  onGenerated,
-  onGoToZiele,
+  canGenerate,
+  error,
 }: Props) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const canGenerate = auswahl.length > 0 && therapieformen.length > 0;
-
-  async function handleGenerate() {
-    setLoading(true);
-    setError(null);
-    try {
-      const ziele = await requestGoals({
-        therapieformen,
-        codes: auswahl,
-        alterHalbjahre,
-        merkmale,
-        beobachtung: beobachtung || undefined,
-      });
-      onGenerated(ziele);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Unbekannter Fehler.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
   return (
     <div className="space-y-5">
       {!canGenerate ? (
@@ -68,32 +48,17 @@ export default function StepUebersicht({
         />
       )}
 
-      <button
-        type="button"
-        onClick={handleGenerate}
-        disabled={!canGenerate || loading}
-        className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {loading ? (
-          <>
-            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-            KI denkt nach …
-          </>
-        ) : hasZiele ? (
-          "Ziele neu vorschlagen"
-        ) : (
-          "Ziele vorschlagen"
-        )}
-      </button>
+      {canGenerate && hasZiele && (
+        <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+          Es bestehen bereits Förderziele. „Weiter“ führt direkt dorthin – neu
+          vorschlagen lassen kannst du sie dort.
+        </div>
+      )}
 
-      {hasZiele && !loading && (
-        <button
-          type="button"
-          onClick={onGoToZiele}
-          className="w-full rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-        >
-          Zu den vorhandenen Zielen →
-        </button>
+      {canGenerate && !hasZiele && (
+        <p className="text-sm text-gray-500">
+          Mit „Weiter“ werden aus dieser Auswahl Förderziele als Entwurf erstellt.
+        </p>
       )}
 
       {error && (
