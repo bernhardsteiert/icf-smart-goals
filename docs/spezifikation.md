@@ -106,9 +106,10 @@ als KI-Assist für unscharfe Fälle.
 
 ```
 Browser (Next.js SPA)
-  │  POST /api/suggest-codes   { therapieformen[], vorgespraechCodes[], merkmale, beobachtung? }
-  │  POST /api/generate-goals  { therapieformen[], codes[]+optQualifier, alterHalbjahre, merkmale, beobachtung?, modus }
-  │  POST /api/next-step       { erreichtesUnterziel, kontext }   // Folgestufe vorschlagen
+  │  POST /api/suggest-codes      { therapieformen[], vorgespraechCodes[], merkmale, beobachtung? }
+  │  POST /api/generate-oberziele { therapieformen[], codes[]+optQualifier, alterHalbjahre, merkmale, beobachtung? }
+  │  POST /api/generate-unterziele{ …wie oben, plus oberziele[] }
+  │  POST /api/next-step          { erreichtesUnterziel, kontext }   // Folgestufe vorschlagen
   ▼
 Serverless-Proxy (Next.js Route Handler, hält API-Key)
   │  baut Prompt, erzwingt JSON-Output, Rate-Limit/Quota
@@ -185,9 +186,13 @@ type Therapieform = {
 
 ## 6. User-Flow
 
-Geführter 6-Schritt-Wizard mit Fortschrittsanzeige; alles über Auswahl, Freitext
+Geführter 7-Schritt-Wizard mit Fortschrittsanzeige; alles über Auswahl, Freitext
 nur optional. **Vorgeschaltet:** ein **Disclaimer-Einstieg** mit Button
 „Gelesen und verstanden" – erscheint bei jedem Start und nach „Neuer Fall".
+
+> **Zweistufige Zielerzeugung:** Die KI schlägt in Schritt 6 zunächst nur die
+> **Oberziele** (Förderrichtungen) vor. Die Fachkraft prüft, ändert, ergänzt oder
+> löscht sie – erst danach werden in Schritt 7 die **SMART-Unterziele** erzeugt.
 
 1. **Therapieform(en) wählen** – Mehrfachauswahl. MVP: Heilpädagogik.
 2. **Ausgangslage (optional)** – Vorgespräch-Codes als Chips (Quelle = Diagnostik-
@@ -203,9 +208,13 @@ nur optional. **Vorgeschaltet:** ein **Disclaimer-Einstieg** mit Button
    nicht-identifizierende Merkmale (§6b); **freies Beobachtungsfeld** (anonym,
    Stichworte) mit Klarnamen-Hinweis.
 5. **Übersicht** – Zusammenfassung der Auswahl (Therapieform, Codes inkl.
-   Schweregrad/Quelle, Alter, Merkmale, Beobachtung) und Button
-   **„Ziele vorschlagen (Aufgabe B)"**. Bei Erfolg automatischer Wechsel zu 6.
-6. **Ziele** (eigene Ergebnisseite) – Oberziele mit ausformulierten
+   Schweregrad/Quelle, Alter, Merkmale, Beobachtung). „Weiter" löst **Stufe 1**
+   aus: die KI schlägt nur die Förderrichtungen (Oberziele) vor.
+6. **Oberziele** – die vorgeschlagenen Förderrichtungen (Titel + Bereich) werden
+   geprüft: ändern, eigene ergänzen, löschen oder neu vorschlagen lassen. „Weiter"
+   löst **Stufe 2** aus (SMART-Unterziele zu den bestätigten Oberzielen). Jede
+   Änderung an den Oberzielen verwirft zuvor erzeugte SMART-Ziele.
+7. **SMART-Ziele** (eigene Ergebnisseite) – Oberziele mit ausformulierten
    SMART-Unterzielen (§7). Oben ein **globaler Umschalter Fachkraft ↔ Eltern**
    (Default Fachkraft): die KI erzeugt zu jedem Unterziel beide Formulierungen
    parallel (`ziel` + `zielEltern`) – inhaltlich identisch, nur Sprache/Ton
@@ -330,8 +339,15 @@ Planungshorizont ~1 Jahr / 42 Einheiten) ist **fest im System-Prompt**.
 - User: Therapieform(en), Vorgespräch-Codes, bereits gewählte Codes, optionale
   Beobachtung, Merkmale.
 
-**Aufgabe B – Förderziele (`/api/generate-goals`):**
-- System: erstelle **Oberziele mit ausformulierten SMART-Unterzielen**. Regeln:
+**Aufgabe B – Förderziele (zweistufig):**
+
+*Stufe 1 (`/api/generate-oberziele`):* schlägt nur die **Oberziele**
+(Förderrichtungen, je mit Bereich und `abgeleitetAus`-Codes) vor – noch ohne
+Unterziele. Die Fachkraft bestätigt/ändert sie in Schritt 6.
+
+*Stufe 2 (`/api/generate-unterziele`):* erhält die bestätigten Oberziele und
+erzeugt dazu die SMART-Unterziele. Regeln:
+- Die vorgegebenen Oberziele werden unverändert übernommen (keine erfinden/weglassen).
   - Jedes Unterziel wird in **zwei Sprachversionen** desselben Ziels formuliert:
     `ziel` (fachsprachlich) und `zielEltern` (elterngerecht/alltagsnah) – jeweils
     **EIN Satz**, der alle SMART-Kriterien zugleich erfüllt, **nicht** in
@@ -390,10 +406,11 @@ Start mit Gemini Flash, hinter einem schlanken Interface – Anbieterwechsel
 
 ```ts
 interface AiProvider {
-  suggestCodes(input: CodeInput): Promise<CodeVorschlag[]>;      // geplant (M6)
-  generateGoals(input: GoalInput): Promise<Foerderziel[]>;       // umgesetzt
-  refineUnterziel(input: RefineInput): Promise<SmartUnterziel>;  // umgesetzt
-  nextStep(input: NextStepInput): Promise<SmartUnterziel>;       // Route vorhanden (M7); UI erst mit Phase 3
+  suggestCodes(input: CodeInput): Promise<CodeVorschlag[]>;            // M6
+  generateOberziele(input: OberzieleInput): Promise<Oberziel[]>;      // Stufe 1
+  generateUnterziele(input: UnterzieleInput): Promise<Foerderziel[]>; // Stufe 2
+  refineUnterziel(input: RefineInput): Promise<SmartUnterziel>;        // umgesetzt
+  nextStep(input: NextStepInput): Promise<SmartUnterziel>;            // Route vorhanden (M7); UI erst mit Phase 3
 }
 
 // Auswahl per Env, z.B. AI_PROVIDER=gemini | openai

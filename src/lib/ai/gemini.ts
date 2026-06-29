@@ -1,23 +1,28 @@
-import type { CodeVorschlag, Foerderziel, SmartUnterziel } from "@/lib/types";
+import type { CodeVorschlag, Foerderziel, Oberziel, SmartUnterziel } from "@/lib/types";
 import type {
   AiProvider,
-  GenerateGoalsInput,
+  GenerateOberzieleInput,
+  GenerateUnterzieleInput,
   SuggestCodesInput,
   NextStepInput,
   RefineUnterzielInput,
 } from "./provider";
 import {
   foerderzielArraySchema,
+  oberzielArraySchema,
   codeVorschlagArraySchema,
   smartUnterzielSchema,
   GEMINI_GOALS_SCHEMA,
+  GEMINI_OBERZIELE_SCHEMA,
   GEMINI_CODES_SCHEMA,
   GEMINI_NEXT_STEP_SCHEMA,
 } from "./schema";
 import {
-  SYSTEM_PROMPT_GOALS,
+  SYSTEM_PROMPT_OBERZIELE,
+  SYSTEM_PROMPT_UNTERZIELE,
   SYSTEM_PROMPT_CODES,
-  buildGoalsUserPrompt,
+  buildOberzieleUserPrompt,
+  buildUnterzieleUserPrompt,
   buildCodesUserPrompt,
   buildNextStepUserPrompt,
   buildRefineUnterzielUserPrompt,
@@ -138,10 +143,22 @@ function parseAndValidate<T>(raw: string, schema: { safeParse(v: unknown): { suc
 }
 
 export class GeminiProvider implements AiProvider {
-  async generateGoals(input: GenerateGoalsInput): Promise<Foerderziel[]> {
+  async generateOberziele(input: GenerateOberzieleInput): Promise<Oberziel[]> {
     const raw = await callGemini({
-      systemInstruction: { parts: [{ text: SYSTEM_PROMPT_GOALS }] },
-      contents: [{ role: "user", parts: [{ text: buildGoalsUserPrompt(input) }] }],
+      systemInstruction: { parts: [{ text: SYSTEM_PROMPT_OBERZIELE }] },
+      contents: [{ role: "user", parts: [{ text: buildOberzieleUserPrompt(input) }] }],
+      generationConfig: {
+        responseMimeType: "application/json",
+        responseSchema: GEMINI_OBERZIELE_SCHEMA,
+      },
+    });
+    return parseAndValidate(raw, oberzielArraySchema);
+  }
+
+  async generateUnterziele(input: GenerateUnterzieleInput): Promise<Foerderziel[]> {
+    const raw = await callGemini({
+      systemInstruction: { parts: [{ text: SYSTEM_PROMPT_UNTERZIELE }] },
+      contents: [{ role: "user", parts: [{ text: buildUnterzieleUserPrompt(input) }] }],
       generationConfig: {
         responseMimeType: "application/json",
         responseSchema: GEMINI_GOALS_SCHEMA,
@@ -164,7 +181,7 @@ export class GeminiProvider implements AiProvider {
 
   async nextStep(input: NextStepInput): Promise<SmartUnterziel> {
     const raw = await callGemini({
-      systemInstruction: { parts: [{ text: SYSTEM_PROMPT_GOALS }] },
+      systemInstruction: { parts: [{ text: SYSTEM_PROMPT_UNTERZIELE }] },
       contents: [{ role: "user", parts: [{ text: buildNextStepUserPrompt(input) }] }],
       generationConfig: {
         responseMimeType: "application/json",
@@ -176,7 +193,7 @@ export class GeminiProvider implements AiProvider {
 
   async refineUnterziel(input: RefineUnterzielInput): Promise<SmartUnterziel> {
     const raw = await callGemini({
-      systemInstruction: { parts: [{ text: SYSTEM_PROMPT_GOALS }] },
+      systemInstruction: { parts: [{ text: SYSTEM_PROMPT_UNTERZIELE }] },
       contents: [
         { role: "user", parts: [{ text: buildRefineUnterzielUserPrompt(input) }] },
       ],

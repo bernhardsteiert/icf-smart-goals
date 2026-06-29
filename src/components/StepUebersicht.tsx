@@ -9,16 +9,16 @@ interface Props {
   alterHalbjahre: number;
   merkmale: Record<string, unknown>;
   beobachtung: string;
-  hasZiele: boolean;
+  hasOberziele: boolean;
   canGenerate: boolean;
   error: string | null;
 }
 
 /**
- * Schritt 5: reine Zusammenfassung der Auswahl. Der Vorwärtsschritt (Ziele
- * erstellen bzw. zu vorhandenen Zielen wechseln) läuft jetzt über den normalen
- * „Weiter →"-Button in der Wizard-Navigation; während der Generierung blendet
- * der Wizard ein Lade-Overlay ein.
+ * Schritt 5: reine Zusammenfassung der Auswahl. „Weiter" lässt die KI im ersten
+ * Schritt nur die Förderrichtungen (Oberziele) vorschlagen; diese werden in
+ * Schritt 6 geprüft, bevor die SMART-Ziele erzeugt werden. Während der
+ * Generierung blendet der Wizard ein Lade-Overlay ein.
  */
 export default function StepUebersicht({
   therapieformen,
@@ -26,7 +26,7 @@ export default function StepUebersicht({
   alterHalbjahre,
   merkmale,
   beobachtung,
-  hasZiele,
+  hasOberziele,
   canGenerate,
   error,
 }: Props) {
@@ -48,16 +48,17 @@ export default function StepUebersicht({
         />
       )}
 
-      {canGenerate && hasZiele && (
+      {canGenerate && hasOberziele && (
         <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
-          Es bestehen bereits Förderziele. „Weiter“ führt direkt dorthin – neu
-          vorschlagen lassen kannst du sie dort.
+          Es bestehen bereits Förderrichtungen. „Weiter“ führt direkt dorthin – dort
+          kannst du sie anpassen oder neu vorschlagen lassen.
         </div>
       )}
 
-      {canGenerate && !hasZiele && (
+      {canGenerate && !hasOberziele && (
         <p className="text-sm text-gray-500">
-          Mit „Weiter“ werden aus dieser Auswahl Förderziele als Entwurf erstellt.
+          Mit „Weiter“ schlägt die KI zunächst die Förderrichtungen (Oberziele) vor.
+          Diese prüfst du im nächsten Schritt, bevor die SMART-Ziele erzeugt werden.
         </p>
       )}
 

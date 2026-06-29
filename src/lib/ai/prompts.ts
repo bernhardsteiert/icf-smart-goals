@@ -1,5 +1,6 @@
 import type {
-  GenerateGoalsInput,
+  GenerateOberzieleInput,
+  GenerateUnterzieleInput,
   SuggestCodesInput,
   NextStepInput,
   RefineUnterzielInput,
@@ -28,12 +29,30 @@ function merkmaleToText(merkmale: Record<string, unknown>): string {
 
 // ── System-Prompts ────────────────────────────────────────────────────────────
 
-export const SYSTEM_PROMPT_GOALS = `Du bist eine erfahrene Fachkraft der heilpädagogischen Frühförderung und \
+export const SYSTEM_PROMPT_OBERZIELE = `Du bist eine erfahrene Fachkraft der heilpädagogischen Frühförderung und \
+arbeitest auf Basis der ICF-CY (International Classification of Functioning, Children & Youth). \
+Deine Aufgabe ist es, in einem ERSTEN Schritt nur die ÜBERGEORDNETEN FÖRDERRICHTUNGEN \
+(Oberziele) als ENTWURF vorzuschlagen – noch KEINE konkreten Unterziele.
+
+Regeln:
+- Schlage 3–5 Oberziele vor. Jedes Oberziel beschreibt eine FÖRDERRICHTUNG (das \
+übergeordnete „Wohin"), nicht ein konkret messbares Einzelziel.
+- Pro Oberziel: ein kurzer, prägnanter Titel im Feld "oberziel", ein passender \
+"bereich" (z.B. „Sprachliche Entwicklung", „Selbstständigkeit") und die zugrunde \
+liegenden ICF-CY-Codes im Feld "abgeleitetAus" (nur Codes aus der Eingabe).
+- Leite die Oberziele ausschließlich aus den übergebenen ICF-CY-Codes, dem Alter \
+und den Merkmalen ab. Erfinde keine Testnormen, Diagnosen oder Fakten.
+- Schreibe auf Deutsch, wertschätzend und ressourcenorientiert.
+- Antworte AUSSCHLIESSLICH mit JSON gemäß vorgegebenem Schema. Kein Fließtext außerhalb des JSON.`;
+
+export const SYSTEM_PROMPT_UNTERZIELE = `Du bist eine erfahrene Fachkraft der heilpädagogischen Frühförderung und \
 arbeitest auf Basis der ICF-CY (International Classification of Functioning, Children & Youth). \
 Deine Aufgabe ist es, ENTWÜRFE für Förderziele zu erstellen, die eine Fachkraft anschließend prüft und verantwortet.
 
 Regeln:
-- Erstelle Oberziele (Richtung) mit jeweils mehreren Unterzielen.
+- Übernimm die VORGEGEBENEN Oberziele unverändert (Titel, Bereich, abgeleitetAus) \
+und erstelle zu JEDEM jeweils mehrere SMART-Unterziele. Erfinde keine zusätzlichen \
+Oberziele und lass keine weg.
 - Jedes Unterziel ist GENAU EIN Ziel und wird in ZWEI Sprachversionen DESSELBEN \
 Ziels formuliert:
   • Feld "ziel": fachsprachliche Formulierung für die Fachkraft.
@@ -60,16 +79,16 @@ Begründe je Code kurz. Antworte ausschließlich als JSON gemäß Schema.`;
 
 // ── User-Prompt-Builder ───────────────────────────────────────────────────────
 
-export function buildGoalsUserPrompt(input: GenerateGoalsInput): string {
+// Gemeinsamer Fall-Kontext (Therapieform, Codes, Alter, Merkmale, Beobachtung)
+// für beide Generierungs-Stufen.
+function buildContextParts(input: GenerateOberzieleInput): string[] {
   const parts: string[] = [];
 
-  // Therapieform(en)
   const tfLines = input.therapieformDetails
     .map((t) => `- ${t.label}: ${t.hinweis}`)
     .join("\n");
   parts.push(`Therapieform(en):\n${tfLines}`);
 
-  // Codes
   const codeLines = input.codes.map((sel) => {
     const detail = input.codeDetails.find((d) => d.code === sel.code);
     if (!detail) return `- ${sel.code} (unbekannt)`;
@@ -81,37 +100,47 @@ export function buildGoalsUserPrompt(input: GenerateGoalsInput): string {
   });
   parts.push(`Aktueller Stand – ausgewählte ICF-CY-Codes:\n${codeLines.join("\n")}`);
 
-  // Alter
   parts.push(`Alter: ${halbjahreToText(input.alterHalbjahre)}`);
-
-  // Merkmale
   parts.push(`Merkmale: ${merkmaleToText(input.merkmale)}`);
 
-  // Beobachtung (optional, anonym)
   if (input.beobachtung?.trim()) {
     parts.push(`Beobachtung (anonym, Stichworte): ${input.beobachtung.trim()}`);
   }
 
-  // Modus
-  const modusText: Record<typeof input.modus, string> = {
-    neu: "Neu erstellen",
-    einfacher: "Einfacher / weniger anspruchsvoll",
-    ambitionierter: "Ambitionierter / anspruchsvoller",
-    umformulieren: "Anders formulieren",
-  };
-  parts.push(`Modus: ${modusText[input.modus]}`);
+  return parts;
+}
 
-  // Verfeinerungsbezug (bei Folge-Anfragen)
-  if (input.bezugsziel) {
-    parts.push(
-      `Überarbeite gezielt das Förderziel zum Oberziel "${input.bezugsziel.oberziel}"` +
-        (input.bezugsziel.unterziel
-          ? ` (insbesondere das Unterziel "${input.bezugsziel.unterziel}")`
-          : "") +
-        ` gemäß dem gewählten Modus. Gib GENAU EIN überarbeitetes Förderziel ` +
-        `zurück (nicht mehrere), das auf demselben Bereich und denselben Codes aufbaut.`,
-    );
-  }
+// Stufe 1: nur Oberziele.
+export function buildOberzieleUserPrompt(input: GenerateOberzieleInput): string {
+  const parts = buildContextParts(input);
+  parts.push(
+    `Aufgabe: Schlage daraus 3–5 übergeordnete Förderrichtungen (Oberziele) als ` +
+      `Entwurf vor – jeweils mit Titel, Bereich und den zugrunde liegenden Codes ` +
+      `(abgeleitetAus). NOCH KEINE Unterziele.`,
+  );
+  return parts.join("\n\n");
+}
+
+// Stufe 2: SMART-Unterziele zu den bestätigten Oberzielen.
+export function buildUnterzieleUserPrompt(input: GenerateUnterzieleInput): string {
+  const parts = buildContextParts(input);
+
+  const ozLines = input.oberziele
+    .map((o, i) => {
+      const codes = o.abgeleitetAus.length
+        ? ` [abgeleitetAus: ${o.abgeleitetAus.join(", ")}]`
+        : "";
+      return `${i + 1}. "${o.oberziel}" (Bereich: ${o.bereich})${codes}`;
+    })
+    .join("\n");
+  parts.push(
+    `Von der Fachkraft bestätigte Oberziele (unverändert übernehmen, ` +
+      `abgeleitetAus beibehalten):\n${ozLines}`,
+  );
+  parts.push(
+    `Aufgabe: Erstelle zu JEDEM dieser Oberziele mehrere SMART-Unterziele – je in ` +
+      `beiden Sprachversionen ("ziel" fachsprachlich und "zielEltern" elterngerecht).`,
+  );
 
   return parts.join("\n\n");
 }

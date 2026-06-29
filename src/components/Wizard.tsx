@@ -8,7 +8,7 @@ import {
   getHauptbereicheForTherapieform,
   getAllMerkmale,
 } from "@/lib/icf";
-import { requestGoals } from "@/lib/goals-client";
+import { requestOberziele, requestUnterziele } from "@/lib/goals-client";
 import CollapsingHeader from "./CollapsingHeader";
 import ConfirmDialog from "./ConfirmDialog";
 import LoadingOverlay from "./LoadingOverlay";
@@ -18,6 +18,7 @@ import StepAusgangslage from "./StepAusgangslage";
 import StepCodes from "./StepCodes";
 import StepMerkmale from "./StepMerkmale";
 import StepUebersicht from "./StepUebersicht";
+import StepOberziele from "./StepOberziele";
 import StepZiele from "./StepZiele";
 
 const STEP_LABELS = [
@@ -26,7 +27,8 @@ const STEP_LABELS = [
   "ICF-Codes",
   "Alter & Merkmale",
   "Übersicht",
-  "Ziele",
+  "Oberziele",
+  "SMART-Ziele",
 ];
 const TOTAL_STEPS = STEP_LABELS.length;
 
@@ -44,9 +46,10 @@ export default function Wizard() {
   const [accepted, setAccepted] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
 
-  // Zielerstellung (Schritt 5) – läuft jetzt über die Wizard-Navigation, damit
-  // der „Weiter →"-Button konsistent zu den anderen Schritten bleibt.
+  // Zweistufige KI-Generierung über die Wizard-Navigation: Schritt 5 → Oberziele,
+  // Schritt 6 → SMART-Unterziele. Ein gemeinsames Overlay mit wechselnder Meldung.
   const [generating, setGenerating] = useState(false);
+  const [generatingMsg, setGeneratingMsg] = useState("");
   const [generateError, setGenerateError] = useState<string | null>(null);
 
   if (!hydrated) {
@@ -66,28 +69,39 @@ export default function Wizard() {
 
   const canAdvance = step === 1 ? state.therapieformen.length > 0 : step < TOTAL_STEPS;
 
-  // Schritt 5: Ziele lassen sich nur erstellen, wenn Codes und Therapieform da sind.
-  const canGenerateGoals =
-    state.auswahl.length > 0 && state.therapieformen.length > 0;
-
-  const goToZiele = () => {
-    setStep(6);
+  const goToStep = (n: number) => {
+    setStep(n);
     window.scrollTo({ top: 0 });
   };
 
-  async function handleGenerateGoals() {
+  const goalContext = () => ({
+    therapieformen: state.therapieformen,
+    codes: state.auswahl,
+    alterHalbjahre: state.alterHalbjahre,
+    merkmale: state.merkmale,
+    beobachtung: state.beobachtung || undefined,
+  });
+
+  // Schritt 5: Oberziele lassen sich nur vorschlagen, wenn Codes + Therapieform da sind.
+  const canGenerateOberziele =
+    state.auswahl.length > 0 && state.therapieformen.length > 0;
+
+  // Schritt 6: SMART-Ziele brauchen mindestens ein Oberziel mit Titel.
+  const canGenerateUnterziele =
+    state.oberziele.length > 0 &&
+    state.oberziele.every((o) => o.oberziel.trim().length > 0);
+
+  // Stufe 1: Förderrichtungen vorschlagen. Neue Oberziele machen alte SMART-Ziele
+  // ungültig → ziele leeren.
+  async function handleGenerateOberziele() {
     setGenerating(true);
+    setGeneratingMsg("Förderrichtungen werden vorgeschlagen …");
     setGenerateError(null);
     try {
-      const ziele = await requestGoals({
-        therapieformen: state.therapieformen,
-        codes: state.auswahl,
-        alterHalbjahre: state.alterHalbjahre,
-        merkmale: state.merkmale,
-        beobachtung: state.beobachtung || undefined,
-      });
-      update("ziele", ziele);
-      goToZiele();
+      const oberziele = await requestOberziele(goalContext());
+      update("oberziele", oberziele);
+      update("ziele", []);
+      goToStep(6);
     } catch (e) {
       setGenerateError(e instanceof Error ? e.message : "Unbekannter Fehler.");
     } finally {
@@ -95,11 +109,41 @@ export default function Wizard() {
     }
   }
 
-  // „Weiter" auf Schritt 5: bestehen schon Ziele, direkt dorthin; sonst erst
-  // generieren (Overlay) und dann wechseln.
+  // Stufe 2: SMART-Unterziele zu den bestätigten Oberzielen erzeugen.
+  async function handleGenerateUnterziele() {
+    setGenerating(true);
+    setGeneratingMsg("SMART-Ziele werden erstellt …");
+    setGenerateError(null);
+    try {
+      const ziele = await requestUnterziele({
+        ...goalContext(),
+        oberziele: state.oberziele,
+      });
+      update("ziele", ziele);
+      goToStep(7);
+    } catch (e) {
+      setGenerateError(e instanceof Error ? e.message : "Unbekannter Fehler.");
+    } finally {
+      setGenerating(false);
+    }
+  }
+
+  // „Weiter" Schritt 5: bestehen schon Oberziele, direkt dorthin; sonst Stufe 1.
   const handleAdvanceFromUebersicht = () => {
-    if (state.ziele.length > 0) goToZiele();
-    else handleGenerateGoals();
+    if (state.oberziele.length > 0) goToStep(6);
+    else handleGenerateOberziele();
+  };
+
+  // „Weiter" Schritt 6: bestehen schon SMART-Ziele, direkt dorthin; sonst Stufe 2.
+  const handleAdvanceFromOberziele = () => {
+    if (state.ziele.length > 0) goToStep(7);
+    else handleGenerateUnterziele();
+  };
+
+  // Oberziele-Änderung in Schritt 6: bestehende SMART-Ziele werden ungültig.
+  const handleOberzieleChange = (oberziele: typeof state.oberziele) => {
+    update("oberziele", oberziele);
+    if (state.ziele.length > 0) update("ziele", []);
   };
 
   const handleReset = () => setConfirmReset(true);
@@ -193,19 +237,30 @@ export default function Wizard() {
                 alterHalbjahre={state.alterHalbjahre}
                 merkmale={state.merkmale}
                 beobachtung={state.beobachtung}
-                hasZiele={state.ziele.length > 0}
-                canGenerate={canGenerateGoals}
-                error={generateError}
+                hasOberziele={state.oberziele.length > 0}
+                canGenerate={canGenerateOberziele}
+                error={step === 5 ? generateError : null}
               />
             )}
 
             {step === 6 && (
+              <StepOberziele
+                oberziele={state.oberziele}
+                onChange={handleOberzieleChange}
+                onRegenerate={handleGenerateOberziele}
+                regenerating={generating}
+                error={step === 6 ? generateError : null}
+              />
+            )}
+
+            {step === 7 && (
               <StepZiele
                 therapieformen={state.therapieformen}
                 auswahl={state.auswahl}
                 alterHalbjahre={state.alterHalbjahre}
                 merkmale={state.merkmale}
                 beobachtung={state.beobachtung}
+                oberziele={state.oberziele}
                 ziele={state.ziele}
                 onZieleChange={(ziele) => update("ziele", ziele)}
               />
@@ -226,8 +281,8 @@ export default function Wizard() {
 
       {generating && (
         <LoadingOverlay
-          message="Förderziele werden erstellt …"
-          hint="Die KI formuliert SMART-Entwürfe aus deiner Auswahl. Das kann einen Moment dauern."
+          message={generatingMsg}
+          hint="Die KI arbeitet an einem Entwurf. Das kann einen Moment dauern."
         />
       )}
 
@@ -251,14 +306,27 @@ export default function Wizard() {
           >
             ← Zurück
           </button>
-          {/* „Weiter →" auf allen Schritten außer dem letzten. Auf Schritt 5
-              löst er die Zielerstellung aus (Overlay) bzw. wechselt zu schon
-              bestehenden Zielen. */}
+          {/* „Weiter →" auf allen Schritten außer dem letzten. Schritt 5 löst die
+              Oberziel-Generierung aus, Schritt 6 die SMART-Ziel-Generierung
+              (jeweils Overlay) bzw. wechselt zu bereits bestehenden Ergebnissen. */}
           {step !== TOTAL_STEPS && (
             <button
               type="button"
-              onClick={step === 5 ? handleAdvanceFromUebersicht : goNext}
-              disabled={step === 5 ? !canGenerateGoals || generating : !canAdvance}
+              onClick={
+                step === 5
+                  ? handleAdvanceFromUebersicht
+                  : step === 6
+                  ? handleAdvanceFromOberziele
+                  : goNext
+              }
+              disabled={
+                generating ||
+                (step === 5
+                  ? !canGenerateOberziele
+                  : step === 6
+                  ? !canGenerateUnterziele
+                  : !canAdvance)
+              }
               className="min-h-[44px] rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 active:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-40"
             >
               Weiter →

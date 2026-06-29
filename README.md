@@ -18,14 +18,19 @@ Kontext: Interdisziplinäre Frühförderstelle der Lebenshilfe Lörrach e.V.
 Lauffähiger MVP – auf Vercel deployed. Der geführte Kern-Flow ist umgesetzt
 (Meilensteine **M0–M5**) und durch mehrere Runden Praxis-Feedback erweitert:
 
-- **6-Schritt-Wizard:** Disclaimer-Einstieg → 1 Therapieform → 2 Ausgangslage →
+- **7-Schritt-Wizard:** Disclaimer-Einstieg → 1 Therapieform → 2 Ausgangslage →
   3 ICF-Codes → 4 Alter & Merkmale (+ freie Beobachtung) → 5 Übersicht →
-  6 Ziele (eigene Ergebnisseite).
+  6 Oberziele (Förderrichtungen prüfen/ändern/ergänzen/löschen) →
+  7 SMART-Ziele (eigene Ergebnisseite).
+- **Zweistufige Zielerzeugung:** Die KI schlägt erst nur die **Oberziele**
+  (Richtungen) vor; nach Bestätigung durch die Fachkraft werden daraus die
+  **SMART-Unterziele** erzeugt.
 - **Erweiterter ICF-CY-Katalog** (~74 Codes, Kapitel b/d/e), gruppiert in
   ausklappbare Kategorien; **semantische Stichwortsuche** über einen Synonym-
   Thesaurus; Code-Erklärung erst auf Klick.
-- **SMART-Ziele** als je ein ausformulierter Satz pro Unterziel; **Verfeinern
-  pro Unterziel** (Voreinstellungen + Freitext) über `/api/refine-goal`.
+- **SMART-Ziele** als je ein ausformulierter Satz pro Unterziel, parallel in
+  Fachkraft- und Elternversion (Umschalter); **Verfeinern pro Unterziel**
+  (Voreinstellungen + Freitext) über `/api/refine-goal`.
 - **Export** wahlweise ausgewählter Ziele oder kompletter Förderplan
   (Zwischenablage / `.txt`).
 - Plattformübergreifender UI-Feinschliff (iOS/Android/Browser, PWA).
@@ -55,7 +60,8 @@ npm run lint    # ESLint
 **Stack:** Next.js 16 (App Router) + TypeScript + Tailwind CSS v4. State lokal
 im Browser (`localStorage`), keine Datenbank/Auth. KI über einen austauschbaren
 Provider (Default Gemini Flash) hinter den Serverless-Routen
-`/api/generate-goals` (Zielentwurf) und `/api/refine-goal` (Unterziel verfeinern).
+`/api/generate-oberziele` (Stufe 1: Förderrichtungen), `/api/generate-unterziele`
+(Stufe 2: SMART-Ziele) und `/api/refine-goal` (Unterziel verfeinern).
 
 **Environment** (siehe [`.env.example`](.env.example)):
 
