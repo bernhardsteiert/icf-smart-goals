@@ -3,6 +3,7 @@ import rawMasken from "@/data/masken.json";
 import rawTherapieformen from "@/data/therapieformen.json";
 import rawMerkmale from "@/data/merkmale.json";
 import rawSynonyme from "@/data/synonyme.json";
+import rawBereiche from "@/data/bereiche.json";
 import type { IcfCode, Maske, Therapieform, Merkmal, Hauptbereich } from "./types";
 
 // ── Codes ─────────────────────────────────────────────────────────────────────
@@ -48,6 +49,14 @@ export function getAllTherapieformen(): Therapieform[] {
 
 export function getAktiveTherapieformen(): Therapieform[] {
   return ALL_THERAPIEFORMEN.filter((t) => t.aktiv);
+}
+
+// ── Bereiche (kuratierte Liste für die Oberziel-Zuordnung) ────────────────────
+
+const ALL_BEREICHE: string[] = rawBereiche as string[];
+
+export function getAllBereiche(): string[] {
+  return ALL_BEREICHE;
 }
 
 // ── Merkmale ──────────────────────────────────────────────────────────────────

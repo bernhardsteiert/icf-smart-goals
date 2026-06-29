@@ -1,4 +1,5 @@
 import type {
+  GoalContextInput,
   GenerateOberzieleInput,
   GenerateUnterzieleInput,
   SuggestCodesInput,
@@ -37,9 +38,12 @@ Deine Aufgabe ist es, in einem ERSTEN Schritt nur die ÜBERGEORDNETEN FÖRDERRIC
 Regeln:
 - Schlage 3–5 Oberziele vor. Jedes Oberziel beschreibt eine FÖRDERRICHTUNG (das \
 übergeordnete „Wohin"), nicht ein konkret messbares Einzelziel.
-- Pro Oberziel: ein kurzer, prägnanter Titel im Feld "oberziel", ein passender \
-"bereich" (z.B. „Sprachliche Entwicklung", „Selbstständigkeit") und die zugrunde \
-liegenden ICF-CY-Codes im Feld "abgeleitetAus" (nur Codes aus der Eingabe).
+- Pro Oberziel: ein kurzer, prägnanter Titel im Feld "oberziel", ein "bereich" \
+und die zugrunde liegenden ICF-CY-Codes im Feld "abgeleitetAus" (nur Codes aus \
+der Eingabe).
+- Wähle als "bereich" GENAU EINEN Wert aus der im User-Prompt mitgegebenen Liste \
+verfügbarer Bereiche (exakt so geschrieben). Nur wenn wirklich kein Bereich passt, \
+formuliere einen knappen eigenen.
 - Leite die Oberziele ausschließlich aus den übergebenen ICF-CY-Codes, dem Alter \
 und den Merkmalen ab. Erfinde keine Testnormen, Diagnosen oder Fakten.
 - Schreibe auf Deutsch, wertschätzend und ressourcenorientiert.
@@ -81,7 +85,7 @@ Begründe je Code kurz. Antworte ausschließlich als JSON gemäß Schema.`;
 
 // Gemeinsamer Fall-Kontext (Therapieform, Codes, Alter, Merkmale, Beobachtung)
 // für beide Generierungs-Stufen.
-function buildContextParts(input: GenerateOberzieleInput): string[] {
+function buildContextParts(input: GoalContextInput): string[] {
   const parts: string[] = [];
 
   const tfLines = input.therapieformDetails
@@ -113,10 +117,16 @@ function buildContextParts(input: GenerateOberzieleInput): string[] {
 // Stufe 1: nur Oberziele.
 export function buildOberzieleUserPrompt(input: GenerateOberzieleInput): string {
   const parts = buildContextParts(input);
+  if (input.bereiche.length > 0) {
+    parts.push(
+      `Verfügbare Bereiche (je Oberziel genau einen exakt übernehmen):\n` +
+        input.bereiche.map((b) => `- ${b}`).join("\n"),
+    );
+  }
   parts.push(
     `Aufgabe: Schlage daraus 3–5 übergeordnete Förderrichtungen (Oberziele) als ` +
-      `Entwurf vor – jeweils mit Titel, Bereich und den zugrunde liegenden Codes ` +
-      `(abgeleitetAus). NOCH KEINE Unterziele.`,
+      `Entwurf vor – jeweils mit Titel, Bereich (aus der Liste) und den zugrunde ` +
+      `liegenden Codes (abgeleitetAus). NOCH KEINE Unterziele.`,
   );
   return parts.join("\n\n");
 }

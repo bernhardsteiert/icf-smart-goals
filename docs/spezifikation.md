@@ -210,10 +210,12 @@ nur optional. **Vorgeschaltet:** ein **Disclaimer-Einstieg** mit Button
 5. **Übersicht** – Zusammenfassung der Auswahl (Therapieform, Codes inkl.
    Schweregrad/Quelle, Alter, Merkmale, Beobachtung). „Weiter" löst **Stufe 1**
    aus: die KI schlägt nur die Förderrichtungen (Oberziele) vor.
-6. **Oberziele** – die vorgeschlagenen Förderrichtungen (Titel + Bereich) werden
-   geprüft: ändern, eigene ergänzen, löschen oder neu vorschlagen lassen. „Weiter"
-   löst **Stufe 2** aus (SMART-Unterziele zu den bestätigten Oberzielen). Jede
-   Änderung an den Oberzielen verwirft zuvor erzeugte SMART-Ziele.
+6. **Oberziele** – die vorgeschlagenen Förderrichtungen werden geprüft: Titel
+   ändern, **Bereich aus kuratierter Liste** wählen (`bereiche.json`; eigene
+   Bereiche via „Eigener Bereich …" ergänzbar, lokal gespeichert), eigene Oberziele
+   ergänzen, löschen oder neu vorschlagen lassen. „Weiter" löst **Stufe 2** aus
+   (SMART-Unterziele zu den bestätigten Oberzielen). Jede Änderung an den Oberzielen
+   verwirft zuvor erzeugte SMART-Ziele.
 7. **SMART-Ziele** (eigene Ergebnisseite) – Oberziele mit ausformulierten
    SMART-Unterzielen (§7). Oben ein **globaler Umschalter Fachkraft ↔ Eltern**
    (Default Fachkraft): die KI erzeugt zu jedem Unterziel beide Formulierungen

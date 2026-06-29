@@ -12,7 +12,7 @@ export type SuggestCodesInput = {
 
 // Gemeinsamer Kontext für beide Generierungs-Stufen (vom Route-Handler aus den
 // JSON-Stammdaten angereichert).
-type GoalContextInput = {
+export type GoalContextInput = {
   therapieformen: string[];
   codes: IcfSelection[];
   alterHalbjahre: number;
@@ -22,8 +22,11 @@ type GoalContextInput = {
   therapieformDetails: { id: string; label: string; hinweis: string }[];
 };
 
-// Stufe 1: nur Oberziele (Förderrichtungen) vorschlagen.
-export type GenerateOberzieleInput = GoalContextInput;
+// Stufe 1: nur Oberziele (Förderrichtungen) vorschlagen. `bereiche` ist die
+// kuratierte Liste, aus der die KI je Oberziel einen passenden Bereich wählt.
+export type GenerateOberzieleInput = GoalContextInput & {
+  bereiche: string[];
+};
 
 // Stufe 2: zu den von der Fachkraft bestätigten Oberzielen die SMART-Unterziele
 // erzeugen.

@@ -1,7 +1,12 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import type { Oberziel } from "@/lib/types";
+import { getAllBereiche } from "@/lib/icf";
+import { useCustomBereiche } from "@/lib/bereiche";
+
+const CURATED_BEREICHE = getAllBereiche();
+const CUSTOM_SENTINEL = "__custom__";
 
 interface Props {
   oberziele: Oberziel[];
@@ -57,12 +62,42 @@ export default function StepOberziele({
   regenerating,
   error,
 }: Props) {
+  const { custom, add: addCustomBereich } = useCustomBereiche();
+  // Welche Karte gerade ein Eingabefeld für einen eigenen Bereich zeigt.
+  const [customFor, setCustomFor] = useState<number | null>(null);
+  const [customText, setCustomText] = useState("");
+
   const patch = (i: number, p: Partial<Oberziel>) =>
     onChange(oberziele.map((o, idx) => (idx === i ? { ...o, ...p } : o)));
   const remove = (i: number) =>
     onChange(oberziele.filter((_, idx) => idx !== i));
   const add = () =>
     onChange([...oberziele, { oberziel: "", bereich: "", abgeleitetAus: [] }]);
+
+  // Optionen je Karte: kuratierte + eigene Bereiche; ein unbekannter (z.B. von der
+  // KI frei formulierter) Wert bleibt erhalten und wird vorangestellt.
+  const optionsFor = (value: string): string[] => {
+    const list = [...CURATED_BEREICHE, ...custom];
+    if (value && !list.includes(value)) list.unshift(value);
+    return list;
+  };
+
+  const onSelectBereich = (i: number, value: string) => {
+    if (value === CUSTOM_SENTINEL) {
+      setCustomFor(i);
+      setCustomText("");
+    } else {
+      patch(i, { bereich: value });
+      if (customFor === i) setCustomFor(null);
+    }
+  };
+
+  const submitCustom = (i: number) => {
+    const added = addCustomBereich(customText);
+    if (added) patch(i, { bereich: added });
+    setCustomFor(null);
+    setCustomText("");
+  };
 
   return (
     <div className="space-y-4">
@@ -145,13 +180,55 @@ export default function StepOberziele({
 
               <div className="space-y-1">
                 <label className="block text-xs text-gray-400">Bereich</label>
-                <AutoTextarea
-                  value={o.bereich}
-                  onChange={(v) => patch(i, { bereich: v })}
-                  placeholder="z.B. Sprachliche Entwicklung"
+                <select
+                  value={customFor === i ? CUSTOM_SENTINEL : o.bereich}
+                  onChange={(e) => onSelectBereich(i, e.target.value)}
                   aria-label={`Bereich von Oberziel ${i + 1}`}
-                  className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm leading-snug text-gray-700 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                />
+                  className="w-full rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-sm text-gray-700 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                >
+                  <option value="">Bereich wählen …</option>
+                  {optionsFor(o.bereich).map((b) => (
+                    <option key={b} value={b}>
+                      {b}
+                    </option>
+                  ))}
+                  <option value={CUSTOM_SENTINEL}>+ Eigener Bereich …</option>
+                </select>
+
+                {customFor === i && (
+                  <div className="flex items-center gap-2 pt-1">
+                    <input
+                      type="text"
+                      value={customText}
+                      onChange={(e) => setCustomText(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.preventDefault();
+                          submitCustom(i);
+                        }
+                      }}
+                      autoFocus
+                      placeholder="Neuen Bereich eingeben"
+                      aria-label="Neuen Bereich eingeben"
+                      className="min-w-0 flex-1 rounded-lg border border-gray-300 px-2.5 py-1.5 text-sm text-gray-700 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => submitCustom(i)}
+                      disabled={!customText.trim()}
+                      className="flex-shrink-0 rounded-lg bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      Übernehmen
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setCustomFor(null)}
+                      className="flex-shrink-0 rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-600 transition-colors hover:bg-gray-50"
+                    >
+                      Abbrechen
+                    </button>
+                  </div>
+                )}
               </div>
 
               {o.abgeleitetAus.length > 0 && (

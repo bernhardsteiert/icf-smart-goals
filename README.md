@@ -93,6 +93,9 @@ Vercel-Projekt-Einstellungen.
 - **[`src/data/synonyme.json`](src/data/synonyme.json)** – Konzept-Thesaurus für
   die semantische Suche (Alltagsbegriff → verwandte Codes, z.B.
   „Selbstbewusstsein", „Entspannung").
+- **[`src/data/bereiche.json`](src/data/bereiche.json)** – kuratierte Förder­bereiche
+  für die Oberziel-Zuordnung (Dropdown in Schritt 6); eigene Bereiche lassen sich
+  ergänzen (lokal gespeichert). Die KI wählt den Bereich aus dieser Liste.
 - Weitere Stammdaten: `src/data/therapieformen.json`, `src/data/merkmale.json`.
 
 ## Umsetzung (mit einem Coding-Agenten iterieren)
