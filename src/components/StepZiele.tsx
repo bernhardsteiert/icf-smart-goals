@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import type { Foerderziel, IcfSelection } from "@/lib/types";
+import type { Foerderziel, IcfSelection, Oberziel } from "@/lib/types";
 import type { RefineModus } from "@/lib/ai/provider";
 import { zieleToText } from "@/lib/export";
-import { requestGoals, requestRefine } from "@/lib/goals-client";
+import { requestUnterziele, requestRefine } from "@/lib/goals-client";
 import GoalCard, { type ZielView } from "./GoalCard";
 
 // Alle Export-Auswahl-Schlüssel (Karten-Index : Unterziel-Index).
@@ -35,6 +35,7 @@ interface Props {
   alterHalbjahre: number;
   merkmale: Record<string, unknown>;
   beobachtung: string;
+  oberziele: Oberziel[];
   ziele: Foerderziel[];
   onZieleChange: (ziele: Foerderziel[]) => void;
 }
@@ -45,6 +46,7 @@ export default function StepZiele({
   alterHalbjahre,
   merkmale,
   beobachtung,
+  oberziele,
   ziele,
   onZieleChange,
 }: Props) {
@@ -67,12 +69,14 @@ export default function StepZiele({
     setLoading(true);
     setError(null);
     try {
-      const neueZiele = await requestGoals({
+      // Regeneriert die SMART-Unterziele zu den (in Schritt 6 bestätigten) Oberzielen.
+      const neueZiele = await requestUnterziele({
         therapieformen,
         codes: auswahl,
         alterHalbjahre,
         merkmale,
         beobachtung: beobachtung || undefined,
+        oberziele,
       });
       onZieleChange(neueZiele);
       setSelected(allSelectionKeys(neueZiele));

@@ -54,10 +54,16 @@ export type SmartUnterziel = {
   begruendung: string;
 };
 
-export type Foerderziel = {
+// Stufe 1: nur die Förderrichtung (ohne SMART-Unterziele). Wird von der Fachkraft
+// geprüft/geändert/ergänzt/gelöscht, bevor die SMART-Unterziele erzeugt werden.
+export type Oberziel = {
   oberziel: string;
   bereich: string;
   abgeleitetAus: string[];
+};
+
+// Stufe 2: ein Oberziel mit ausformulierten SMART-Unterzielen.
+export type Foerderziel = Oberziel & {
   unterziele: SmartUnterziel[];
 };
 
@@ -80,5 +86,6 @@ export type FallState = {
   alterHalbjahre: number;
   merkmale: Record<string, unknown>;
   beobachtung: string;
-  ziele: Foerderziel[];
+  oberziele: Oberziel[]; // Stufe 1 – bestätigte/bearbeitete Förderrichtungen
+  ziele: Foerderziel[]; // Stufe 2 – daraus erzeugte SMART-Ziele
 };

@@ -17,10 +17,15 @@ const requestSchema = z.object({
   alterHalbjahre: z.number().min(0).max(14),
   merkmale: z.record(z.string(), z.unknown()),
   beobachtung: z.string().optional(),
-  modus: z.enum(["neu", "einfacher", "ambitionierter", "umformulieren"]),
-  bezugsziel: z
-    .object({ oberziel: z.string(), unterziel: z.string().optional() })
-    .optional(),
+  oberziele: z
+    .array(
+      z.object({
+        oberziel: z.string().min(1),
+        bereich: z.string(),
+        abgeleitetAus: z.array(z.string()),
+      }),
+    )
+    .min(1, "Mindestens ein Oberziel muss vorhanden sein."),
 });
 
 export async function POST(req: NextRequest) {
@@ -66,7 +71,12 @@ export async function POST(req: NextRequest) {
 
   try {
     const provider = getProvider();
-    const ziele = await provider.generateGoals({ ...data, codes: codesTyped, codeDetails, therapieformDetails });
+    const ziele = await provider.generateUnterziele({
+      ...data,
+      codes: codesTyped,
+      codeDetails,
+      therapieformDetails,
+    });
     return NextResponse.json({ ziele });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : "Unbekannter Fehler";
@@ -84,7 +94,7 @@ export async function POST(req: NextRequest) {
     }
     if (msg.includes("abgeschnitten")) {
       return NextResponse.json(
-        { error: "Die KI-Antwort war zu lang. Bitte mit weniger Codes erneut versuchen." },
+        { error: "Die KI-Antwort war zu lang. Bitte mit weniger Oberzielen erneut versuchen." },
         { status: 502 },
       );
     }
@@ -100,7 +110,7 @@ export async function POST(req: NextRequest) {
         { status: 502 },
       );
     }
-    console.error("[generate-goals]", err);
+    console.error("[generate-unterziele]", err);
     return NextResponse.json(
       { error: "KI-Anfrage fehlgeschlagen. Bitte erneut versuchen." },
       { status: 502 },

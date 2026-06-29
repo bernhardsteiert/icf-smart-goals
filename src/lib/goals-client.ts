@@ -1,9 +1,15 @@
-import type { CodeVorschlag, Foerderziel, IcfSelection, SmartUnterziel } from "./types";
+import type {
+  CodeVorschlag,
+  Foerderziel,
+  IcfSelection,
+  Oberziel,
+  SmartUnterziel,
+} from "./types";
 import type { RefineModus } from "./ai/provider";
 
 const NETWORK_ERROR = "Netzwerkfehler. Bitte Verbindung prüfen und erneut versuchen.";
 
-export type GenerateGoalsClientInput = {
+export type GoalContextClientInput = {
   therapieformen: string[];
   codes: IcfSelection[];
   alterHalbjahre: number;
@@ -11,16 +17,40 @@ export type GenerateGoalsClientInput = {
   beobachtung?: string;
 };
 
-// Fordert neue Förderziele an. Wirft Error mit nutzbarer Meldung bei Fehlern.
-export async function requestGoals(
-  input: GenerateGoalsClientInput,
+// Stufe 1: fordert nur Oberziele (Förderrichtungen) an.
+export async function requestOberziele(
+  input: GoalContextClientInput,
+): Promise<Oberziel[]> {
+  let res: Response;
+  try {
+    res = await fetch("/api/generate-oberziele", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(input),
+    });
+  } catch {
+    throw new Error(NETWORK_ERROR);
+  }
+  const data = (await res.json().catch(() => ({}))) as {
+    oberziele?: Oberziel[];
+    error?: string;
+  };
+  if (!res.ok || data.error) {
+    throw new Error(data.error ?? "Unbekannter Fehler beim Abrufen der Oberziele.");
+  }
+  return data.oberziele ?? [];
+}
+
+// Stufe 2: erzeugt zu den bestätigten Oberzielen die SMART-Unterziele.
+export async function requestUnterziele(
+  input: GoalContextClientInput & { oberziele: Oberziel[] },
 ): Promise<Foerderziel[]> {
   let res: Response;
   try {
-    res = await fetch("/api/generate-goals", {
+    res = await fetch("/api/generate-unterziele", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...input, modus: "neu" }),
+      body: JSON.stringify(input),
     });
   } catch {
     throw new Error(NETWORK_ERROR);

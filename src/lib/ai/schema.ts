@@ -15,10 +15,17 @@ export const smartUnterzielSchema = z.object({
   begruendung: z.string(),
 });
 
-export const foerderzielSchema = z.object({
+// Stufe 1: nur Förderrichtungen (ohne Unterziele).
+export const oberzielSchema = z.object({
   oberziel: z.string(),
   bereich: z.string(),
   abgeleitetAus: z.array(z.string()),
+});
+
+export const oberzielArraySchema = z.array(oberzielSchema);
+
+// Stufe 2: Oberziel inkl. SMART-Unterziele.
+export const foerderzielSchema = oberzielSchema.extend({
   unterziele: z.array(smartUnterzielSchema),
 });
 
@@ -48,6 +55,21 @@ const UNTERZIEL_SCHEMA = {
   required: ["ziel", "zielEltern", "status", "begruendung"],
 };
 
+// Stufe 1: nur Oberziele (Richtung), ohne Unterziele.
+export const GEMINI_OBERZIELE_SCHEMA = {
+  type: "ARRAY",
+  items: {
+    type: "OBJECT",
+    properties: {
+      oberziel: { type: "STRING" },
+      bereich: { type: "STRING" },
+      abgeleitetAus: { type: "ARRAY", items: { type: "STRING" } },
+    },
+    required: ["oberziel", "bereich", "abgeleitetAus"],
+  },
+};
+
+// Stufe 2: Oberziele inkl. SMART-Unterziele.
 export const GEMINI_GOALS_SCHEMA = {
   type: "ARRAY",
   items: {

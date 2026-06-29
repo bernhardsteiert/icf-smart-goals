@@ -12,6 +12,7 @@ export const INITIAL_FALL_STATE: FallState = {
   alterHalbjahre: 4,
   merkmale: {},
   beobachtung: "",
+  oberziele: [],
   ziele: [],
 };
 

@@ -67,24 +67,26 @@ src/
     manifest.ts               # PWA-Manifest
     globals.css
     api/
-      generate-goals/route.ts # Aufgabe B (umgesetzt)
+      generate-oberziele/route.ts  # Stufe 1: nur Förderrichtungen (Oberziele)
+      generate-unterziele/route.ts # Stufe 2: SMART-Unterziele zu den Oberzielen
       refine-goal/route.ts    # Verfeinern EINES Unterziels (umgesetzt)
-      # suggest-codes/route.ts  -> NEU in M6 anlegen
-      # next-step/route.ts      -> NEU in M7 anlegen
+      suggest-codes/route.ts  # KI-Code-Vorschläge (M6)
+      next-step/route.ts      # Folgestufe (M7, Server – UI entfernt)
   components/
-    Wizard.tsx                # 6-Schritt-Wizard + Disclaimer-Gate + Navigation
+    Wizard.tsx                # 7-Schritt-Wizard + Disclaimer-Gate + Navigation
     DisclaimerIntro.tsx       # Einstiegsseite "Gelesen und verstanden"
     CollapsingHeader.tsx      # iOS-Large-Title-Header
     StepTherapieform.tsx      # Schritt 1
     StepAusgangslage.tsx      # Schritt 2 (nutzt CodeCatalog)
     StepCodes.tsx             # Schritt 3 (nutzt CodeCatalog, variant="qualifier")
     StepMerkmale.tsx          # Schritt 4: Alter + Merkmale + freie Beobachtung
-    StepUebersicht.tsx        # Schritt 5: Zusammenfassung + "Ziele vorschlagen"
-    StepZiele.tsx             # Schritt 6: Ergebnisse, Verfeinern, Export
+    StepUebersicht.tsx        # Schritt 5: Zusammenfassung (Weiter → Oberziele)
+    StepOberziele.tsx         # Schritt 6: Förderrichtungen ändern/ergänzen/löschen
+    StepZiele.tsx             # Schritt 7: SMART-Ziele, Umschalter, Verfeinern, Export
     CodeCatalog.tsx           # Suche + ausklappbare Kategorien + Desc-auf-Klick + Schweregrad-Slider
     SelectionSummary.tsx      # Zusammenfassung der Auswahl (in Schritt 5)
     ConfirmDialog.tsx         # Eigener Bestätigungs-Dialog (ersetzt window.confirm)
-    LoadingOverlay.tsx        # Vollbild-Lade-Overlay (Zielerstellung Schritt 5)
+    LoadingOverlay.tsx        # Vollbild-Lade-Overlay (Stufe 1 + 2 der Generierung)
     GoalCard.tsx              # Oberziel-Karte; Verfeinern + Export-Checkbox je Unterziel
   lib/
     types.ts                  # zentrale Typen (siehe §3)
@@ -151,11 +153,16 @@ export type SmartUnterziel = {
   begruendung: string;
 };
 
-// Kein zeithorizont-Feld (Planungshorizont ist nur interner Prompt-Hintergrund).
-export type Foerderziel = {
+// Stufe 1: nur die Förderrichtung (ohne Unterziele) – editierbar in Schritt 6.
+export type Oberziel = {
   oberziel: string;
   bereich: string;
   abgeleitetAus: string[];
+};
+
+// Stufe 2: Oberziel inkl. SMART-Unterziele. Kein zeithorizont-Feld
+// (Planungshorizont ist nur interner Prompt-Hintergrund).
+export type Foerderziel = Oberziel & {
   unterziele: SmartUnterziel[];
 };
 
@@ -194,10 +201,11 @@ export type AlterHalbjahre = number;
 
 ```ts
 export interface AiProvider {
-  suggestCodes(input: SuggestCodesInput): Promise<CodeVorschlag[]>;       // M6 (Route fehlt noch)
-  generateGoals(input: GenerateGoalsInput): Promise<Foerderziel[]>;       // umgesetzt
-  refineUnterziel(input: RefineUnterzielInput): Promise<SmartUnterziel>;  // umgesetzt
-  nextStep(input: NextStepInput): Promise<SmartUnterziel>;                // M7 (Route/UI fehlen)
+  suggestCodes(input: SuggestCodesInput): Promise<CodeVorschlag[]>;            // M6
+  generateOberziele(input: GenerateOberzieleInput): Promise<Oberziel[]>;      // Stufe 1
+  generateUnterziele(input: GenerateUnterzieleInput): Promise<Foerderziel[]>; // Stufe 2
+  refineUnterziel(input: RefineUnterzielInput): Promise<SmartUnterziel>;       // umgesetzt
+  nextStep(input: NextStepInput): Promise<SmartUnterziel>;                     // M7 (Server)
 }
 
 export function getProvider(): AiProvider {
@@ -276,12 +284,21 @@ Alle Routen: `POST`, JSON rein/raus, laufen serverseitig, nutzen `getProvider()`
 Body-Validierung mit `zod`. Der Route-Handler reichert Codes aus `src/data` zu
 `codeDetails` an (Client schickt nur Code-Keys/IcfSelection).
 
-**`POST /api/generate-goals`** *(umgesetzt)*
+**`POST /api/generate-oberziele`** *(Stufe 1 – nur Förderrichtungen)*
 ```ts
 // Request
 { therapieformen: string[]; codes: IcfSelection[]; alterHalbjahre: number;
+  merkmale: Record<string,unknown>; beobachtung?: string }
+// Response
+{ oberziele: Oberziel[] }   // { oberziel, bereich, abgeleitetAus } – ohne Unterziele
+```
+
+**`POST /api/generate-unterziele`** *(Stufe 2 – SMART-Unterziele zu bestätigten Oberzielen)*
+```ts
+// Request  – wie oben PLUS die (ggf. bearbeiteten) Oberziele
+{ therapieformen: string[]; codes: IcfSelection[]; alterHalbjahre: number;
   merkmale: Record<string,unknown>; beobachtung?: string;
-  modus: "neu" | "einfacher" | "ambitionierter" | "umformulieren" }
+  oberziele: Oberziel[] }
 // Response  – jedes Unterziel enthält "ziel" (Fachkraft) UND "zielEltern"
 { ziele: Foerderziel[] }   // ohne zeithorizont-Feld
 ```
@@ -333,7 +350,8 @@ type FallState = {
   alterHalbjahre: number;
   merkmale: Record<string, unknown>;
   beobachtung: string;
-  ziele: Foerderziel[];
+  oberziele: Oberziel[];   // Stufe 1 – bestätigte/bearbeitete Förderrichtungen
+  ziele: Foerderziel[];    // Stufe 2 – daraus erzeugte SMART-Ziele
 };
 ```
 
@@ -355,19 +373,25 @@ Schritt-Wizard (Spec §6), oben Fortschrittsanzeige, unten Weiter/Zurück:
    annehmbare Vorschläge).
 4. **Alter & Merkmale** – Alter als Dropdown in Halbjahrschritten; Merkmale aus
    `merkmale.json`.
-5. **Übersicht** – Zusammenfassung der Auswahl. Die Zielerstellung
-   (`/api/generate-goals`) läuft über den normalen „Weiter →"-Button der
-   Wizard-Navigation (konsistent zu den übrigen Schritten); während der Anfrage
-   blendet `LoadingOverlay` ein Vollbild-Lade-Overlay ein. Bestehen bereits
-   Ziele, führt „Weiter" direkt zu Schritt 6 (ohne neue KI-Anfrage).
-6. **Ziele** – Anzeige als
+5. **Übersicht** – Zusammenfassung der Auswahl. „Weiter →" löst **Stufe 1**
+   (`/api/generate-oberziele`) aus: die KI schlägt nur die Förderrichtungen vor.
+   Läuft über die Wizard-Navigation (konsistent); während der Anfrage blendet
+   `LoadingOverlay` ein Vollbild-Lade-Overlay ein. Bestehen bereits Oberziele,
+   führt „Weiter" direkt zu Schritt 6 (ohne neue KI-Anfrage).
+6. **Oberziele** (`StepOberziele`) – Liste der Förderrichtungen (Titel + Bereich
+   editierbar, `abgeleitetAus` als Chips). Pro Oberziel löschen; „Eigenes Oberziel
+   hinzufügen"; „Neu vorschlagen" (Stufe 1 erneut). „Weiter →" löst **Stufe 2**
+   (`/api/generate-unterziele`) aus: SMART-Unterziele zu den bestätigten Oberzielen.
+   Jede Änderung an den Oberzielen verwirft bestehende SMART-Ziele (Regenerierung).
+7. **SMART-Ziele** – Anzeige als
    `GoalCard` (Oberziel + Unterziele mit SMART-Details + `abgeleitetAus`-Codes).
    Oben ein **globaler Umschalter Fachkraft ↔ Eltern** (Default Fachkraft): die KI
    erzeugt zu jedem Unterziel beide Formulierungen parallel (`ziel` + `zielEltern`),
    der Umschalter zeigt dieselben Ziele nur in anderer Sprache. Pro Unterziel:
    Verfeinern-Buttons (einfacher · ambitionierter · anders formulieren · Freitext;
    regenerieren beide Versionen synchron) und „Bearbeiten" (wirkt auf die gerade
-   angezeigte Version). Export-Button (Text).
+   angezeigte Version). „Ziele neu vorschlagen" regeneriert die Unterziele zu den
+   Oberzielen. Export-Button (Text).
 
 **Quer:** `DisclaimerBanner` (Entwurfshilfe, Verantwortung bei Fachkraft),
 `NameWarning` an jedem Freitextfeld, Ladezustände, Fehlertoasts.
