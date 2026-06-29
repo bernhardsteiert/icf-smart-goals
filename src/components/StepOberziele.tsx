@@ -1,5 +1,6 @@
 "use client";
 
+import { useLayoutEffect, useRef } from "react";
 import type { Oberziel } from "@/lib/types";
 
 interface Props {
@@ -8,6 +9,39 @@ interface Props {
   onRegenerate: () => void;
   regenerating: boolean;
   error: string | null;
+}
+
+/**
+ * Textarea, die automatisch mit ihrem Inhalt mitwächst – damit lange Oberziele
+ * vollständig (umgebrochen) lesbar bleiben, statt in einer Zeile abzuschneiden.
+ */
+function AutoTextarea({
+  value,
+  onChange,
+  className,
+  ...rest
+}: Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange"> & {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (el) {
+      el.style.height = "auto";
+      el.style.height = `${el.scrollHeight}px`;
+    }
+  }, [value]);
+  return (
+    <textarea
+      ref={ref}
+      value={value}
+      rows={1}
+      onChange={(e) => onChange(e.target.value)}
+      className={`w-full resize-none overflow-hidden ${className ?? ""}`}
+      {...rest}
+    />
+  );
 }
 
 /**
@@ -69,52 +103,19 @@ export default function StepOberziele({
           {oberziele.map((o, i) => (
             <li
               key={i}
-              className="rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm"
+              className="space-y-2 rounded-lg border border-gray-200 bg-white px-4 py-3 shadow-sm"
             >
-              <div className="flex items-start gap-2">
-                <span className="mt-2 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
+              {/* Kopfzeile: Nummer + Löschen – die Felder darunter über volle Breite */}
+              <div className="flex items-center justify-between">
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
                   {i + 1}
                 </span>
-                <div className="min-w-0 flex-1 space-y-2">
-                  <input
-                    type="text"
-                    value={o.oberziel}
-                    onChange={(e) => patch(i, { oberziel: e.target.value })}
-                    placeholder="Förderrichtung (Oberziel)"
-                    aria-label={`Oberziel ${i + 1}`}
-                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-900 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                  />
-                  <div className="flex items-center gap-2">
-                    <label className="text-xs text-gray-400">Bereich:</label>
-                    <input
-                      type="text"
-                      value={o.bereich}
-                      onChange={(e) => patch(i, { bereich: e.target.value })}
-                      placeholder="z.B. Sprachliche Entwicklung"
-                      aria-label={`Bereich von Oberziel ${i + 1}`}
-                      className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm text-gray-700 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
-                    />
-                  </div>
-                  {o.abgeleitetAus.length > 0 && (
-                    <div className="flex flex-wrap items-center gap-1">
-                      <span className="text-xs text-gray-400">Abgeleitet aus:</span>
-                      {o.abgeleitetAus.map((code) => (
-                        <span
-                          key={code}
-                          className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs text-gray-600"
-                        >
-                          {code}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
                 <button
                   type="button"
                   onClick={() => remove(i)}
                   aria-label={`Oberziel ${i + 1} löschen`}
                   title="Oberziel löschen"
-                  className="-mr-1 mt-1 flex-shrink-0 rounded-full p-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                  className="-mr-1 rounded-full p-1.5 text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600"
                 >
                   <svg
                     viewBox="0 0 24 24"
@@ -133,6 +134,39 @@ export default function StepOberziele({
                   </svg>
                 </button>
               </div>
+
+              <AutoTextarea
+                value={o.oberziel}
+                onChange={(v) => patch(i, { oberziel: v })}
+                placeholder="Förderrichtung (Oberziel)"
+                aria-label={`Oberziel ${i + 1}`}
+                className="rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium leading-snug text-gray-900 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+              />
+
+              <div className="space-y-1">
+                <label className="block text-xs text-gray-400">Bereich</label>
+                <AutoTextarea
+                  value={o.bereich}
+                  onChange={(v) => patch(i, { bereich: v })}
+                  placeholder="z.B. Sprachliche Entwicklung"
+                  aria-label={`Bereich von Oberziel ${i + 1}`}
+                  className="rounded-lg border border-gray-200 px-2.5 py-1.5 text-sm leading-snug text-gray-700 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                />
+              </div>
+
+              {o.abgeleitetAus.length > 0 && (
+                <div className="flex flex-wrap items-center gap-1 pt-0.5">
+                  <span className="text-xs text-gray-400">Abgeleitet aus:</span>
+                  {o.abgeleitetAus.map((code) => (
+                    <span
+                      key={code}
+                      className="rounded bg-gray-100 px-1.5 py-0.5 font-mono text-xs text-gray-600"
+                    >
+                      {code}
+                    </span>
+                  ))}
+                </div>
+              )}
             </li>
           ))}
         </ul>
