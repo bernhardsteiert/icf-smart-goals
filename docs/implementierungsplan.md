@@ -106,6 +106,7 @@ src/
     merkmale.json
     therapieformen.json
     synonyme.json             # Konzept-Thesaurus für die semantische Suche
+    bereiche.json             # kuratierte Förderbereiche (Oberziel-Dropdown)
 ```
 
 > Hinweis: `CodeGroup.tsx`, `DisclaimerBanner.tsx` und `NameWarning.tsx` aus der
@@ -378,9 +379,12 @@ Schritt-Wizard (Spec §6), oben Fortschrittsanzeige, unten Weiter/Zurück:
    Läuft über die Wizard-Navigation (konsistent); während der Anfrage blendet
    `LoadingOverlay` ein Vollbild-Lade-Overlay ein. Bestehen bereits Oberziele,
    führt „Weiter" direkt zu Schritt 6 (ohne neue KI-Anfrage).
-6. **Oberziele** (`StepOberziele`) – Liste der Förderrichtungen (Titel + Bereich
-   editierbar, `abgeleitetAus` als Chips). Pro Oberziel löschen; „Eigenes Oberziel
-   hinzufügen"; „Neu vorschlagen" (Stufe 1 erneut). „Weiter →" löst **Stufe 2**
+6. **Oberziele** (`StepOberziele`) – Liste der Förderrichtungen (Titel als
+   mitwachsendes Textfeld, **Bereich als Dropdown** aus `bereiche.json` + eigene
+   Bereiche via „Eigener Bereich …", lokal gemerkt; `abgeleitetAus` als Chips). Die
+   KI wählt den Bereich aus der Liste (unbekannte Werte bleiben erhalten). Pro
+   Oberziel löschen; „Eigenes Oberziel hinzufügen"; „Neu vorschlagen" (Stufe 1
+   erneut). „Weiter →" löst **Stufe 2**
    (`/api/generate-unterziele`) aus: SMART-Unterziele zu den bestätigten Oberzielen.
    Jede Änderung an den Oberzielen verwirft bestehende SMART-Ziele (Regenerierung).
 7. **SMART-Ziele** – Anzeige als

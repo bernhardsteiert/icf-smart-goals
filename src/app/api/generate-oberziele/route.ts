@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getProvider } from "@/lib/ai/provider";
-import { getAllCodes, getAllTherapieformen } from "@/lib/icf";
+import { getAllCodes, getAllTherapieformen, getAllBereiche } from "@/lib/icf";
 
 const requestSchema = z.object({
   therapieformen: z.array(z.string()).min(1),
@@ -67,6 +67,7 @@ export async function POST(req: NextRequest) {
       codes: codesTyped,
       codeDetails,
       therapieformDetails,
+      bereiche: getAllBereiche(),
     });
     return NextResponse.json({ oberziele });
   } catch (err: unknown) {
