@@ -140,9 +140,12 @@ export type Therapieform = { id: string; label: string; hinweis: string; aktiv: 
 
 export type Merkmal = { id: string; label: string; typ: "auswahl" | "toggle" | "kurztext" };
 
-// Jedes Unterziel ist EIN ausformulierter SMART-Satz (keine Einzelfelder mehr).
+// Jedes Unterziel ist EIN ausformulierter SMART-Satz (keine Einzelfelder mehr),
+// in zwei inhaltlich identischen Sprachversionen (Default Fachkraft, per
+// Umschalter Eltern).
 export type SmartUnterziel = {
-  ziel: string;
+  ziel: string;        // fachsprachliche Formulierung (Default)
+  zielEltern: string;  // dieselbe Aussage, elterngerecht/alltagsnah
   status: "offen" | "erreicht";
   naechsteStufe?: string;
   begruendung: string;
@@ -250,7 +253,9 @@ Regeln:
 **Verfeinern eines Unterziels, `buildRefineUnterzielUserPrompt`:** übergibt
 Oberziel, bisherigen Zielsatz, Bezug-Codes, Alter, Merkmale, Beobachtung und den
 Modus (inkl. `freitext`-Vorgabe) und fordert **genau ein** überarbeitetes
-Unterziel als JSON.
+Unterziel als JSON – mit **beiden** Sprachversionen (`ziel` + `zielEltern`,
+inhaltlich identisch). „Für Eltern" ist kein Verfeinern-Modus mehr, sondern der
+globale Umschalter in Schritt 6.
 
 **System-Prompt – Aufgabe A (Code-Vorschläge), `SYSTEM_PROMPT_CODES` (für M6):**
 
@@ -276,8 +281,8 @@ Body-Validierung mit `zod`. Der Route-Handler reichert Codes aus `src/data` zu
 // Request
 { therapieformen: string[]; codes: IcfSelection[]; alterHalbjahre: number;
   merkmale: Record<string,unknown>; beobachtung?: string;
-  modus: "neu" | "einfacher" | "ambitionierter" | "umformulieren" | "elterngerecht" }
-// Response
+  modus: "neu" | "einfacher" | "ambitionierter" | "umformulieren" }
+// Response  – jedes Unterziel enthält "ziel" (Fachkraft) UND "zielEltern"
 { ziele: Foerderziel[] }   // ohne zeithorizont-Feld
 ```
 
@@ -285,7 +290,7 @@ Body-Validierung mit `zod`. Der Route-Handler reichert Codes aus `src/data` zu
 ```ts
 // Request
 { oberziel: string; bisherigesZiel: string;
-  modus: "einfacher" | "ambitionierter" | "umformulieren" | "elterngerecht" | "freitext";
+  modus: "einfacher" | "ambitionierter" | "umformulieren" | "freitext";
   freitext?: string;                       // bei modus "freitext"
   alterHalbjahre: number; merkmale: Record<string,unknown>; beobachtung?: string;
   codes: string[] }                        // ausgewählte Code-Keys (für Kontext)
@@ -357,8 +362,12 @@ Schritt-Wizard (Spec §6), oben Fortschrittsanzeige, unten Weiter/Zurück:
    Ziele, führt „Weiter" direkt zu Schritt 6 (ohne neue KI-Anfrage).
 6. **Ziele** – Anzeige als
    `GoalCard` (Oberziel + Unterziele mit SMART-Details + `abgeleitetAus`-Codes).
-   Pro Karte: Verfeinern-Buttons, je Unterziel „erreicht"-Toggle → bei erreicht
-   Button „Nächste Stufe vorschlagen" (`/api/next-step`). Export-Button (Text).
+   Oben ein **globaler Umschalter Fachkraft ↔ Eltern** (Default Fachkraft): die KI
+   erzeugt zu jedem Unterziel beide Formulierungen parallel (`ziel` + `zielEltern`),
+   der Umschalter zeigt dieselben Ziele nur in anderer Sprache. Pro Unterziel:
+   Verfeinern-Buttons (einfacher · ambitionierter · anders formulieren · Freitext;
+   regenerieren beide Versionen synchron) und „Bearbeiten" (wirkt auf die gerade
+   angezeigte Version). Export-Button (Text).
 
 **Quer:** `DisclaimerBanner` (Entwurfshilfe, Verantwortung bei Fachkraft),
 `NameWarning` an jedem Freitextfeld, Ladezustände, Fehlertoasts.
@@ -385,8 +394,10 @@ Oberziel: Erweiterung des Wortschatzes
   (abgeleitet aus: d330)
 ```
 
-`zieleToText(ziele)` akzeptiert eine ggf. **gefilterte** Zielliste (Export-Auswahl
-vs. kompletter Plan). Button „In Zwischenablage kopieren" + „Als .txt herunterladen".
+`zieleToText(ziele, { includeEltern })` akzeptiert eine ggf. **gefilterte** Zielliste
+(Export-Auswahl vs. kompletter Plan). Standard ist die Fachkraft-Formulierung; eine
+**Checkbox „Elternversion mit exportieren"** (Default aus) ergänzt je Ziel eine
+`Elternversion:`-Zeile. Button „In Zwischenablage kopieren" + „Als .txt herunterladen".
 
 ---
 
@@ -578,8 +589,8 @@ GEMINI_MODEL=gemini-2.5-flash
    plausibles Oberziel „Wortschatz erweitern" mit messbaren Unterzielen.
 2. **ADL-Fall:** d540+d550, Alter 2,5 J. → Ziele zu Selbstständigkeit beim
    An-/Ausziehen und Essen.
-3. **Verfeinern:** „einfacher" senkt Anspruch sichtbar; „elterngerecht" ändert
-   Tonalität.
+3. **Verfeinern:** „einfacher" senkt Anspruch sichtbar; Umschalter „Eltern" zeigt
+   dasselbe Ziel in alltagsnaher Sprache.
 4. **Folgestufe:** Unterziel auf „erreicht" → aufbauender nächster Schritt.
 5. **Privacy:** Beobachtung mit „Max heißt..." → Klarnamen-Warnung erscheint.
 6. **Resilienz:** ungültiger/fehlender API-Key → klare UI-Fehlermeldung, kein Crash.

@@ -44,7 +44,11 @@ export type Merkmal = {
 export type SmartUnterziel = {
   // Ein einzelnes, ausformuliertes SMART-Ziel: in sich spezifisch, messbar,
   // erreichbar, relevant und terminiert – keine Aufschlüsselung nach Kriterien.
+  // Dasselbe Ziel in zwei Sprachversionen: "ziel" fachsprachlich (Default),
+  // "zielEltern" alltagsnah/elterngerecht. Inhalt und Anspruch sind identisch,
+  // nur Wortwahl/Ton unterscheiden sich – per Umschalter in der UI wählbar.
   ziel: string;
+  zielEltern: string;
   status: "offen" | "erreicht";
   naechsteStufe?: string;
   begruendung: string;

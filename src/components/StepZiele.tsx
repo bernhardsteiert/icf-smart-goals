@@ -5,7 +5,7 @@ import type { Foerderziel, IcfSelection } from "@/lib/types";
 import type { RefineModus } from "@/lib/ai/provider";
 import { zieleToText } from "@/lib/export";
 import { requestGoals, requestRefine } from "@/lib/goals-client";
-import GoalCard from "./GoalCard";
+import GoalCard, { type ZielView } from "./GoalCard";
 
 // Alle Export-Auswahl-Schlüssel (Karten-Index : Unterziel-Index).
 function allSelectionKeys(ziele: Foerderziel[]): Set<string> {
@@ -56,6 +56,10 @@ export default function StepZiele({
     allSelectionKeys(ziele),
   );
   const [exportScope, setExportScope] = useState<"auswahl" | "komplett">("auswahl");
+  // Globaler Umschalter: Fachkraft (Default) ↔ Eltern – schaltet alle Ziele.
+  const [view, setView] = useState<ZielView>("fachkraft");
+  // Export ergänzt die Elternversion nur auf Wunsch (Default aus).
+  const [exportEltern, setExportEltern] = useState(false);
 
   const codes = auswahl.map((a) => a.code);
 
@@ -113,6 +117,8 @@ export default function StepZiele({
   }
 
   function handleEditZiel(zi: number, ui: number, newZiel: string) {
+    // Manuelles Editieren wirkt auf die gerade angezeigte Sprachversion.
+    const field = view === "eltern" ? "zielEltern" : "ziel";
     onZieleChange(
       ziele.map((z, i) =>
         i !== zi
@@ -120,7 +126,7 @@ export default function StepZiele({
           : {
               ...z,
               unterziele: z.unterziele.map((u, j) =>
-                j !== ui ? u : { ...u, ziel: newZiel },
+                j !== ui ? u : { ...u, [field]: newZiel },
               ),
             },
       ),
@@ -144,7 +150,7 @@ export default function StepZiele({
 
   function exportText(): string {
     const list = exportScope === "komplett" ? ziele : filterSelected(ziele, selected);
-    return zieleToText(list);
+    return zieleToText(list, { includeEltern: exportEltern });
   }
 
   async function handleCopy() {
@@ -235,6 +241,39 @@ export default function StepZiele({
         </button>
       </div>
 
+      {/* Globaler Umschalter: dieselben Ziele, andere Formulierung. */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-sm font-medium text-gray-700">Ansicht:</span>
+        <div
+          role="group"
+          aria-label="Sprachversion der Ziele"
+          className="inline-flex rounded-lg border border-gray-300 bg-gray-100 p-0.5"
+        >
+          {([
+            ["fachkraft", "Fachkraft"],
+            ["eltern", "Eltern"],
+          ] as const).map(([val, label]) => (
+            <button
+              key={val}
+              type="button"
+              onClick={() => setView(val)}
+              aria-pressed={view === val}
+              className={`rounded-md px-3 py-1 text-sm font-medium transition-colors ${
+                view === val
+                  ? "bg-white text-blue-700 shadow-sm"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <span className="text-xs text-gray-400">
+          Gleiches Ziel, {view === "eltern" ? "elterngerechte" : "fachsprachliche"}{" "}
+          Formulierung
+        </span>
+      </div>
+
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           <strong>Fehler:</strong> {error}
@@ -246,6 +285,7 @@ export default function StepZiele({
           key={i}
           ziel={z}
           zielIndex={i}
+          view={view}
           selected={selected}
           onToggleSelect={toggleSelect}
           onRefineUnterziel={(ui, modus, freitext) =>
@@ -286,6 +326,15 @@ export default function StepZiele({
             Kompletter Förderplan
           </label>
         </div>
+        <label className="flex cursor-pointer items-center gap-1.5 text-sm text-gray-700">
+          <input
+            type="checkbox"
+            checked={exportEltern}
+            onChange={(e) => setExportEltern(e.target.checked)}
+            className="h-4 w-4"
+          />
+          Elternversion mit exportieren
+        </label>
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"

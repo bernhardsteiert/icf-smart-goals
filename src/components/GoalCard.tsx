@@ -9,12 +9,15 @@ const PRESET_BUTTONS: { modus: RefineModus; label: string }[] = [
   { modus: "einfacher", label: "Einfacher" },
   { modus: "ambitionierter", label: "Ambitionierter" },
   { modus: "umformulieren", label: "Anders formulieren" },
-  { modus: "elterngerecht", label: "Für Eltern" },
 ];
+
+// Welche Sprachversion gerade angezeigt wird (globaler Umschalter in StepZiele).
+export type ZielView = "fachkraft" | "eltern";
 
 interface Props {
   ziel: Foerderziel;
   zielIndex: number;
+  view: ZielView;
   selected: Set<string>;
   onToggleSelect: (key: string) => void;
   onRefineUnterziel: (
@@ -30,6 +33,7 @@ interface Props {
 export default function GoalCard({
   ziel,
   zielIndex,
+  view,
   selected,
   onToggleSelect,
   onRefineUnterziel,
@@ -97,6 +101,7 @@ export default function GoalCard({
             <UnterzielRow
               key={i}
               unterziel={uz}
+              view={view}
               selected={selected.has(key)}
               onToggleSelect={() => onToggleSelect(key)}
               onRefine={(modus, freitext) => onRefineUnterziel(i, modus, freitext)}
@@ -112,6 +117,7 @@ export default function GoalCard({
 
 function UnterzielRow({
   unterziel,
+  view,
   selected,
   onToggleSelect,
   onRefine,
@@ -119,16 +125,22 @@ function UnterzielRow({
   onEdit,
 }: {
   unterziel: Foerderziel["unterziele"][number];
+  view: ZielView;
   selected: boolean;
   onToggleSelect: () => void;
   onRefine: (modus: RefineModus, freitext?: string) => void;
   busy: boolean;
   onEdit: (newZiel: string) => void;
 }) {
+  // Angezeigter Zielsatz folgt dem globalen Umschalter; Fallback auf die
+  // Fachkraft-Version, falls eine ältere Antwort noch keine Elternversion hat.
+  const displayedZiel =
+    view === "eltern" ? unterziel.zielEltern || unterziel.ziel : unterziel.ziel;
+
   const [showWhy, setShowWhy] = useState(false);
   const [showRefine, setShowRefine] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
-  const [editText, setEditText] = useState(unterziel.ziel);
+  const [editText, setEditText] = useState(displayedZiel);
   const [freitext, setFreitext] = useState("");
   const [freitextDirty, setFreitextDirty] = useState(false);
 
@@ -144,7 +156,7 @@ function UnterzielRow({
 
   const submitEdit = () => {
     const trimmed = editText.trim();
-    if (!trimmed || trimmed === unterziel.ziel) {
+    if (!trimmed || trimmed === displayedZiel) {
       setShowEdit(false);
       return;
     }
@@ -153,7 +165,7 @@ function UnterzielRow({
   };
 
   const openEdit = () => {
-    setEditText(unterziel.ziel);
+    setEditText(displayedZiel);
     setShowEdit(true);
     setShowRefine(false);
   };
@@ -172,7 +184,7 @@ function UnterzielRow({
 
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <p className="text-sm text-gray-800">{unterziel.ziel}</p>
+            <p className="text-sm text-gray-800">{displayedZiel}</p>
             {busy && (
               <span
                 className="mt-0.5 inline-block h-4 w-4 flex-shrink-0 animate-spin rounded-full border-2 border-blue-600 border-t-transparent"
@@ -225,7 +237,8 @@ function UnterzielRow({
           {showEdit && (
             <div className="mt-2 space-y-2 rounded-md bg-gray-50 px-3 py-2.5">
               <label className="block text-xs font-medium text-gray-600">
-                Zielsatz direkt bearbeiten
+                {view === "eltern" ? "Elternversion" : "Fachkraft-Version"} direkt
+                bearbeiten
               </label>
               <textarea
                 value={editText}

@@ -9,6 +9,7 @@ const qualifierSchema = z.union([
 
 export const smartUnterzielSchema = z.object({
   ziel: z.string(),
+  zielEltern: z.string(),
   status: z.enum(["offen", "erreicht"]),
   naechsteStufe: z.string().optional(),
   begruendung: z.string(),
@@ -39,11 +40,12 @@ const UNTERZIEL_SCHEMA = {
   type: "OBJECT",
   properties: {
     ziel: { type: "STRING" },
+    zielEltern: { type: "STRING" },
     status: { type: "STRING", enum: ["offen", "erreicht"] },
     naechsteStufe: { type: "STRING" },
     begruendung: { type: "STRING" },
   },
-  required: ["ziel", "status", "begruendung"],
+  required: ["ziel", "zielEltern", "status", "begruendung"],
 };
 
 export const GEMINI_GOALS_SCHEMA = {
