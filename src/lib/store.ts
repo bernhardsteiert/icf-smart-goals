@@ -26,8 +26,13 @@ export function useFallState() {
     // `hydrated`-Guard gegen Überschreiben abgesichert.
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (raw) setStateRaw(JSON.parse(raw) as FallState);
+      // Über die Defaults mergen, damit ein älterer gespeicherter Stand, dem neue
+      // Felder fehlen (z.B. `oberziele`), nicht zu `undefined`-Zugriffen führt.
+      if (raw) {
+        const merged = { ...INITIAL_FALL_STATE, ...(JSON.parse(raw) as Partial<FallState>) };
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setStateRaw(merged);
+      }
     } catch {
       // localStorage not available or corrupted
     }
