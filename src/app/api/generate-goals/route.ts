@@ -17,7 +17,7 @@ const requestSchema = z.object({
   alterHalbjahre: z.number().min(0).max(14),
   merkmale: z.record(z.string(), z.unknown()),
   beobachtung: z.string().optional(),
-  modus: z.enum(["neu", "einfacher", "ambitionierter", "umformulieren", "elterngerecht"]),
+  modus: z.enum(["neu", "einfacher", "ambitionierter", "umformulieren"]),
   bezugsziel: z
     .object({ oberziel: z.string(), unterziel: z.string().optional() })
     .optional(),

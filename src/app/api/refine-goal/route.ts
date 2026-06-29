@@ -10,7 +10,6 @@ const requestSchema = z.object({
     "einfacher",
     "ambitionierter",
     "umformulieren",
-    "elterngerecht",
     "freitext",
   ]),
   freitext: z.string().optional(),

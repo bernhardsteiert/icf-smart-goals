@@ -16,7 +16,7 @@ export type GenerateGoalsInput = {
   alterHalbjahre: number;
   merkmale: Record<string, unknown>;
   beobachtung?: string;
-  modus: "neu" | "einfacher" | "ambitionierter" | "umformulieren" | "elterngerecht";
+  modus: "neu" | "einfacher" | "ambitionierter" | "umformulieren";
   bezugsziel?: { oberziel: string; unterziel?: string };
   // Angereichert vom Route-Handler aus den JSON-Stammdaten:
   codeDetails: { code: string; title: string; description: string }[];
@@ -34,7 +34,6 @@ export type RefineModus =
   | "einfacher"
   | "ambitionierter"
   | "umformulieren"
-  | "elterngerecht"
   | "freitext";
 
 export type RefineUnterzielInput = {

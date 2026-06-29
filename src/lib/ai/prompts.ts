@@ -34,11 +34,16 @@ Deine Aufgabe ist es, ENTWÜRFE für Förderziele zu erstellen, die eine Fachkra
 
 Regeln:
 - Erstelle Oberziele (Richtung) mit jeweils mehreren Unterzielen.
-- Jedes Unterziel ist GENAU EIN Ziel, formuliert als EIN zusammenhängender, \
-ausformulierter Satz im Feld "ziel", der ALLE SMART-Kriterien zugleich erfüllt: \
-spezifisch, messbar (konkreter, beobachtbarer Indikator), erreichbar, relevant und \
-terminiert. Schlüssele die Kriterien NICHT in Einzelfelder auf – sie müssen sich \
-aus dem einen Satz ergeben.
+- Jedes Unterziel ist GENAU EIN Ziel und wird in ZWEI Sprachversionen DESSELBEN \
+Ziels formuliert:
+  • Feld "ziel": fachsprachliche Formulierung für die Fachkraft.
+  • Feld "zielEltern": dieselbe Aussage in alltagsnaher, wertschätzender Sprache \
+für die Eltern (keine Fachbegriffe, gut verständlich).
+  Beide Versionen sind jeweils EIN zusammenhängender, ausformulierter Satz, der \
+ALLE SMART-Kriterien zugleich erfüllt: spezifisch, messbar (konkreter, \
+beobachtbarer Indikator), erreichbar, relevant und terminiert. Inhalt, Anspruch \
+und Messbarkeit sind in BEIDEN Versionen IDENTISCH – nur Wortwahl und Ton \
+unterscheiden sich. Schlüssele die Kriterien NICHT in Einzelfelder auf.
 - Planungshintergrund (NICHT im Text erwähnen): ein Förderzeitraum von ca. einem \
 Jahr bzw. rund 42 Therapieeinheiten. Nutze das nur, um den Anspruch realistisch zu \
 wählen. Nenne KEINE konkreten Monats- oder Einheitenzahlen in den Zielen; formuliere \
@@ -46,8 +51,6 @@ den Zeitbezug allgemein, z.B. "bis zum Ende des Förderzeitraums".
 - Leite Ziele ausschließlich aus den übergebenen ICF-CY-Codes, dem Alter und den \
 Merkmalen ab. Erfinde keine Testnormen, Diagnosen oder Fakten.
 - Schreibe auf Deutsch, wertschätzend und ressourcenorientiert.
-- Passe die Sprache an den Modus an: \
-"neu" und "fachintern" → Fachsprache; "elterngerecht" → alltagsnahe, positive Sprache.
 - Antworte AUSSCHLIESSLICH mit JSON gemäß vorgegebenem Schema. Kein Fließtext außerhalb des JSON.`;
 
 export const SYSTEM_PROMPT_CODES = `Du bist eine erfahrene Fachkraft der heilpädagogischen Frühförderung (ICF-CY). \
@@ -95,7 +98,6 @@ export function buildGoalsUserPrompt(input: GenerateGoalsInput): string {
     einfacher: "Einfacher / weniger anspruchsvoll",
     ambitionierter: "Ambitionierter / anspruchsvoller",
     umformulieren: "Anders formulieren",
-    elterngerecht: "Elterngerecht (alltagsnahe Sprache)",
   };
   parts.push(`Modus: ${modusText[input.modus]}`);
 
@@ -142,7 +144,9 @@ export function buildNextStepUserPrompt(input: NextStepInput): string {
     `Oberziel: "${input.oberziel}"`,
     `Alter: ${halbjahreToText(input.alterHalbjahre)}`,
     `Aufgabe: Schlage ein darauf aufbauendes, schwierigeres nächstes Unterziel vor (Progression). \
-Das neue Unterziel soll auf dem Erreichten aufbauen und eine realistische nächste Entwicklungsstufe beschreiben.`,
+Das neue Unterziel soll auf dem Erreichten aufbauen und eine realistische nächste Entwicklungsstufe beschreiben. \
+Gib BEIDE Sprachversionen desselben Ziels zurück: Feld "ziel" (fachsprachlich) und Feld "zielEltern" \
+(alltagsnah/elterngerecht) – inhaltlich identisch, nur Wortwahl/Ton unterscheiden sich.`,
   ].join("\n\n");
 }
 
@@ -150,7 +154,6 @@ const REFINE_MODUS_TEXT: Record<RefineUnterzielInput["modus"], string> = {
   einfacher: "Mache das Ziel EINFACHER / weniger anspruchsvoll.",
   ambitionierter: "Mache das Ziel AMBITIONIERTER / anspruchsvoller.",
   umformulieren: "Formuliere dasselbe Ziel ANDERS (gleicher Anspruch, neue Formulierung).",
-  elterngerecht: "Formuliere das Ziel ELTERNGERECHT in alltagsnaher, positiver Sprache.",
   freitext: "Überarbeite das Ziel gemäß der gewünschten Änderung der Fachkraft.",
 };
 
@@ -176,9 +179,12 @@ export function buildRefineUnterzielUserPrompt(input: RefineUnterzielInput): str
   }
 
   parts.push(
-    `Gib GENAU EIN überarbeitetes Unterziel als JSON zurück (Feld "ziel" als ein \
-ausformulierter SMART-Satz, der alle SMART-Kriterien zugleich erfüllt). Behalte \
-den Status "offen", außer es ist anders sinnvoll.`,
+    `Gib GENAU EIN überarbeitetes Unterziel als JSON zurück, mit BEIDEN \
+Sprachversionen desselben Ziels: Feld "ziel" (fachsprachlich) und Feld \
+"zielEltern" (alltagsnah/elterngerecht). Beide sind ein ausformulierter SMART-Satz, \
+der alle SMART-Kriterien zugleich erfüllt; Inhalt und Anspruch sind identisch, nur \
+Wortwahl/Ton unterscheiden sich. Behalte den Status "offen", außer es ist anders \
+sinnvoll.`,
   );
 
   return parts.join("\n\n");

@@ -4,6 +4,7 @@ import { getProvider } from "@/lib/ai/provider";
 
 const unterzielSchema = z.object({
   ziel: z.string(),
+  zielEltern: z.string(),
   status: z.enum(["offen", "erreicht"]),
   naechsteStufe: z.string().optional(),
   begruendung: z.string(),

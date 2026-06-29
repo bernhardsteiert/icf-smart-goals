@@ -206,14 +206,22 @@ nur optional. **Vorgeschaltet:** ein **Disclaimer-Einstieg** mit Button
    Schweregrad/Quelle, Alter, Merkmale, Beobachtung) und Button
    **„Ziele vorschlagen (Aufgabe B)"**. Bei Erfolg automatischer Wechsel zu 6.
 6. **Ziele** (eigene Ergebnisseite) – Oberziele mit ausformulierten
-   SMART-Unterzielen (§7). Pro **Unterziel**:
-   - **Verfeinern**: *einfacher · ambitionierter · anders formulieren · für
-     Eltern* **plus Freitext** („eigene Änderung"). Wirkt nur auf das Unterziel.
+   SMART-Unterzielen (§7). Oben ein **globaler Umschalter Fachkraft ↔ Eltern**
+   (Default Fachkraft): die KI erzeugt zu jedem Unterziel beide Formulierungen
+   parallel (`ziel` + `zielEltern`) – inhaltlich identisch, nur Sprache/Ton
+   unterscheiden sich. Pro **Unterziel**:
+   - **Verfeinern**: *einfacher · ambitionierter · anders formulieren* **plus
+     Freitext** („eigene Änderung"). Wirkt nur auf das Unterziel und erzeugt beide
+     Sprachversionen neu. (Eltern ist kein Verfeinern-Modus mehr, sondern der
+     Umschalter.)
+   - **Bearbeiten**: Zielsatz direkt editieren – wirkt auf die gerade angezeigte
+     Version.
    - *(M7, Server vorhanden; UI erst mit Phase 3 / DB sinnvoll)* Unterziel als **erreicht** markieren → **nächste Stufe**.
    - **Begründung** auf Klick einblendbar.
    Pro Oberziel: Mülleimer-Icon zum Verwerfen, „Ziele neu vorschlagen".
    **Export**: einzelne Unterziele per Checkbox auswählen; Umfang „ausgewählte
-   Ziele" oder „kompletter Förderplan"; Kopieren / `.txt`.
+   Ziele" oder „kompletter Förderplan"; Checkbox „Elternversion mit exportieren"
+   (Default aus); Kopieren / `.txt`.
 
 > Reiner Auswahl-Pfad: Schritte 1, 3 (nur Kategorien+Codes), 4 (nur Alter), 5 – ohne Freitext.
 
@@ -283,7 +291,8 @@ type Foerderziel = {
 };
 
 type SmartUnterziel = {
-  ziel: string;                 // EIN ausformulierter SMART-Satz (alle Kriterien zugleich)
+  ziel: string;                 // EIN ausformulierter SMART-Satz, fachsprachlich (Default)
+  zielEltern: string;           // dieselbe Aussage, elterngerecht – per Umschalter wählbar
   status: "offen" | "erreicht";
   naechsteStufe?: string;       // bei "erreicht": aufbauender Folgevorschlag (M7)
   begruendung: string;          // kurze fachliche Begründung, auf Klick einblendbar
@@ -323,22 +332,26 @@ Planungshorizont ~1 Jahr / 42 Einheiten) ist **fest im System-Prompt**.
 
 **Aufgabe B – Förderziele (`/api/generate-goals`):**
 - System: erstelle **Oberziele mit ausformulierten SMART-Unterzielen**. Regeln:
-  - Jedes Unterziel ist **EIN Satz** im Feld `ziel`, der alle SMART-Kriterien
-    zugleich erfüllt – **nicht** in Einzelfelder aufschlüsseln.
+  - Jedes Unterziel wird in **zwei Sprachversionen** desselben Ziels formuliert:
+    `ziel` (fachsprachlich) und `zielEltern` (elterngerecht/alltagsnah) – jeweils
+    **EIN Satz**, der alle SMART-Kriterien zugleich erfüllt, **nicht** in
+    Einzelfelder aufschlüsseln. Inhalt, Anspruch und Messbarkeit sind in beiden
+    Versionen identisch; nur Wortwahl und Ton unterscheiden sich.
   - **Planungshintergrund (nicht im Text nennen):** ~1 Jahr / ~42 Einheiten – nur
     für realistischen Anspruch. **Keine** Monats-/Einheitenzahlen ausgeben;
     Zeitbezug allgemein, z.B. „bis zum Ende des Förderzeitraums".
   - Ziele **ausschließlich** aus Codes + Merkmalen (+ optional Beobachtung) ableiten.
   - **Keine** erfundenen Testnormen/Diagnosen.
-  - Sprache an Modus anpassen (fachintern vs. elterngerecht).
   - Ausgabe **strikt als JSON** (`Foerderziel[]`).
 - User: Codes (+ optional Qualifier), Therapieform(en) + Fokus, Alter
   (Halbjahre), Merkmale, optionale Beobachtung, Modus.
 
 **Verfeinerung pro Unterziel (`/api/refine-goal`):** Ein einzelnes Unterziel wird
 gezielt überarbeitet (statt „alles neu" oder ganzes Oberziel). Modi: *einfacher,
-ambitionierter, umformulieren, elterngerecht* sowie **`freitext`** (eigene
-Anweisung der Fachkraft). Rückgabe: **genau ein** überarbeitetes `SmartUnterziel`.
+ambitionierter, umformulieren* sowie **`freitext`** (eigene Anweisung der
+Fachkraft). Rückgabe: **genau ein** überarbeitetes `SmartUnterziel` mit **beiden**
+Sprachversionen (`ziel` + `zielEltern`). Die Eltern-Formulierung ist kein eigener
+Modus mehr, sondern wird immer parallel erzeugt und per Umschalter angezeigt.
 
 **Folgestufe (`/api/next-step`, M7):** Bei erreichtem Unterziel ein darauf
 **aufbauendes** nächstes Unterziel vorschlagen (Progression).
@@ -400,8 +413,9 @@ interface AiProvider {
    (`synonyme.json`)? (laufender Input vom Team)
 2. **Schweregrad/Qualifier:** Wird er fachlich genutzt – und wie? (aktuell optional, Schieber)
 3. Welche **Merkmale** genau (über Alter/Kontext/Einschränkungen hinaus)?
-4. Soll die Ziel-Formulierung primär fachintern oder elterngerecht sein
-   (oder umschaltbar – aktueller Plan)?
+4. ~~Soll die Ziel-Formulierung primär fachintern oder elterngerecht sein?~~
+   **Geklärt:** Die KI erzeugt beide Versionen parallel; Default ist Fachkraft,
+   per globalem Umschalter wird die Elternsicht angezeigt.
 5. Form des **Text-Exports** (Struktur/Reihenfolge für das größere Dokument)?
 
 ---

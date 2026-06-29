@@ -49,11 +49,14 @@ Fehlende/zu ändernde Codes / Suchbegriffe:
 Beispiele für gute / schlechte Ziele:
 
 
-## 4. Verfeinern (pro Unterziel)
+## 4. Verfeinern & Eltern-/Fachkraft-Umschalter (pro Unterziel)
 - [ ] „Einfacher" senkt den Anspruch sinnvoll.
 - [ ] „Ambitionierter" hebt ihn sinnvoll.
 - [ ] „Anders formulieren" liefert eine brauchbare Alternative.
-- [ ] „Für Eltern" klingt wirklich elterngerecht/wertschätzend.
+- [ ] Der Umschalter **Eltern** zeigt dasselbe Ziel wirklich elterngerecht/
+      wertschätzend – inhaltlich gleich, nur verständlicher formuliert.
+- [ ] Fachkraft- und Elternversion sagen tatsächlich **dasselbe** aus (gleicher
+      Anspruch, gleiche Messbarkeit).
 - [ ] Die **eigene Änderung** (Freitext) wird sinnvoll umgesetzt.
 
 Notizen:
