@@ -371,7 +371,8 @@ Schritt-Wizard (Spec §6), oben Fortschrittsanzeige, unten Weiter/Zurück:
 3. **Codes (Maske)** – Hauptbereiche aus `masken.json`, je Code an-/abwählbar,
    optionaler Qualifier-Schieber; optional Beobachtungsfeld + Button
    „Passende Codes vorschlagen" (ruft `/api/suggest-codes`, Ergebnis als
-   annehmbare Vorschläge).
+   annehmbare Vorschläge). Die KI schlägt großzügig viele Codes vor (nach Relevanz
+   sortiert); die ersten vier sind direkt sichtbar, der Rest klappt per Button auf.
 4. **Alter & Merkmale** – Alter als Dropdown in Halbjahrschritten; Merkmale aus
    `merkmale.json`.
 5. **Übersicht** – Zusammenfassung der Auswahl. „Weiter →" löst **Stufe 1**

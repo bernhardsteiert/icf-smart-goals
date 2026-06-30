@@ -13,6 +13,9 @@ const QUALIFIER_LABELS: Record<number, string> = {
   4: "vollständiges Problem",
 };
 
+// Wie viele KI-Vorschläge direkt sichtbar sind; der Rest klappt auf Knopfdruck aus.
+const INITIAL_VISIBLE = 4;
+
 interface Props {
   gruppen: Hauptbereich[];
   allCodes: IcfCode[];
@@ -33,6 +36,7 @@ export default function StepCodes({
   onChange,
 }: Props) {
   const [vorschlaege, setVorschlaege] = useState<CodeVorschlag[]>([]);
+  const [expanded, setExpanded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [fehler, setFehler] = useState<string | null>(null);
   const [stichwort, setStichwort] = useState("");
@@ -60,6 +64,7 @@ export default function StepCodes({
     setLoading(true);
     setFehler(null);
     setVorschlaege([]);
+    setExpanded(false);
     try {
       const result = await requestSuggestCodes({
         therapieformen,
@@ -155,7 +160,7 @@ export default function StepCodes({
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
               Vorschläge der KI – Entwurf, bitte prüfen
             </p>
-            {vorschlaege.map((v) => {
+            {(expanded ? vorschlaege : vorschlaege.slice(0, INITIAL_VISIBLE)).map((v) => {
               const alreadySelected = auswahl.some((a) => a.code === v.code);
               return (
                 <div
@@ -188,6 +193,19 @@ export default function StepCodes({
                 </div>
               );
             })}
+
+            {vorschlaege.length > INITIAL_VISIBLE && (
+              <button
+                type="button"
+                onClick={() => setExpanded((e) => !e)}
+                aria-expanded={expanded}
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-blue-700 transition-colors hover:bg-blue-50"
+              >
+                {expanded
+                  ? "Weniger anzeigen ▲"
+                  : `Weitere ${vorschlaege.length - INITIAL_VISIBLE} Vorschläge anzeigen ▼`}
+              </button>
+            )}
           </div>
         )}
       </div>
