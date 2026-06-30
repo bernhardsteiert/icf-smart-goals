@@ -436,6 +436,12 @@ interface AiProvider {
    **Geklärt:** Die KI erzeugt beide Versionen parallel; Default ist Fachkraft,
    per globalem Umschalter wird die Elternsicht angezeigt.
 5. Form des **Text-Exports** (Struktur/Reihenfolge für das größere Dokument)?
+6. **Datenschutz & Sicherheit vor Echtbetrieb** (aktuell **Prototyp**, nur erfundene
+   Testfälle!): Gesundheitsdaten Art. 9 DSGVO / Schweigepflicht, LLM-Endpoint auf
+   **Vertex AI EU + AVV** umstellen, AVV mit Vercel, Freitext-Guardrail, Rate-Limit
+   der `/api/*`-Routen, DSFA, „kein Medizinprodukt" dokumentieren. Details und
+   Priorisierung in `implementierungsplan.md` §14 → „Sicherheit & Datenschutz".
+   **Mit der/dem Datenschutzbeauftragten der Einrichtung abstimmen.**
 
 ---
 
