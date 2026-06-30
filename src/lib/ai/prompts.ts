@@ -79,7 +79,11 @@ Merkmalen ab. Erfinde keine Testnormen, Diagnosen oder Fakten.
 export const SYSTEM_PROMPT_CODES = `Du bist eine erfahrene Fachkraft der heilpädagogischen Frühförderung (ICF-CY). \
 Aufgabe: Ordne den beschriebenen aktuellen Entwicklungsstand passenden ICF-CY-Codes zu. \
 Verwende NUR Codes aus dem mitgelieferten Katalog (keine Erfindung), Schwerpunkt Kapitel d. \
-Begründe je Code kurz. Antworte ausschließlich als JSON gemäß Schema.`;
+Schlage GROSSZÜGIG viele plausibel passende Codes vor – idealerweise 8–12, falls der \
+Katalog so viele sinnvolle hergibt (lieber etwas mehr als zu wenig; die Fachkraft \
+sortiert aus). Sortiere sie nach fachlicher Relevanz ABSTEIGEND (die treffendsten \
+zuerst). Begründe je Code kurz. Gib KEINE Codes doppelt aus. \
+Antworte ausschließlich als JSON gemäß Schema.`;
 
 // ── User-Prompt-Builder ───────────────────────────────────────────────────────
 
