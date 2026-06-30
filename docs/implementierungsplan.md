@@ -709,3 +709,51 @@ Jitter-Freiheit.
 
 **Verifikation:** `npm run lint` + `npm run build` grün; manuell auf Schritt 1 (kurz)
 und Schritt 6 mit Zielen (lang) prüfen.
+
+---
+
+### Sicherheit & Datenschutz – offene Punkte (vor Echtbetrieb)
+
+> **Aktueller Status: Prototyp.** Solange ausschließlich **erfundene Testfälle** (keine
+> realen Klientendaten) verwendet werden, ist das Risiko gering. **Bevor echte Fälle
+> erfasst werden**, müssen die folgenden Punkte geklärt sein – gemeinsam mit der/dem
+> **Datenschutzbeauftragten der Einrichtung** (Verantwortliche = Lebenshilfe Lörrach,
+> nicht die Entwicklung). Diese Liste ist eine technische Einschätzung, **keine
+> Rechtsberatung**.
+
+**Was bereits gut ist (im Code bestätigt):**
+- API-Key nur serverseitig (`process.env`), nicht im Client-Bundle; der Client ruft nur
+  eigene `/api/*`-Routen.
+- Keine DB, kein Login; Persistenz nur `localStorage`. `.gitignore` schließt Secrets aus.
+- Kein `dangerouslySetInnerHTML`/`eval`; React-Default-Escaping. Kleine Angriffsfläche
+  (nur JSON-Routen, zod-validiert).
+
+**Hohe Priorität (Datenschutz / vor Echtbetrieb zwingend):**
+1. **Rechtsnatur der Daten:** Fälle in der Frühförderung sind **Gesundheitsdaten
+   besonderer Kategorie (Art. 9 DSGVO)**, bei Kindern besonders schützenswert; „anonym"
+   ist faktisch eher **pseudonym**. Schweigepflicht (§203 StGB) beachten. → Rechtsgrundlage,
+   Verzeichnis von Verarbeitungstätigkeiten, voraussichtlich **DSFA** nötig.
+2. **LLM-Endpoint:** Aktuell `generativelanguage.googleapis.com` (Consumer-/AI-Studio-API
+   mit Key) – andere Datenbedingungen als Enterprise. Für aus Klientendaten abgeleitete
+   Inhalte **nicht tragbar**. → Auf **Vertex AI (EU-Region) mit AVV** umstellen oder
+   EU-LLM-Anbieter mit AVV (kein Training auf den Daten, EU-Verarbeitung).
+3. **Auftragsverarbeitung:** **AVV** mit KI-Anbieter und Vercel; EU-Region fixieren;
+   US-Transfer bewerten.
+4. **Freitext-Beobachtung als Leck:** Codes/Alter/Merkmale sind unkritisch, aber das
+   Freitextfeld kann identifizierende Angaben enthalten. Die Klarnamen-Heuristik ist nur
+   eine weiche Warnung. → Warnung prominenter, Feld klar als „optional/anonym", ggf.
+   Hinweis vor dem Absenden.
+
+**Mittlere Priorität (technische Härtung):**
+5. **Offene `/api/*`-Routen** ohne Rate-Limit → Kosten-/Missbrauchsrisiko (KI-Kontingent).
+   → einfaches Rate-Limit oder Zugangs-Token, falls öffentlich erreichbar.
+6. **Security-Review** (`/security-review`) + `npm audit fix`; Abhängigkeiten aktuell halten.
+
+**Niedrige Priorität / Klärung:**
+7. **Repo-Sichtbarkeit** auf **privat** prüfen (enthält nur Code/Doku/öffentl. ICF-Katalog,
+   keine Patientendaten – „Microsoft/GitHub" ist hier kein DSGVO-Thema).
+8. **„Kein Medizinprodukt" (MDR)** dokumentieren: Entwurfshilfe, Fachkraft behält
+   Verantwortung, keine autonome Diagnose/Therapie.
+
+> **Empfehlung:** Bis zur geklärten Rechts-/AVV-Lage strikt als **Prototyp mit erfundenen
+> Fällen** betreiben; parallel die Datenschutz-Person der Einrichtung einbinden.
