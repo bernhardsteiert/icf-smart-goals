@@ -8,8 +8,8 @@ oder anzupassen und (2) daraus **SMART-formulierte Förderziele** (Oberziele mit
 ausformulierten SMART-Unterzielen) als Entwurf zu erhalten.
 
 > **Status dieses Dokuments:** Fachliche Referenz für den umgesetzten MVP. Der
-> Kern-Flow (M0–M5) ist implementiert, deployed und durch Praxis-Feedback
-> erweitert. Wesentliche Änderungen ggü. v3:
+> gesamte Flow (M0–M8) ist implementiert, deployed und durch mehrere Runden
+> Praxis-Feedback erweitert. Wesentliche Änderungen ggü. v3:
 > - ICF-Katalog auf Kapitel **b/d/e** erweitert (~74 Codes, §4, Anhang A).
 > - Jedes **Unterziel ist ein einzelner ausformulierter SMART-Satz** (keine
 >   Aufschlüsselung in spezifisch/messbar/… mehr; §7).
@@ -18,14 +18,19 @@ ausformulierten SMART-Unterzielen) als Entwurf zu erhalten.
 > - **Disclaimer als Einstiegsseite**; **freie Beobachtung in Schritt 4**;
 >   Ergebnisse auf **eigener Seite** (§6).
 >
-> **MVP vollständig umgesetzt** (M0–M8, Stand 2026-06-28). Post-M8 UX-Korrekturen
-> abgeschlossen (gleichmäßige Schrittanzeige, eigener Bestätigungs-Dialog, Bounce-Fix
-> im CollapsingHeader teilweise). Ein bekanntes UI-Problem offen: iOS-Scroll-Jitter
-> → Implementierungsplan §14.
+> **MVP vollständig umgesetzt** (M0–M8). Danach mehrere Iterationen umgesetzt:
+> **zweistufige Zielerzeugung** (erst Oberziele bestätigen, dann SMART-Ziele; §6),
+> **Fachkraft-/Elternversion pro Ziel mit Umschalter** (§7), **Bereich als Dropdown**
+> (`bereiche.json`), mehr KI-Code-Vorschläge (aufklappbar), Lade-Overlay, sowie
+> UI-Fixes (Schrittanzeige, Bestätigungs-Dialog, iOS-Scroll-Jitter **gelöst** →
+> Implementierungsplan §14).
 >
 > **Wichtig M7:** `offen/erreicht`-Toggle und „Nächste Stufe vorschlagen" wurden aus
 > der UI entfernt, da sie erst mit Datenbankpersistenz (Phase 3) sinnvoll sind.
 > Server-Route `/api/next-step` und Client-Helfer `requestNextStep` bleiben erhalten.
+>
+> **Datenschutz/Sicherheit:** Aktuell **Prototyp** (nur erfundene Testfälle). Vor
+> Echtbetrieb offene Punkte klären → Implementierungsplan §14 und §12 unten.
 
 ## 0. Praxis-Kontext (warum die App so aussieht)
 

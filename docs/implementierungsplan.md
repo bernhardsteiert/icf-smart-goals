@@ -334,8 +334,8 @@ Body-Validierung mit `zod`. Der Route-Handler reichert Codes aus `src/data` zu
 
 Fehlerfälle: 400 bei ungültigem Body (zod); 429 bei Quota; 503 bei Überlastung;
 502 bei Provider-/Parse-Fehler – jeweils mit kurzer, nicht-technischer Meldung für
-die UI (siehe `generate-goals/route.ts` als Vorlage). Client-Helfer für die fetch-
-Calls liegen in `src/lib/goals-client.ts`.
+die UI (siehe `generate-unterziele/route.ts` als Vorlage). Client-Helfer für die
+fetch-Calls liegen in `src/lib/goals-client.ts`.
 
 ---
 
@@ -432,19 +432,19 @@ Oberziel: Erweiterung des Wortschatzes
 
 ## 10. Meilensteine
 
-> **Hinweis für den umsetzenden Agenten (z.B. Claude Sonnet 4.6):** M0–M5 sind
-> **abgeschlossen** und durch mehrere Runden Praxis-Feedback erweitert (siehe
-> Block darunter). **Offen sind nur M6, M7 und M8** – jeweils unten detailliert
-> mit konkreten Dateien und Akzeptanzkriterien. Halte vor jeder Umsetzung die
-> Leitplanken aus §0 ein und prüfe den IST-Code (Strukturen §2, Typen §3,
-> API-Verträge §6). Nimm `src/app/api/refine-goal/route.ts` als Vorlage für neue
-> Routen und `CodeCatalog.tsx` / `GoalCard.tsx` als UI-Vorlagen. Nach jeder
-> Änderung: `npm run lint` und `npm run build` müssen fehlerfrei sein.
+> **Hinweis für den umsetzenden Agenten:** **M0–M8 sind abgeschlossen** und durch
+> mehrere Runden Praxis-Feedback erweitert (zweistufige Zielerzeugung, Fachkraft-/
+> Elternversion, Bereich-Dropdown u.a. – siehe Block darunter und §14). Für
+> **neue** Arbeiten: Leitplanken aus §0 einhalten, IST-Code prüfen (Strukturen §2,
+> Typen §3, API-Verträge §6). Nimm `src/app/api/refine-goal/route.ts` als Vorlage
+> für neue Routen und `CodeCatalog.tsx` / `GoalCard.tsx` als UI-Vorlagen. Nach
+> jeder Änderung: `npm run lint` und `npm run build` müssen fehlerfrei sein.
 
-### Abgeschlossen (M0–M6)
+### Abgeschlossen (M0–M8)
 
 - **M0–M5:** Projektgerüst, Stammdaten/Typen, Wizard + `localStorage`,
-  Code-Maske, AI-Layer + `/api/generate-goals`, Zielanzeige/Verfeinern/Export.
+  Code-Maske, AI-Layer + Zielerzeugung (heute zweistufig: `/api/generate-oberziele`
+  + `/api/generate-unterziele`), Zielanzeige/Verfeinern/Export.
 - **Iterationen nach M5 (umgesetzt):**
   - ICF-Katalog auf **Kapitel b/d/e** erweitert (~74 Codes); `masken.json` in
     Kategorien mit `chapter` gruppiert; **ausklappbare Kategorien**,
