@@ -15,8 +15,8 @@ Kontext: Interdisziplinäre Frühförderstelle der Lebenshilfe Lörrach e.V.
 
 ## Projektstatus
 
-Lauffähiger MVP – auf Vercel deployed. Der geführte Kern-Flow ist umgesetzt
-(Meilensteine **M0–M5**) und durch mehrere Runden Praxis-Feedback erweitert:
+Lauffähiger MVP – auf Vercel deployed. Alle Meilensteine **M0–M8** sind
+abgeschlossen; der Flow wurde durch mehrere Runden Praxis-Feedback erweitert:
 
 - **7-Schritt-Wizard:** Disclaimer-Einstieg → 1 Therapieform → 2 Ausgangslage →
   3 ICF-Codes → 4 Alter & Merkmale (+ freie Beobachtung) → 5 Übersicht →
@@ -31,13 +31,19 @@ Lauffähiger MVP – auf Vercel deployed. Der geführte Kern-Flow ist umgesetzt
 - **SMART-Ziele** als je ein ausformulierter Satz pro Unterziel, parallel in
   Fachkraft- und Elternversion (Umschalter); **Verfeinern pro Unterziel**
   (Voreinstellungen + Freitext) über `/api/refine-goal`.
+- **KI-Code-Vorschläge** in Schritt 3 (`/api/suggest-codes`): großzügig viele,
+  nach Relevanz sortiert, erste vier direkt sichtbar, Rest aufklappbar.
+- **Bereich als Dropdown** (kuratierte Liste, eigene Bereiche ergänzbar).
 - **Export** wahlweise ausgewählter Ziele oder kompletter Förderplan
-  (Zwischenablage / `.txt`).
+  (optional inkl. Elternversion; Zwischenablage / `.txt`).
 - Plattformübergreifender UI-Feinschliff (iOS/Android/Browser, PWA).
 
-**Noch offen:** KI-gestützte Code-Vorschläge (M6, `/api/suggest-codes`),
-aufbauende Folgestufen (M7, `/api/next-step`) sowie restlicher Feinschliff
-(M8). Details und Akzeptanzkriterien in `docs/implementierungsplan.md` §10.
+**Noch offen:** Praxis-Test durch Fachkräfte (`docs/review-checkliste.md`) und
+daraus abgeleitete Feinjustierung (Codes, Synonyme, Bereiche, Ziel-Prompts).
+**Vor einem Echtbetrieb mit realen Daten** sind die Datenschutz-/Sicherheits­punkte
+in `docs/implementierungsplan.md` §14 zu klären (aktuell **Prototyp**). Aufbauende
+Folgestufen (M7-UI) sind bewusst bis Phase 3 (zentrale Speicherung) zurückgestellt;
+die Server-Route `/api/next-step` besteht bereits.
 
 ## Setup & Entwicklung
 
